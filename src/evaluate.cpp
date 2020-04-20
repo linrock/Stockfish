@@ -86,6 +86,14 @@ namespace {
   constexpr int BishopSafeCheck = 635;
   constexpr int KnightSafeCheck = 790;
 
+  int rSafeCheckWNum = 3; int rSafeCheckWDen = 2;
+  int qSafeCheckWNum = 3; int qSafeCheckWDen = 2;
+  int bSafeCheckWNum = 3; int bSafeCheckWDen = 2;
+  int nSafeCheckWNum = 3; int nSafeCheckWDen = 2;
+
+  TUNE(SetRange(0, 10), rSafeCheckWNum, qSafeCheckWNum, bSafeCheckWNum, nSafeCheckWNum);
+  TUNE(SetRange(1, 10), rSafeCheckWDen, qSafeCheckWDen, bSafeCheckWDen, nSafeCheckWDen);
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -399,7 +407,7 @@ namespace {
     // Enemy rooks checks
     rookChecks = b1 & safe & attackedBy[Them][ROOK];
     if (rookChecks)
-        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 3/2
+        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * rSafeCheckWNum/rSafeCheckWDen
                                                 : RookSafeCheck;
     else
         unsafeChecks |= b1 & attackedBy[Them][ROOK];
@@ -412,7 +420,7 @@ namespace {
                  & ~attackedBy[Us][QUEEN]
                  & ~rookChecks;
     if (queenChecks)
-        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 3/2
+        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * qSafeCheckWNum/qSafeCheckWDen
                                                  : QueenSafeCheck;
 
     // Enemy bishops checks: we count them only if they are from squares from
@@ -422,7 +430,7 @@ namespace {
                   & safe
                   & ~queenChecks;
     if (bishopChecks)
-        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * 3/2
+        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * bSafeCheckWNum/bSafeCheckWDen
                                                   : BishopSafeCheck;
     else
         unsafeChecks |= b2 & attackedBy[Them][BISHOP];
@@ -430,7 +438,7 @@ namespace {
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
     if (knightChecks & safe)
-        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 3/2
+        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * nSafeCheckWNum/nSafeCheckWDen
                                                          : KnightSafeCheck;
     else
         unsafeChecks |= knightChecks;
