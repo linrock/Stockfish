@@ -86,6 +86,14 @@ namespace {
   constexpr int BishopSafeCheck = 635;
   constexpr int KnightSafeCheck = 790;
 
+  int p1 = 22;
+  int p2 = 22;
+  int p3 = 3;
+
+  TUNE(SetRange(5, 40), p1, p2);
+  TUNE(SetRange(0, 10), p3);
+
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -765,9 +773,9 @@ namespace {
         {
             if (   pos.non_pawn_material(WHITE) == BishopValueMg
                 && pos.non_pawn_material(BLACK) == BishopValueMg)
-                sf = 22;
+                sf = p1;
             else
-                sf = 22 + 3 * pos.count<ALL_PIECES>(strongSide);
+                sf = p2 + p3 * pos.count<ALL_PIECES>(strongSide);
         }
         else
             sf = std::min(sf, 36 + 7 * pos.count<PAWN>(strongSide));
