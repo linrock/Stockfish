@@ -126,6 +126,15 @@ namespace {
     S(0, 0), S(10, 28), S(17, 33), S(15, 41), S(62, 72), S(168, 177), S(276, 260)
   };
 
+  int tpp0 = 48;
+  int tpp1 = 39;
+  int tsp0 = 173;
+  int tsp1 = 94;
+
+  TUNE(SetRange(20, 80), tpp0, tpp1);
+  TUNE(SetRange(125, 250), tsp0);
+  TUNE(SetRange(60, 150), tsp1);
+
   // Assorted bonuses and penalties
   constexpr Score BishopPawns         = S(  3,  7);
   constexpr Score CorneredBishop      = S( 50, 50);
@@ -142,8 +151,8 @@ namespace {
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
-  constexpr Score ThreatByPawnPush    = S( 48, 39);
-  constexpr Score ThreatBySafePawn    = S(173, 94);
+            Score ThreatByPawnPush    = S( tpp0, tpp1);
+            Score ThreatBySafePawn    = S( tsp0, tsp1);
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
