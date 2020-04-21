@@ -644,14 +644,14 @@ namespace {
                 // and even smaller bonus if it is attacked but block square is not.
                 int k = !unsafeSquares                    ? 35 :
                         !(unsafeSquares & squaresToQueen) ? 20 :
-                        !(unsafeSquares & blockSq)        ?  9 :
+                        !(unsafeSquares & blockSq)        ?  6 :
                                                              0 ;
 
                 // Assign a larger bonus if the block square is defended
                 if ((pos.pieces(Us) & bb) || (attackedBy[Us][ALL_PIECES] & blockSq))
-                    k += 5;
+                    k += 3;
 
-                bonus += make_score(k * w, k * w);
+                bonus += make_score(k * w * 14 / 40, k * w);
             }
         } // r > RANK_3
 
