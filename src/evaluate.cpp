@@ -86,6 +86,19 @@ namespace {
   constexpr int BishopSafeCheck = 635;
   constexpr int KnightSafeCheck = 790;
 
+  int safePPb1 = 35;
+  int safePPb2 = 20;
+  int safePPb3 = 9;
+  int safePPb4 = 5;
+
+  int mgScaleNum = 1; int mgScaleDen = 1;
+  int egScaleNum = 1; int egScaleDen = 1;
+
+  TUNE(SetRange(0, 80), safePPb1, safePPb2);
+  TUNE(SetRange(0, 30), safePPb3, safePPb4);
+  TUNE(SetRange(0, 40), mgScaleNum, egScaleNum);
+  TUNE(SetRange(1, 40), mgScaleDen, egScaleDen);
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -642,16 +655,16 @@ namespace {
                 // If there are no enemy attacks on passed pawn span, assign a big bonus.
                 // Otherwise assign a smaller bonus if the path to queen is not attacked
                 // and even smaller bonus if it is attacked but block square is not.
-                int k = !unsafeSquares                    ? 35 :
-                        !(unsafeSquares & squaresToQueen) ? 20 :
-                        !(unsafeSquares & blockSq)        ?  9 :
+                int k = !unsafeSquares                    ? safePPb1 :
+                        !(unsafeSquares & squaresToQueen) ? safePPb2 :
+                        !(unsafeSquares & blockSq)        ? safePPb3 :
                                                              0 ;
 
                 // Assign a larger bonus if the block square is defended
                 if ((pos.pieces(Us) & bb) || (attackedBy[Us][ALL_PIECES] & blockSq))
-                    k += 5;
+                    k += safePPb4;
 
-                bonus += make_score(k * w, k * w);
+                bonus += make_score(k * w * mgScaleNum / mgScaleDen, k * w * egScaleNum / egScaleDen);
             }
         } // r > RANK_3
 
