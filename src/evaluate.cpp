@@ -129,10 +129,10 @@ namespace {
   int ppr8m = 276; int ppr8e = 260;
 
   TUNE(SetRange(0, 40), ppr3m, ppr4m, ppr5m);
-  TUNE(SetRange(10, 80), ppr3e, ppr4e, ppr5e);
-  TUNE(SetRange(40, 100), ppr6m, ppr6e);
-  TUNE(SetRange(140, 220), ppr7m, ppr7e);
-  TUNE(SetRange(200, 400), ppr8m, ppr8e);
+  TUNE(SetRange(0, 100), ppr3e, ppr4e, ppr5e);
+  TUNE(SetRange(50, 100), ppr6m, ppr6e);
+  TUNE(SetRange(130, 250), ppr7m, ppr7e);
+  TUNE(SetRange(180, 400), ppr8m, ppr8e);
 
   // PassedRank[Rank] contains a bonus according to the rank of a passed pawn
   Score PassedRank[RANK_NB] = {
@@ -148,14 +148,19 @@ namespace {
   TUNE(SetRange(5, 50),   pfm);
   TUNE(SetRange(50, 150), pfe);
 
-  int mbpm = 18; int mbpe = 3;
-  TUNE(SetRange(0, 50), mbpm, mbpe);
+  int mbpm = 18; int mbpe = 3; TUNE(SetRange(0, 50), mbpm, mbpe);
+  int tbppm = 48; int tbppe = 39; TUNE(SetRange(10, 100), tbppm, tbppe);
+  int tbspm = 173; int tbspe = 94; TUNE(SetRange(50, 300), tbspm, tbspe);
+  int psfm = 11; int psfe = 8; TUNE(SetRange(0, 30), psfm, psfe);
 
-  int tbppm = 48; int tbppe = 39;
-  TUNE(SetRange(10, 100), tbppm, tbppe);
+  // Tune w formula
+  int wLine = 5; int wCons = 13;
+  TUNE(SetRange(0, 20), wLine);
+  TUNE(SetRange(0, 40), wCons);
 
-  int tbspm = 173; int tbspe = 94;
-  TUNE(SetRange(50, 300), tbspm, tbspe);
+  int ykScale = 100; int ekScale = 100;
+  int mgScale = 100; int egScale = 100;
+  TUNE(SetRange(0, 300), ekScale, ykScale, mgScale, egScale);
 
   // Assorted bonuses and penalties
             Score BishopPawns         = S(bpm,bpe);
@@ -167,7 +172,7 @@ namespace {
   constexpr Score LongDiagonalBishop  = S( 45,  0);
             Score MinorBehindPawn     = S(mbpm,mbpe);
   constexpr Score Outpost             = S( 30, 21);
-  constexpr Score PassedFile          = S( 11,  8);
+            Score PassedFile          = S(psfm,psfe);
             Score PawnlessFlank       = S(pfm,pfe);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
@@ -648,12 +653,12 @@ namespace {
 
         if (r > RANK_3)
         {
-            int w = 5 * r - 13;
+            int w = wLine * r - wCons;
             Square blockSq = s + Up;
 
             // Adjust bonus based on the king's proximity
-            bonus += make_score(0, (  (king_proximity(Them, blockSq) * 19) / 4
-                                     - king_proximity(Us,   blockSq) *  2) * w);
+            bonus += make_score(0, (  (king_proximity(Them, blockSq) * 19 * ykScale/100) / 4
+                                     - king_proximity(Us,   blockSq) *  2 * ekScale/100    ) * w);
 
             // If blockSq is not the queening square then consider also a second push
             if (r != RANK_7)
@@ -682,7 +687,7 @@ namespace {
                 if ((pos.pieces(Us) & bb) || (attackedBy[Us][ALL_PIECES] & blockSq))
                     k += 5;
 
-                bonus += make_score(k * w, k * w);
+                bonus += make_score(k * w * mgScale / 100, k * w * egScale / 100);
             }
         } // r > RANK_3
 
