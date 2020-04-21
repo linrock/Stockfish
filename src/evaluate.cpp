@@ -140,28 +140,41 @@ namespace {
     S(ppr5m, ppr5e), S(ppr6m, ppr6e), S(ppr7m, ppr7e), S(ppr8m, ppr8e)
   };
 
+  int bpm = 3; int bpe = 7;
+  TUNE(SetRange(0, 20), bpm);
+  TUNE(SetRange(0, 20), bpe);
+
   int pfm = 17; int pfe = 95;
-  TUNE(SetRange(5, 50), pfm);
+  TUNE(SetRange(5, 50),   pfm);
   TUNE(SetRange(50, 150), pfe);
 
+  int mbpm = 18; int mbpe = 3;
+  TUNE(SetRange(0, 50), mbpm, mbpe);
+
+  int tbppm = 48; int tbppe = 39;
+  TUNE(SetRange(10, 100), tbppm, tbppe);
+
+  int tbspm = 173; int tbspe = 94;
+  TUNE(SetRange(50, 300), tbspm, tbspe);
+
   // Assorted bonuses and penalties
-  constexpr Score BishopPawns         = S(  3,  7);
+            Score BishopPawns         = S(bpm,bpe);
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
   constexpr Score KingProtector       = S(  7,  8);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
-  constexpr Score MinorBehindPawn     = S( 18,  3);
+            Score MinorBehindPawn     = S(mbpm,mbpe);
   constexpr Score Outpost             = S( 30, 21);
   constexpr Score PassedFile          = S( 11,  8);
-            Score PawnlessFlank       = S( pfm, pfe);
+            Score PawnlessFlank       = S(pfm,pfe);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
-  constexpr Score ThreatByPawnPush    = S( 48, 39);
-  constexpr Score ThreatBySafePawn    = S(173, 94);
+            Score ThreatByPawnPush    = S(tbppm, tbppe);
+            Score ThreatBySafePawn    = S(tbspm, tbspe);
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
