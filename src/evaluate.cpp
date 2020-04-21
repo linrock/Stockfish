@@ -86,9 +86,9 @@ namespace {
   int BishopSafeCheck = 635;
   int KnightSafeCheck = 790;
   TUNE(SetRange(500, 1000), QueenSafeCheck);
-  TUNE(SetRange(800, 1200), RookSafeCheck);
-  TUNE(SetRange(500, 800), BishopSafeCheck);
-  TUNE(SetRange(600, 900), KnightSafeCheck);
+  TUNE(SetRange(700, 1500), RookSafeCheck);
+  TUNE(SetRange(500, 1000), BishopSafeCheck);
+  TUNE(SetRange(500, 1000), KnightSafeCheck);
 
   int rSafeCheckW = 150;
   int qSafeCheckW = 150;
