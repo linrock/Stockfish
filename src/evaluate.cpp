@@ -86,6 +86,25 @@ namespace {
   constexpr int BishopSafeCheck = 635;
   constexpr int KnightSafeCheck = 790;
 
+  int kd1 = 185;
+  int kd2 = 148;
+  int kd3 = 98;
+  int kd4 = 69;
+  int kd5 = 3;
+  int kd6 = 873;
+  int kd7 = 100;
+  int kd8 = 6;
+  int kd9 = 4;
+  int kd10 = 37;
+
+  TUNE(SetRange(100, 300), kd1, kd2);
+  TUNE(SetRange(70, 140), kd3);
+  TUNE(SetRange(40, 100), kd4);
+  TUNE(SetRange(1, 10), kd5, kd8, kd9);
+  TUNE(SetRange(700, 1000), kd6);
+  TUNE(SetRange(50, 150), kd7);
+  TUNE(SetRange(20, 80), kd10);
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -445,17 +464,17 @@ namespace {
     int kingFlankDefense = popcount(b3);
 
     kingDanger +=        kingAttackersCount[Them] * kingAttackersWeight[Them]
-                 + 185 * popcount(kingRing[Us] & weak)
-                 + 148 * popcount(unsafeChecks)
-                 +  98 * popcount(pos.blockers_for_king(Us))
-                 +  69 * kingAttacksCount[Them]
-                 +   3 * kingFlankAttack * kingFlankAttack / 8
+                 + kd1 * popcount(kingRing[Us] & weak)
+                 + kd2 * popcount(unsafeChecks)
+                 + kd3 * popcount(pos.blockers_for_king(Us))
+                 + kd4 * kingAttacksCount[Them]
+                 + kd5 * kingFlankAttack * kingFlankAttack / 8
                  +       mg_value(mobility[Them] - mobility[Us])
-                 - 873 * !pos.count<QUEEN>(Them)
-                 - 100 * bool(attackedBy[Us][KNIGHT] & attackedBy[Us][KING])
-                 -   6 * mg_value(score) / 8
-                 -   4 * kingFlankDefense
-                 +  37;
+                 - kd6 * !pos.count<QUEEN>(Them)
+                 - kd7 * bool(attackedBy[Us][KNIGHT] & attackedBy[Us][KING])
+                 - kd8 * mg_value(score) / 8
+                 - kd9 * kingFlankDefense
+                 + kd10;
 
     // Transform the kingDanger units into a Score, and subtract it from the evaluation
     if (kingDanger > 100)
