@@ -58,6 +58,33 @@ using namespace Search;
 
 namespace {
 
+  // Tune search constants
+  int rm531 = 531; TUNE(SetRange(400, 600), rm531);
+  int fm217 = 217; TUNE(SetRange(200, 240), fm217);
+
+  int r511 = 511; TUNE(SetRange(500, 520), r511);
+  int r1007 = 1007; TUNE(SetRange(990, 1110), r1007);
+
+  int sb_15 = 15; TUNE(SetRange(13, 20), sb_15);
+  int sb_8 = 8; TUNE(SetRange(4, 12), sb_8);
+  int sb_19 = 19; TUNE(SetRange(12, 25), sb_19);
+  int sb_155 = 155; TUNE(SetRange(145, 160), sb_155);
+  int sb_132 = 132; TUNE(SetRange(120, 140), sb_132);
+
+  int ct_102 = 102; TUNE(SetRange(80, 120), ct_102);
+  int ct_157 = 157; TUNE(SetRange(130, 180), ct_157);
+
+  int nm_23397 = 23397; TUNE(SetRange(23380, 23420), nm_23397);
+  int nm_292 = 292; TUNE(SetRange(270, 320), nm_292);
+
+  int nmr_854 = 854; TUNE(SetRange(830, 870), nmr_854);
+  int nmr_68 = 68; TUNE(SetRange(60, 70), nmr_68);
+  int nmr_258 = 258; TUNE(SetRange(255, 260), nmr_258);
+  int nmr_192 = 192; TUNE(SetRange(180, 200), nmr_192);
+
+  int sscore_4926 = 4926; TUNE(SetRange(4700, 5200), sscore_4926);
+  int sscore_16434 = 16434; TUNE(SetRange(16350, 16550), sscore_16434);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV };
 
@@ -65,9 +92,9 @@ namespace {
   constexpr uint64_t ttHitAverageResolution = 1024;
 
   // Razor and futility margins
-  constexpr int RazorMargin = 531;
+  int RazorMargin = rm531;
   Value futility_margin(Depth d, bool improving) {
-    return Value(217 * (d - improving));
+    return Value(fm217 * (d - improving));
   }
 
   // Reductions lookup table, initialized at startup
@@ -75,7 +102,7 @@ namespace {
 
   Depth reduction(bool i, Depth d, int mn) {
     int r = Reductions[d] * Reductions[mn];
-    return (r + 511) / 1024 + (!i && r > 1007);
+    return (r + r511) / 1024 + (!i && r > r1007);
   }
 
   constexpr int futility_move_count(bool improving, Depth depth) {
@@ -84,7 +111,7 @@ namespace {
 
   // History and stats update bonus, based on depth
   int stat_bonus(Depth d) {
-    return d > 15 ? -8 : 19 * d * d + 155 * d - 132;
+    return d > sb_15 ? -sb_8 : sb_19 * d * d + sb_155 * d - sb_132;
   }
 
   // Add a small random component to draw evaluations to avoid 3fold-blindness
@@ -439,7 +466,7 @@ void Thread::search() {
               beta  = std::min(prev + delta, VALUE_INFINITE);
 
               // Adjust contempt based on root move's previousScore (dynamic contempt)
-              int dct = ct + (102 - ct / 2) * prev / (abs(prev) + 157);
+              int dct = ct + (ct_102 - ct / 2) * prev / (abs(prev) + ct_157);
 
               contempt = (us == WHITE ?  make_score(dct, dct / 2)
                                       : -make_score(dct, dct / 2));
@@ -847,10 +874,10 @@ namespace {
     // Step 9. Null move search with verification search (~40 Elo)
     if (   !PvNode
         && (ss-1)->currentMove != MOVE_NULL
-        && (ss-1)->statScore < 23397
+        && (ss-1)->statScore < nm_23397
         &&  eval >= beta
         &&  eval >= ss->staticEval
-        &&  ss->staticEval >= beta - 32 * depth - 30 * improving + 120 * ttPv + 292
+        &&  ss->staticEval >= beta - 32 * depth - 30 * improving + 120 * ttPv + nm_292
         && !excludedMove
         &&  pos.non_pawn_material(us)
         && (ss->ply >= thisThread->nmpMinPly || us != thisThread->nmpColor))
@@ -858,7 +885,7 @@ namespace {
         assert(eval - beta >= 0);
 
         // Null move dynamic reduction based on depth and value
-        Depth R = (854 + 68 * depth) / 258 + std::min(int(eval - beta) / 192, 3);
+        Depth R = (nmr_854 + nmr_68 * depth) / nmr_258 + std::min(int(eval - beta) / nmr_192, 3);
 
         ss->currentMove = MOVE_NULL;
         ss->continuationHistory = &thisThread->continuationHistory[0][0][NO_PIECE][0];
@@ -1211,7 +1238,7 @@ moves_loop: // When in check, search starts from here
                              + (*contHist[0])[movedPiece][to_sq(move)]
                              + (*contHist[1])[movedPiece][to_sq(move)]
                              + (*contHist[3])[movedPiece][to_sq(move)]
-                             - 4926;
+                             - sscore_4926;
 
               // Decrease/increase reduction by comparing opponent's stat score (~10 Elo)
               if (ss->statScore >= -102 && (ss-1)->statScore < -114)
@@ -1221,7 +1248,7 @@ moves_loop: // When in check, search starts from here
                   r++;
 
               // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-              r -= ss->statScore / 16434;
+              r -= ss->statScore / sscore_16434;
           }
           else
           {
