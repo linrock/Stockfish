@@ -86,6 +86,20 @@ namespace {
   constexpr int BishopSafeCheck = 635;
   constexpr int KnightSafeCheck = 790;
 
+  int cx1 = 9;
+  int cx2 = 11;
+  int cx3 = 9;
+  int cx4 = 21;
+  int cx5 = 24;
+  int cx6 = 51;
+  int cx7 = 43;
+  int cx8 = 110;
+
+  TUNE(SetRange(0, 30), cx1, cx2, cx3);
+  TUNE(SetRange(5, 50), cx4, cx5);
+  TUNE(SetRange(20, 100), cx6, cx7);
+  TUNE(SetRange(50, 200), cx8);
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -725,14 +739,14 @@ namespace {
                      || rank_of(pos.square<KING>(BLACK)) < RANK_5;
 
     // Compute the initiative bonus for the attacking side
-    int complexity =   9 * pe->passed_count()
-                    + 11 * pos.count<PAWN>()
-                    +  9 * outflanking
-                    + 21 * pawnsOnBothFlanks
-                    + 24 * infiltration
-                    + 51 * !pos.non_pawn_material()
-                    - 43 * almostUnwinnable
-                    -110 ;
+    int complexity =  cx1 * pe->passed_count()
+                    + cx2 * pos.count<PAWN>()
+                    + cx3 * outflanking
+                    + cx4 * pawnsOnBothFlanks
+                    + cx5 * infiltration
+                    + cx6 * !pos.non_pawn_material()
+                    - cx7 * almostUnwinnable
+                    - cx8 ;
 
     Value mg = mg_value(score);
     Value eg = eg_value(score);
