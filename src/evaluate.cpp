@@ -96,7 +96,6 @@ namespace {
   int kd8 = 6;
   int kd9 = 4;
   int kd10 = 37;
-
   TUNE(SetRange(100, 300), kd1, kd2);
   TUNE(SetRange(70, 140), kd3);
   TUNE(SetRange(40, 100), kd4);
@@ -104,6 +103,17 @@ namespace {
   TUNE(SetRange(700, 1000), kd6);
   TUNE(SetRange(50, 150), kd7);
   TUNE(SetRange(20, 80), kd10);
+
+  int kdThresh = 100;
+  TUNE(SetRange(50, 200), kdThresh);
+
+
+  // test different S(mg, eg) formulas
+  int kdMQuad = 100;
+  int kdMLine = 0;
+  int kdEQuad = 0;
+  int kdELine = 100;
+  TUNE(SetRange(-200, 400), kdMQuad, kdMLine, kdEQuad, kdELine);
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -477,8 +487,11 @@ namespace {
                  + kd10;
 
     // Transform the kingDanger units into a Score, and subtract it from the evaluation
-    if (kingDanger > 100)
-        score -= make_score(kingDanger * kingDanger / 4096, kingDanger / 16);
+    if (kingDanger > kdThresh)
+        score -= make_score(
+          kingDanger * kingDanger * (kdMQuad/100) / 4096 + kingDanger * (kdMLine/100) / 16,
+          kingDanger * kingDanger * (kdEQuad/100) / 4096 + kingDanger * (kdELine/100) / 16
+        );
 
     // Penalty when our king is on a pawnless flank
     if (!(pos.pieces(PAWN) & KingFlank[file_of(ksq)]))
