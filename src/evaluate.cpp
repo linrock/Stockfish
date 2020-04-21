@@ -86,6 +86,16 @@ namespace {
   constexpr int BishopSafeCheck = 635;
   constexpr int KnightSafeCheck = 790;
 
+  // tune formula for w
+  int wQuadNum = 0; int wQuadDen = 1;
+  int wLineNum = 1; int wLineDen = 1;
+  int wConst = 0;
+
+  TUNE(SetRange(0, 30), wQuadNum, wLineNum);
+  TUNE(SetRange(1, 30), wQuadDen, wLineDen);
+  TUNE(SetRange(-10, 10), wConst);
+
+  // tune weights for safe passed pawns
   int safePPb1 = 35;
   int safePPb2 = 20;
   int safePPb3 = 9;
@@ -630,7 +640,7 @@ namespace {
 
         if (r > RANK_3)
         {
-            int w = 5 * r - 13;
+            int w = wQuadNum / wQuadDen * r * r + 5 * wLineNum / wLineDen * r - 13 + wConst;
             Square blockSq = s + Up;
 
             // Adjust bonus based on the king's proximity
