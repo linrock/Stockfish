@@ -121,10 +121,28 @@ namespace {
     S(0, 0), S(3, 46), S(37, 68), S(42, 60), S(0, 38), S(58, 41)
   };
 
+  int ppr3m = 10; int ppr3e = 28;
+  int ppr4m = 17; int ppr4e = 33;
+  int ppr5m = 15; int ppr5e = 41;
+  int ppr6m = 62; int ppr6e = 72;
+  int ppr7m = 168; int ppr7e = 177;
+  int ppr8m = 276; int ppr8e = 260;
+
+  TUNE(SetRange(0, 40), ppr3m, ppr4m, ppr5m);
+  TUNE(SetRange(10, 80), ppr3e, ppr4e, ppr5e);
+  TUNE(SetRange(40, 100), ppr6m, ppr6e);
+  TUNE(SetRange(140, 220), ppr7m, ppr7e);
+  TUNE(SetRange(200, 400), ppr8m, ppr8e);
+
   // PassedRank[Rank] contains a bonus according to the rank of a passed pawn
-  constexpr Score PassedRank[RANK_NB] = {
-    S(0, 0), S(10, 28), S(17, 33), S(15, 41), S(62, 72), S(168, 177), S(276, 260)
+  Score PassedRank[RANK_NB] = {
+    S(0, 0), S(ppr3m, ppr3e), S(ppr4m, ppr4e),
+    S(ppr5m, ppr5e), S(ppr6m, ppr6e), S(ppr7m, ppr7e), S(ppr8m, ppr8e)
   };
+
+  int pfm = 17; int pfe = 95;
+  TUNE(SetRange(5, 50), pfm);
+  TUNE(SetRange(50, 150), pfe);
 
   // Assorted bonuses and penalties
   constexpr Score BishopPawns         = S(  3,  7);
@@ -137,7 +155,7 @@ namespace {
   constexpr Score MinorBehindPawn     = S( 18,  3);
   constexpr Score Outpost             = S( 30, 21);
   constexpr Score PassedFile          = S( 11,  8);
-  constexpr Score PawnlessFlank       = S( 17, 95);
+            Score PawnlessFlank       = S( pfm, pfe);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
