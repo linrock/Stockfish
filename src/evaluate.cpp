@@ -87,27 +87,29 @@ namespace {
   constexpr int KnightSafeCheck = 790;
 
   // tune formula for w
-  int wQuadNum = 0; int wQuadDen = 1;
-  int wLineNum = 1; int wLineDen = 1;
+  int wQuad = 0;
+  int wLine = 100;
   int wConst = 0;
 
-  TUNE(SetRange(0, 30), wQuadNum, wLineNum);
-  TUNE(SetRange(1, 30), wQuadDen, wLineDen);
+  TUNE(SetRange(-200, 200), wQuad);
+  TUNE(SetRange(-200, 200), wLine);
   TUNE(SetRange(-10, 10), wConst);
 
   // tune weights for safe passed pawns
   int safePPb1 = 35;
   int safePPb2 = 20;
   int safePPb3 = 9;
-  int safePPb4 = 5;
-
-  int mgScaleNum = 1; int mgScaleDen = 1;
-  int egScaleNum = 1; int egScaleDen = 1;
+  int safePPb4 = 0;
+  int safePPb5 = 5;
 
   TUNE(SetRange(0, 80), safePPb1, safePPb2);
-  TUNE(SetRange(0, 30), safePPb3, safePPb4);
-  TUNE(SetRange(0, 40), mgScaleNum, egScaleNum);
-  TUNE(SetRange(1, 40), mgScaleDen, egScaleDen);
+  TUNE(SetRange(-10, 10), safePPb4);
+  TUNE(SetRange(0, 30), safePPb3, safePPb5);
+
+  int mgScale = 100;
+  int egScale = 100;
+
+  TUNE(SetRange(0, 500), mgScale, egScale);
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -640,7 +642,7 @@ namespace {
 
         if (r > RANK_3)
         {
-            int w = wQuadNum / wQuadDen * r * r + 5 * wLineNum / wLineDen * r - 13 + wConst;
+            int w = (wQuad/100)*r*r + 5*(wLine/100)*r - 13 + wConst;
             Square blockSq = s + Up;
 
             // Adjust bonus based on the king's proximity
@@ -668,13 +670,13 @@ namespace {
                 int k = !unsafeSquares                    ? safePPb1 :
                         !(unsafeSquares & squaresToQueen) ? safePPb2 :
                         !(unsafeSquares & blockSq)        ? safePPb3 :
-                                                             0 ;
+                                                            safePPb4 ;
 
                 // Assign a larger bonus if the block square is defended
                 if ((pos.pieces(Us) & bb) || (attackedBy[Us][ALL_PIECES] & blockSq))
-                    k += safePPb4;
+                    k += safePPb5;
 
-                bonus += make_score(k * w * mgScaleNum / mgScaleDen, k * w * egScaleNum / egScaleDen);
+                bonus += make_score(k * w * mgScale/100, k * w * egScale/100);
             }
         } // r > RANK_3
 
