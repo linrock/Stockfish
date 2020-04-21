@@ -617,7 +617,7 @@ namespace {
 
         if (r > RANK_3)
         {
-            int w = 5 * r - 13;
+            int w = -r*r/4 + 5*3*r/2 - 13;
             Square blockSq = s + Up;
 
             // Adjust bonus based on the king's proximity
@@ -651,7 +651,7 @@ namespace {
                 if ((pos.pieces(Us) & bb) || (attackedBy[Us][ALL_PIECES] & blockSq))
                     k += 5;
 
-                bonus += make_score(k * w, k * w);
+                bonus += make_score(k * w * 11/10, k * w * 82/100);
             }
         } // r > RANK_3
 
