@@ -81,10 +81,20 @@ namespace {
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 81, 52, 44, 10 };
 
   // Penalties for enemy's safe checks
-  constexpr int QueenSafeCheck  = 780;
-  constexpr int RookSafeCheck   = 1078;
-  constexpr int BishopSafeCheck = 635;
-  constexpr int KnightSafeCheck = 790;
+  int QueenSafeCheck  = 780;
+  int RookSafeCheck   = 1078;
+  int BishopSafeCheck = 635;
+  int KnightSafeCheck = 790;
+  TUNE(SetRange(500, 1000), QueenSafeCheck);
+  TUNE(SetRange(800, 1200), RookSafeCheck);
+  TUNE(SetRange(500, 800), BishopSafeCheck);
+  TUNE(SetRange(600, 900), KnightSafeCheck);
+
+  int rSafeCheckW = 150;
+  int qSafeCheckW = 150;
+  int bSafeCheckW = 150;
+  int nSafeCheckW = 150;
+  TUNE(SetRange(0, 500), rSafeCheckW, qSafeCheckW, bSafeCheckW, nSafeCheckW);
 
   int kd1 = 185;
   int kd2 = 148;
@@ -428,7 +438,7 @@ namespace {
     // Enemy rooks checks
     rookChecks = b1 & safe & attackedBy[Them][ROOK];
     if (rookChecks)
-        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 3/2
+        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * rSafeCheckW/100
                                                 : RookSafeCheck;
     else
         unsafeChecks |= b1 & attackedBy[Them][ROOK];
@@ -441,7 +451,7 @@ namespace {
                  & ~attackedBy[Us][QUEEN]
                  & ~rookChecks;
     if (queenChecks)
-        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 3/2
+        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * qSafeCheckW/100
                                                  : QueenSafeCheck;
 
     // Enemy bishops checks: we count them only if they are from squares from
@@ -451,7 +461,7 @@ namespace {
                   & safe
                   & ~queenChecks;
     if (bishopChecks)
-        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * 3/2
+        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * bSafeCheckW/100
                                                   : BishopSafeCheck;
     else
         unsafeChecks |= b2 & attackedBy[Them][BISHOP];
@@ -459,7 +469,7 @@ namespace {
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
     if (knightChecks & safe)
-        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 3/2
+        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * nSafeCheckW/100
                                                          : KnightSafeCheck;
     else
         unsafeChecks |= knightChecks;
