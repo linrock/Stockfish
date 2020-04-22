@@ -81,10 +81,10 @@ namespace {
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 81, 52, 44, 10 };
 
   // Penalties for enemy's safe checks
-  constexpr int QueenSafeCheck  = 780;
-  constexpr int RookSafeCheck   = 1078;
-  constexpr int BishopSafeCheck = 635;
-  constexpr int KnightSafeCheck = 790;
+  constexpr int QueenSafeCheck  = 765;
+  constexpr int RookSafeCheck   = 1062;
+  constexpr int BishopSafeCheck = 645;
+  constexpr int KnightSafeCheck = 804;
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -399,7 +399,7 @@ namespace {
     // Enemy rooks checks
     rookChecks = b1 & safe & attackedBy[Them][ROOK];
     if (rookChecks)
-        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 3/2
+        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 141/100
                                                 : RookSafeCheck;
     else
         unsafeChecks |= b1 & attackedBy[Them][ROOK];
@@ -412,7 +412,7 @@ namespace {
                  & ~attackedBy[Us][QUEEN]
                  & ~rookChecks;
     if (queenChecks)
-        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 3/2
+        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 156/100
                                                  : QueenSafeCheck;
 
     // Enemy bishops checks: we count them only if they are from squares from
@@ -422,7 +422,7 @@ namespace {
                   & safe
                   & ~queenChecks;
     if (bishopChecks)
-        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * 3/2
+        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * 134/100
                                                   : BishopSafeCheck;
     else
         unsafeChecks |= b2 & attackedBy[Them][BISHOP];
@@ -430,7 +430,7 @@ namespace {
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
     if (knightChecks & safe)
-        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 3/2
+        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 168/100
                                                          : KnightSafeCheck;
     else
         unsafeChecks |= knightChecks;
