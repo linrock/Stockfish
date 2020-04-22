@@ -104,14 +104,17 @@ namespace {
   int unsafeChecksW = 148;
   TUNE(SetRange(0, 500), unsafeChecksW);
 
+  int safeChecksW = 0;
+  TUNE(SetRange(-500, 500), safeChecksW);
+
   int unsafeChecksQuadW = 0;
-  TUNE(SetRange(-300, 300), unsafeChecksQuadW);
+  TUNE(SetRange(-10, 10), unsafeChecksQuadW);
 
   int usChecksRookW = 0;
   int usChecksBishopW = 0;
   int usChecksKnightW = 0;
   int usChecksQueenW = 0;
-  TUNE(SetRange(-300, 300), usChecksRookW, usChecksBishopW, usChecksKnightW, usChecksQueenW);
+  TUNE(SetRange(-500, 200), usChecksRookW, usChecksBishopW, usChecksKnightW, usChecksQueenW);
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -403,9 +406,14 @@ namespace {
     constexpr Bitboard Camp = (Us == WHITE ? AllSquares ^ Rank6BB ^ Rank7BB ^ Rank8BB
                                            : AllSquares ^ Rank1BB ^ Rank2BB ^ Rank3BB);
 
-    Bitboard weak, b1, b2, b3, safe, unsafeChecks = 0;
+    Bitboard weak, b1, b2, b3, safe;
+
+    Bitboard safeChecks = 0;
     Bitboard safeRookChecks, safeQueenChecks, safeBishopChecks, safeKnightChecks;
+
     Bitboard rookChecks, queenChecks, bishopChecks, knightChecks;
+
+    Bitboard unsafeChecks = 0;
     Bitboard unsafeRookChecks = 0;
     Bitboard unsafeQueenChecks = 0;
     Bitboard unsafeBishopChecks = 0;
@@ -432,10 +440,11 @@ namespace {
     // Enemy rooks checks
     rookChecks = b1 & attackedBy[Them][ROOK];
     safeRookChecks = rookChecks & safe;
-    if (safeRookChecks)
+    if (safeRookChecks) {
         kingDanger += more_than_one(safeRookChecks) ? RookSafeCheck * rSafeCheckW/100
                                                     : RookSafeCheck;
-    else {
+        safeChecks |= safeRookChecks;
+    } else {
         unsafeChecks |= rookChecks;
         unsafeRookChecks |= rookChecks;
     }
@@ -453,6 +462,7 @@ namespace {
         } else {
             kingDanger += QueenSafeCheck * qSafeWeakCheckW/100;
         }
+        safeChecks |= safeQueenChecks;
     } else {
       unsafeQueenChecks |= queenChecks;
     }
@@ -472,15 +482,17 @@ namespace {
         } else {
             kingDanger += BishopSafeCheck * bSafeWeakCheckW/100;
         }
+        safeChecks |= safeBishopChecks;
     }
 
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
     safeKnightChecks = knightChecks & safe;
-    if (safeKnightChecks)
+    if (safeKnightChecks) {
         kingDanger += more_than_one(safeKnightChecks) ? KnightSafeCheck * nSafeCheckW/100
                                                       : KnightSafeCheck;
-    else {
+        safeChecks |= safeKnightChecks;
+    } else {
         unsafeChecks |= knightChecks;
         unsafeKnightChecks |= knightChecks;
     }
@@ -496,6 +508,7 @@ namespace {
 
     kingDanger +=        kingAttackersCount[Them] * kingAttackersWeight[Them]
                  + 185 * popcount(kingRing[Us] & weak)
+                 + safeChecksW * popcount(safeChecks)
                  + unsafeChecksW * popcount(unsafeChecks)
                  + unsafeChecksQuadW * popcount(unsafeChecks) * popcount(unsafeChecks)
                  + usChecksRookW * unsafeRookChecks
