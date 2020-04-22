@@ -88,8 +88,8 @@ namespace {
 
   TUNE(SetRange(500, 1000), QueenSafeCheck);
   TUNE(SetRange(700, 1500), RookSafeCheck);
-  TUNE(SetRange(500, 1000), BishopSafeCheck);
-  TUNE(SetRange(500, 1000), KnightSafeCheck);
+  TUNE(SetRange(300, 1000), BishopSafeCheck);
+  TUNE(SetRange(300, 1000), KnightSafeCheck);
 
   int rSafeCheckW = 150;
   int qSafeCheckW = 150;
@@ -99,10 +99,10 @@ namespace {
 
   int qSafeWeakCheckW = 0;
   int bSafeWeakCheckW = 0;
-  TUNE(SetRange(0, 500), qSafeWeakCheckW, bSafeWeakCheckW);
+  TUNE(SetRange(-100, 500), qSafeWeakCheckW, bSafeWeakCheckW);
 
   int unsafeChecksW = 148;
-  TUNE(SetRange(0, 500), unsafeChecksW);
+  TUNE(SetRange(-100, 500), unsafeChecksW);
 
   int safeChecksW = 0;
   TUNE(SetRange(-500, 500), safeChecksW);
@@ -115,6 +115,9 @@ namespace {
   int usChecksKnightW = 0;
   int usChecksQueenW = 0;
   TUNE(SetRange(-500, 200), usChecksRookW, usChecksBishopW, usChecksKnightW, usChecksQueenW);
+
+  int kdConstant = 0;
+  TUNE(SetRange(-500, 500), kdConstant);
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -523,7 +526,8 @@ namespace {
                  - 100 * bool(attackedBy[Us][KNIGHT] & attackedBy[Us][KING])
                  -   6 * mg_value(score) / 8
                  -   4 * kingFlankDefense
-                 +  37;
+                 +  37
+                 + kdConstant;
 
     // Transform the kingDanger units into a Score, and subtract it from the evaluation
     if (kingDanger > 100)
