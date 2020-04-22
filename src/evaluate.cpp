@@ -123,27 +123,27 @@ namespace {
 
   // PassedRank[Rank] contains a bonus according to the rank of a passed pawn
   constexpr Score PassedRank[RANK_NB] = {
-    S(0, 0), S(10, 28), S(17, 33), S(15, 41), S(62, 72), S(168, 177), S(276, 260)
+    S(0, 0), S(8, 21), S(17, 38), S(10, 32), S(58, 72), S(167, 174), S(274, 250)
   };
 
   // Assorted bonuses and penalties
-  constexpr Score BishopPawns         = S(  3,  7);
+  constexpr Score BishopPawns         = S(  2,  8);
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
   constexpr Score KingProtector       = S(  7,  8);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
-  constexpr Score MinorBehindPawn     = S( 18,  3);
+  constexpr Score MinorBehindPawn     = S( 20,  2);
   constexpr Score Outpost             = S( 30, 21);
-  constexpr Score PassedFile          = S( 11,  8);
-  constexpr Score PawnlessFlank       = S( 17, 95);
+  constexpr Score PassedFile          = S( 10, 10);
+  constexpr Score PawnlessFlank       = S( 17, 92);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
-  constexpr Score ThreatByPawnPush    = S( 48, 39);
-  constexpr Score ThreatBySafePawn    = S(173, 94);
+  constexpr Score ThreatByPawnPush    = S( 45, 38);
+  constexpr Score ThreatBySafePawn    = S(173, 92);
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
@@ -617,12 +617,12 @@ namespace {
 
         if (r > RANK_3)
         {
-            int w = 5 * r - 13;
+            int w = r * 53/10 - 11;
             Square blockSq = s + Up;
 
             // Adjust bonus based on the king's proximity
-            bonus += make_score(0, (  (king_proximity(Them, blockSq) * 19) / 4
-                                     - king_proximity(Us,   blockSq) *  2) * w);
+            bonus += make_score(0, (  (king_proximity(Them, blockSq) * 19 * 75/100) / 4
+                                     - king_proximity(Us,   blockSq) *  2 * 69/100    ) * w);
 
             // If blockSq is not the queening square then consider also a second push
             if (r != RANK_7)
@@ -651,7 +651,7 @@ namespace {
                 if ((pos.pieces(Us) & bb) || (attackedBy[Us][ALL_PIECES] & blockSq))
                     k += 5;
 
-                bonus += make_score(k * w, k * w);
+                bonus += make_score(k * w * 86 / 100, k * w * 65 / 100);
             }
         } // r > RANK_3
 
