@@ -511,10 +511,10 @@ namespace {
                  + safeChecksW * popcount(safeChecks)
                  + unsafeChecksW * popcount(unsafeChecks)
                  + unsafeChecksQuadW * popcount(unsafeChecks) * popcount(unsafeChecks)
-                 + usChecksRookW * unsafeRookChecks
-                 + usChecksBishopW * unsafeBishopChecks
-                 + usChecksKnightW * unsafeKnightChecks
-                 + usChecksQueenW * unsafeQueenChecks
+                 + usChecksRookW * popcount(unsafeRookChecks)
+                 + usChecksBishopW * popcount(unsafeBishopChecks)
+                 + usChecksKnightW * popcount(unsafeKnightChecks)
+                 + usChecksQueenW * popcount(unsafeQueenChecks)
                  +  98 * popcount(pos.blockers_for_king(Us))
                  +  69 * kingAttacksCount[Them]
                  +   3 * kingFlankAttack * kingFlankAttack / 8
