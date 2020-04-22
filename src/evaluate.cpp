@@ -494,9 +494,9 @@ namespace {
                  + 185 * popcount(kingRing[Us] & weak)
                  + unsafeChecksW * popcount(unsafeChecks)
                  + unsafeChecksQuadW * popcount(unsafeChecks) * popcount(unsafeChecks)
-                 + usChecksRookW * unsafeRookChecks
-                 + usChecksRookB * unsafeBishopChecks
-                 + usChecksRookN * unsafeKnightChecks
+                 + usChecksRookW * popcount(unsafeRookChecks)
+                 + usChecksRookB * popcount(unsafeBishopChecks)
+                 + usChecksRookN * popcount(unsafeKnightChecks)
                  +  98 * popcount(pos.blockers_for_king(Us))
                  +  69 * kingAttacksCount[Them]
                  +   3 * kingFlankAttack * kingFlankAttack / 8
