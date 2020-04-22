@@ -391,6 +391,7 @@ namespace {
                                            : AllSquares ^ Rank1BB ^ Rank2BB ^ Rank3BB);
 
     Bitboard weak, b1, b2, b3, safe, unsafeChecks = 0;
+    Bitboard safeRookChecks, safeQueenChecks, safeBishopChecks, safeKnightChecks;
     Bitboard rookChecks, queenChecks, bishopChecks, knightChecks;
     int kingDanger = 0;
     const Square ksq = pos.square<KING>(Us);
@@ -411,10 +412,11 @@ namespace {
     b2 = attacks_bb<BISHOP>(ksq, pos.pieces() ^ pos.pieces(Us, QUEEN));
 
     // Enemy rooks checks
-    rookChecks = b1 & safe & attackedBy[Them][ROOK];
-    if (rookChecks)
-        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * rSafeCheckW/100
-                                                : RookSafeCheck;
+    rookChecks = b1 & attackedBy[Them][ROOK];
+    safeRookChecks = rookChecks & safe;
+    if (safeRookChecks)
+        kingDanger += more_than_one(safeRookChecks) ? RookSafeCheck * rSafeCheckW/100
+                                                    : RookSafeCheck;
     else
         unsafeChecks |= b1 & attackedBy[Them][ROOK];
 
@@ -422,12 +424,12 @@ namespace {
     // which we can't give a rook check, because rook checks are more valuable.
     queenChecks =  (b1 | b2)
                  & attackedBy[Them][QUEEN]
-                 & safe
                  & ~attackedBy[Us][QUEEN];
-    if (queenChecks) {
-        if (queenChecks & ~rookChecks) {
-            kingDanger += more_than_one(queenChecks & ~rookChecks) ? QueenSafeCheck * qSafeCheckW/100
-                                                                   : QueenSafeCheck;
+    safeQueenChecks = queenChecks & safe;
+    if (safeQueenChecks) {
+        if (safeQueenChecks & ~safeRookChecks) {
+            kingDanger += more_than_one(safeQueenChecks & ~safeRookChecks) ? QueenSafeCheck * qSafeCheckW/100
+                                                                           : QueenSafeCheck;
         } else {
             kingDanger += QueenSafeCheck * qSafeWeakCheckW/100;
         }
@@ -436,14 +438,15 @@ namespace {
     // Enemy bishops checks: we count them only if they are from squares from
     // which we can't give a queen check, because queen checks are more valuable.
     bishopChecks =  b2
-                  & attackedBy[Them][BISHOP]
-                  & safe;
-    if (!(bishopChecks & ~queenChecks & ~rookChecks)) {
+                  & attackedBy[Them][BISHOP];
+    safeBishopChecks = bishopChecks & safe;
+    if (!(safeBishopChecks & ~safeQueenChecks & ~safeRookChecks)) {
         unsafeChecks |= b2 & attackedBy[Them][BISHOP];
-    } else if (bishopChecks) {
-        if (bishopChecks & ~queenChecks & ~rookChecks) {
-            kingDanger += more_than_one(bishopChecks & ~queenChecks & ~rookChecks) ? BishopSafeCheck * bSafeCheckW/100
-                                                      : BishopSafeCheck;
+    } else if (safeBishopChecks) {
+        if (safeBishopChecks & ~safeQueenChecks & ~safeRookChecks) {
+            kingDanger += more_than_one(
+              safeBishopChecks & ~safeQueenChecks & ~safeRookChecks) ? BishopSafeCheck * bSafeCheckW/100
+                                                                     : BishopSafeCheck;
         } else {
             kingDanger += BishopSafeCheck * bSafeWeakCheckW/100;
         }
@@ -451,9 +454,10 @@ namespace {
 
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
-    if (knightChecks & safe)
-        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * nSafeCheckW/100
-                                                         : KnightSafeCheck;
+    safeKnightChecks = knightChecks & safe;
+    if (safeKnightChecks)
+        kingDanger += more_than_one(safeKnightChecks) ? KnightSafeCheck * nSafeCheckW/100
+                                                      : KnightSafeCheck;
     else
         unsafeChecks |= knightChecks;
 
