@@ -452,17 +452,17 @@ namespace {
         unsafeRookChecks |= rookChecks;
     }
 
-    // Enemy queen safe checks: we count them only if they are from squares from
-    // which we can't give a rook check, because rook checks are more valuable.
-    queenChecks =  (b1 | b2)
-                 & attackedBy[Them][QUEEN]
-                 & ~attackedBy[Us][QUEEN];
+    // Enemy queen checks
+    queenChecks = (b1 | b2) & attackedBy[Them][QUEEN] & ~attackedBy[Us][QUEEN];
     safeQueenChecks = queenChecks & safe;
     if (safeQueenChecks) {
         if (safeQueenChecks & ~safeRookChecks) {
+            // Safe queen checks from squares where we can't give a rook check
+            // are worth more because rook checks are more valuable.
             kingDanger += more_than_one(safeQueenChecks & ~safeRookChecks) ? QueenSafeCheck * qSafeCheckW/100
                                                                            : QueenSafeCheck;
         } else {
+            // Safe queen checks from squares where rook checks are also possible
             kingDanger += QueenSafeCheck * qSafeWeakCheckW/100;
         }
         safeChecks |= safeQueenChecks;
@@ -470,8 +470,7 @@ namespace {
       unsafeQueenChecks |= queenChecks;
     }
 
-    // Enemy bishops checks: we count them only if they are from squares from
-    // which we can't give a queen check, because queen checks are more valuable.
+    // Enemy bishops checks
     bishopChecks = b2 & attackedBy[Them][BISHOP];
     safeBishopChecks = bishopChecks & safe;
     if (!(safeBishopChecks & ~safeQueenChecks & ~safeRookChecks)) {
@@ -479,10 +478,13 @@ namespace {
         unsafeBishopChecks |= bishopChecks;
     } else if (safeBishopChecks) {
         if (safeBishopChecks & ~safeQueenChecks & ~safeRookChecks) {
+            // Safe bishop checks from squares where we can't give a queen or rook check
+            // are worth more, because queen and rook checks are more valuable.
             kingDanger += more_than_one(
               safeBishopChecks & ~safeQueenChecks & ~safeRookChecks) ? BishopSafeCheck * bSafeCheckW/100
                                                                      : BishopSafeCheck;
         } else {
+            // Safe bishopo checks where queen/rook checks are also possible
             kingDanger += BishopSafeCheck * bSafeWeakCheckW/100;
         }
         safeChecks |= safeBishopChecks;
@@ -514,10 +516,10 @@ namespace {
                  + safeChecksW * popcount(safeChecks)
                  + unsafeChecksW * popcount(unsafeChecks)
                  + unsafeChecksQuadW * popcount(unsafeChecks) * popcount(unsafeChecks)
-                 + usChecksRookW * unsafeRookChecks
-                 + usChecksBishopW * unsafeBishopChecks
-                 + usChecksKnightW * unsafeKnightChecks
-                 + usChecksQueenW * unsafeQueenChecks
+                 + usChecksRookW * popcount(unsafeRookChecks)
+                 + usChecksBishopW * popcount(unsafeBishopChecks)
+                 + usChecksKnightW * popcount(unsafeKnightChecks)
+                 + usChecksQueenW * popcount(unsafeQueenChecks)
                  +  98 * popcount(pos.blockers_for_king(Us))
                  +  69 * kingAttacksCount[Them]
                  +   3 * kingFlankAttack * kingFlankAttack / 8
