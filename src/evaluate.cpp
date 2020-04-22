@@ -85,6 +85,7 @@ namespace {
   int RookSafeCheck   = 1078;
   int BishopSafeCheck = 635;
   int KnightSafeCheck = 790;
+
   TUNE(SetRange(500, 1000), QueenSafeCheck);
   TUNE(SetRange(700, 1500), RookSafeCheck);
   TUNE(SetRange(500, 1000), BishopSafeCheck);
@@ -107,9 +108,10 @@ namespace {
   TUNE(SetRange(-300, 300), unsafeChecksQuadW);
 
   int usChecksRookW = 0;
-  int usChecksRookB = 0;
-  int usChecksRookN = 0;
-  TUNE(SetRange(-300, 300), usChecksRookW, usChecksRookB, usChecksRookN);
+  int usChecksBishopW = 0;
+  int usChecksKnightW = 0;
+  int usChecksQueenW = 0;
+  TUNE(SetRange(-300, 300), usChecksRookW, usChecksBishopW, usChecksKnightW, usChecksQueenW);
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -405,7 +407,7 @@ namespace {
     Bitboard safeRookChecks, safeQueenChecks, safeBishopChecks, safeKnightChecks;
     Bitboard rookChecks, queenChecks, bishopChecks, knightChecks;
     Bitboard unsafeRookChecks = 0;
-    // Bitboard unsafeQueenChecks = 0;
+    Bitboard unsafeQueenChecks = 0;
     Bitboard unsafeBishopChecks = 0;
     Bitboard unsafeKnightChecks = 0;
 
@@ -451,6 +453,8 @@ namespace {
         } else {
             kingDanger += QueenSafeCheck * qSafeWeakCheckW/100;
         }
+    } else {
+      unsafeQueenChecks |= queenChecks;
     }
 
     // Enemy bishops checks: we count them only if they are from squares from
@@ -495,8 +499,9 @@ namespace {
                  + unsafeChecksW * popcount(unsafeChecks)
                  + unsafeChecksQuadW * popcount(unsafeChecks) * popcount(unsafeChecks)
                  + usChecksRookW * unsafeRookChecks
-                 + usChecksRookB * unsafeBishopChecks
-                 + usChecksRookN * unsafeKnightChecks
+                 + usChecksBishopW * unsafeBishopChecks
+                 + usChecksKnightW * unsafeKnightChecks
+                 + usChecksQueenW * unsafeQueenChecks
                  +  98 * popcount(pos.blockers_for_king(Us))
                  +  69 * kingAttacksCount[Them]
                  +   3 * kingFlankAttack * kingFlankAttack / 8
