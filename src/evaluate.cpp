@@ -96,6 +96,10 @@ namespace {
   int nSafeCheckW = 150;
   TUNE(SetRange(0, 500), rSafeCheckW, qSafeCheckW, bSafeCheckW, nSafeCheckW);
 
+  int qSafeWeakCheckW = 0;
+  int bSafeWeakCheckW = 0;
+  TUNE(SetRange(0, 500), qSafeWeakCheckW, bSafeWeakCheckW);
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -419,23 +423,31 @@ namespace {
     queenChecks =  (b1 | b2)
                  & attackedBy[Them][QUEEN]
                  & safe
-                 & ~attackedBy[Us][QUEEN]
-                 & ~rookChecks;
-    if (queenChecks)
-        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * qSafeCheckW/100
-                                                 : QueenSafeCheck;
+                 & ~attackedBy[Us][QUEEN];
+    if (queenChecks) {
+        if (queenChecks & ~rookChecks) {
+            kingDanger += more_than_one(queenChecks & ~rookChecks) ? QueenSafeCheck * qSafeCheckW/100
+                                                                   : QueenSafeCheck;
+        } else {
+            kingDanger += QueenSafeCheck * qSafeWeakCheckW/100;
+        }
+    }
 
     // Enemy bishops checks: we count them only if they are from squares from
     // which we can't give a queen check, because queen checks are more valuable.
     bishopChecks =  b2
                   & attackedBy[Them][BISHOP]
-                  & safe
-                  & ~queenChecks;
-    if (bishopChecks)
-        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * bSafeCheckW/100
-                                                  : BishopSafeCheck;
-    else
+                  & safe;
+    if (!(bishopChecks & ~queenChecks & ~rookChecks)) {
         unsafeChecks |= b2 & attackedBy[Them][BISHOP];
+    } else if (bishopChecks) {
+        if (bishopChecks & ~queenChecks & ~rookChecks) {
+            kingDanger += more_than_one(bishopChecks & ~queenChecks & ~rookChecks) ? BishopSafeCheck * bSafeCheckW/100
+                                                      : BishopSafeCheck;
+        } else {
+            kingDanger += BishopSafeCheck * bSafeWeakCheckW/100;
+        }
+    }
 
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
