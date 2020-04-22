@@ -100,6 +100,9 @@ namespace {
   int bSafeWeakCheckW = 0;
   TUNE(SetRange(0, 500), qSafeWeakCheckW, bSafeWeakCheckW);
 
+  int unsafeChecksW = 148;
+  TUNE(SetRange(0, 500), unsafeChecksW);
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -418,7 +421,7 @@ namespace {
         kingDanger += more_than_one(safeRookChecks) ? RookSafeCheck * rSafeCheckW/100
                                                     : RookSafeCheck;
     else
-        unsafeChecks |= b1 & attackedBy[Them][ROOK];
+        unsafeChecks |= rookChecks;
 
     // Enemy queen safe checks: we count them only if they are from squares from
     // which we can't give a rook check, because rook checks are more valuable.
@@ -437,11 +440,10 @@ namespace {
 
     // Enemy bishops checks: we count them only if they are from squares from
     // which we can't give a queen check, because queen checks are more valuable.
-    bishopChecks =  b2
-                  & attackedBy[Them][BISHOP];
+    bishopChecks = b2 & attackedBy[Them][BISHOP];
     safeBishopChecks = bishopChecks & safe;
     if (!(safeBishopChecks & ~safeQueenChecks & ~safeRookChecks)) {
-        unsafeChecks |= b2 & attackedBy[Them][BISHOP];
+        unsafeChecks |= bishopChecks;
     } else if (safeBishopChecks) {
         if (safeBishopChecks & ~safeQueenChecks & ~safeRookChecks) {
             kingDanger += more_than_one(
@@ -472,7 +474,7 @@ namespace {
 
     kingDanger +=        kingAttackersCount[Them] * kingAttackersWeight[Them]
                  + 185 * popcount(kingRing[Us] & weak)
-                 + 148 * popcount(unsafeChecks)
+                 + unsafeChecksW * popcount(unsafeChecks)
                  +  98 * popcount(pos.blockers_for_king(Us))
                  +  69 * kingAttacksCount[Them]
                  +   3 * kingFlankAttack * kingFlankAttack / 8
