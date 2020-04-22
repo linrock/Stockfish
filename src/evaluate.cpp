@@ -103,6 +103,9 @@ namespace {
   int unsafeChecksW = 148;
   TUNE(SetRange(0, 500), unsafeChecksW);
 
+  int unsafeChecksQuadW = 0;
+  TUNE(SetRange(-300, 300), unsafeChecksQuadW);
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -475,6 +478,7 @@ namespace {
     kingDanger +=        kingAttackersCount[Them] * kingAttackersWeight[Them]
                  + 185 * popcount(kingRing[Us] & weak)
                  + unsafeChecksW * popcount(unsafeChecks)
+                 + unsafeChecksQuadW * popcount(unsafeChecks) * popcount(unsafeChecks)
                  +  98 * popcount(pos.blockers_for_king(Us))
                  +  69 * kingAttacksCount[Them]
                  +   3 * kingFlankAttack * kingFlankAttack / 8
