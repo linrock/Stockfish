@@ -106,6 +106,11 @@ namespace {
   int unsafeChecksQuadW = 0;
   TUNE(SetRange(-300, 300), unsafeChecksQuadW);
 
+  int usChecksRookW = 0;
+  int usChecksRookB = 0;
+  int usChecksRookN = 0;
+  TUNE(SetRange(-300, 300), usChecksRookW, usChecksRookB, usChecksRookN);
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -399,6 +404,11 @@ namespace {
     Bitboard weak, b1, b2, b3, safe, unsafeChecks = 0;
     Bitboard safeRookChecks, safeQueenChecks, safeBishopChecks, safeKnightChecks;
     Bitboard rookChecks, queenChecks, bishopChecks, knightChecks;
+    Bitboard unsafeRookChecks = 0;
+    // Bitboard unsafeQueenChecks = 0;
+    Bitboard unsafeBishopChecks = 0;
+    Bitboard unsafeKnightChecks = 0;
+
     int kingDanger = 0;
     const Square ksq = pos.square<KING>(Us);
 
@@ -423,8 +433,10 @@ namespace {
     if (safeRookChecks)
         kingDanger += more_than_one(safeRookChecks) ? RookSafeCheck * rSafeCheckW/100
                                                     : RookSafeCheck;
-    else
+    else {
         unsafeChecks |= rookChecks;
+        unsafeRookChecks |= rookChecks;
+    }
 
     // Enemy queen safe checks: we count them only if they are from squares from
     // which we can't give a rook check, because rook checks are more valuable.
@@ -447,6 +459,7 @@ namespace {
     safeBishopChecks = bishopChecks & safe;
     if (!(safeBishopChecks & ~safeQueenChecks & ~safeRookChecks)) {
         unsafeChecks |= bishopChecks;
+        unsafeBishopChecks |= bishopChecks;
     } else if (safeBishopChecks) {
         if (safeBishopChecks & ~safeQueenChecks & ~safeRookChecks) {
             kingDanger += more_than_one(
@@ -463,8 +476,10 @@ namespace {
     if (safeKnightChecks)
         kingDanger += more_than_one(safeKnightChecks) ? KnightSafeCheck * nSafeCheckW/100
                                                       : KnightSafeCheck;
-    else
+    else {
         unsafeChecks |= knightChecks;
+        unsafeKnightChecks |= knightChecks;
+    }
 
     // Find the squares that opponent attacks in our king flank, the squares
     // which they attack twice in that flank, and the squares that we defend.
@@ -479,6 +494,9 @@ namespace {
                  + 185 * popcount(kingRing[Us] & weak)
                  + unsafeChecksW * popcount(unsafeChecks)
                  + unsafeChecksQuadW * popcount(unsafeChecks) * popcount(unsafeChecks)
+                 + usChecksRookW * unsafeRookChecks
+                 + usChecksRookB * unsafeBishopChecks
+                 + usChecksRookN * unsafeKnightChecks
                  +  98 * popcount(pos.blockers_for_king(Us))
                  +  69 * kingAttacksCount[Them]
                  +   3 * kingFlankAttack * kingFlankAttack / 8
