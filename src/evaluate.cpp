@@ -132,7 +132,7 @@ namespace {
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
   constexpr Score KingProtector       = S(  7,  8);
-  constexpr Score KnightOnQueen       = S( 16, 11);
+            Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
   constexpr Score Outpost             = S( 30, 21);
@@ -140,7 +140,8 @@ namespace {
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
-  constexpr Score SliderOnQueen       = S( 59, 18);
+            Score RookOnQueen         = S( 59, 18);
+            Score BishopOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
   constexpr Score ThreatBySafePawn    = S(173, 94);
@@ -148,6 +149,8 @@ namespace {
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
+  TUNE(SetRange(0, 100), KnightOnQueen);
+  TUNE(SetRange(0, 200), BishopOnQueen, RookOnQueen);
 #undef S
 
   // Evaluation class computes and stores attacks tables and other working data
@@ -555,13 +558,13 @@ namespace {
         safe = mobilityArea[Us] & ~stronglyProtected;
 
         b = attackedBy[Us][KNIGHT] & pos.attacks_from<KNIGHT>(s);
-
         score += KnightOnQueen * popcount(b & safe);
 
-        b =  (attackedBy[Us][BISHOP] & pos.attacks_from<BISHOP>(s))
-           | (attackedBy[Us][ROOK  ] & pos.attacks_from<ROOK  >(s));
+        b = attackedBy[Us][BISHOP] & pos.attacks_from<BISHOP>(s);
+        score += BishopOnQueen * popcount(b & safe & attackedBy2[Us]);
 
-        score += SliderOnQueen * popcount(b & safe & attackedBy2[Us]);
+        b = attackedBy[Us][ROOK  ] & pos.attacks_from<ROOK  >(s);
+        score += RookOnQueen * popcount(b & safe & attackedBy2[Us]);
     }
 
     if (T)
