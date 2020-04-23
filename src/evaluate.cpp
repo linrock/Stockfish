@@ -143,11 +143,16 @@ namespace {
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
-  constexpr Score ThreatBySafePawn    = S(173, 94);
+            Score ThreatBySafePawnN   = S(173, 94);
+            Score ThreatBySafePawnB   = S(173, 94);
+            Score ThreatBySafePawnQ   = S(173, 94);
+            Score ThreatBySafePawnR   = S(173, 94);
+            Score ThreatBySafePawnK   = S(173, 94);
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
+  TUNE(SetRange(0, 300), ThreatBySafePawnN, ThreatBySafePawnB, ThreatBySafePawnQ, ThreatBySafePawnR, ThreatBySafePawnK);
 #undef S
 
   // Evaluation class computes and stores attacks tables and other working data
@@ -535,7 +540,11 @@ namespace {
     // Bonus for attacking enemy pieces with our relatively safe pawns
     b = pos.pieces(Us, PAWN) & safe;
     b = pawn_attacks_bb<Us>(b) & nonPawnEnemies;
-    score += ThreatBySafePawn * popcount(b);
+    score += ThreatBySafePawnN * popcount(b & pos.pieces(KNIGHT));
+    score += ThreatBySafePawnB * popcount(b & pos.pieces(BISHOP));
+    score += ThreatBySafePawnQ * popcount(b & pos.pieces(QUEEN));
+    score += ThreatBySafePawnR * popcount(b & pos.pieces(ROOK));
+    score += ThreatBySafePawnK * popcount(b & pos.pieces(KING));
 
     // Find squares where our pawns can push on the next move
     b  = shift<Up>(pos.pieces(Us, PAWN)) & ~pos.pieces();
