@@ -151,7 +151,7 @@ namespace {
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
-  TUNE(SetRange(-10, 50), BishopBehindOurPawn, KnightBehindOurPawn,
+  TUNE(SetRange(-20, 60), BishopBehindOurPawn, KnightBehindOurPawn,
                           BishopBehindTheirPawn, KnightBehindTheirPawn);
 #undef S
 
