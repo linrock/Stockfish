@@ -152,7 +152,6 @@ namespace {
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
-  TUNE(SetRange(0, 300), ThreatBySafePawnN, ThreatBySafePawnB, ThreatBySafePawnQ, ThreatBySafePawnR, ThreatBySafePawnK);
 #undef S
 
   // Evaluation class computes and stores attacks tables and other working data
