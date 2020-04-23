@@ -121,8 +121,8 @@ namespace {
     S(0, 0), S(3, 46), S(37, 68), S(42, 60), S(0, 38), S(58, 41)
   };
 
-  Score HangingPiece[PIECE_TYPE_NB] = {
-    S(0, 0), S(69, 36), S(69, 36), S(69, 36), S(69, 36), S(69, 36), S(69, 36)
+  constexpr Score HangingPiece[PIECE_TYPE_NB] = {
+    S(0, 0), S(69, 39), S(72, 30), S(71, 44), S(74, 29), S(66, 33), S(72, 36)
   };
   TUNE(SetRange(0, 120), HangingPiece);
 
