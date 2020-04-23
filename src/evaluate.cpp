@@ -113,9 +113,16 @@ namespace {
   // ThreatByMinor/ByRook[attacked PieceType] contains bonuses according to
   // which piece type attacks which one. Attacks on lesser pieces which are
   // pawn-defended are not considered.
-  constexpr Score ThreatByMinor[PIECE_TYPE_NB] = {
+  Score ThreatByKnight[PIECE_TYPE_NB] = {
     S(0, 0), S(5, 32), S(57, 41), S(77, 56), S(88, 119), S(79, 161)
   };
+  Score ThreatByBishop[PIECE_TYPE_NB] = {
+    S(0, 0), S(5, 32), S(57, 41), S(77, 56), S(88, 119), S(79, 161)
+  };
+  Score ThreatByMinor[PIECE_TYPE_NB] = {
+    S(0, 0), S(5, 32), S(57, 41), S(77, 56), S(88, 119), S(79, 161)
+  };
+  TUNE(SetRange(0, 250), ThreatByKnight, ThreatByBishop, ThreatByMinor);
 
   constexpr Score ThreatByRook[PIECE_TYPE_NB] = {
     S(0, 0), S(3, 46), S(37, 68), S(42, 60), S(0, 38), S(58, 41)
@@ -504,7 +511,15 @@ namespace {
     // Bonus according to the kind of attacking pieces
     if (defended | weak)
     {
-        b = (defended | weak) & (attackedBy[Us][KNIGHT] | attackedBy[Us][BISHOP]);
+        b = (defended | weak) & attackedBy[Us][KNIGHT] & ~attackedBy[Us][BISHOP];
+        while (b)
+            score += ThreatByKnight[type_of(pos.piece_on(pop_lsb(&b)))];
+
+        b = (defended | weak) & attackedBy[Us][BISHOP] & ~attackedBy[Us][KNIGHT];
+        while (b)
+            score += ThreatByBishop[type_of(pos.piece_on(pop_lsb(&b)))];
+
+        b = (defended | weak) & attackedBy[Us][BISHOP] & attackedBy[Us][KNIGHT];
         while (b)
             score += ThreatByMinor[type_of(pos.piece_on(pop_lsb(&b)))];
 
