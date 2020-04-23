@@ -108,8 +108,7 @@ namespace {
 
   // RookOnFile[semiopen/open] contains bonuses for each rook when there is
   // no (friendly) pawn on the rook file.
-  Score RookOnFile[] = { S(19, 7), S(48, 29) };
-  TUNE(SetRange(0, 100), RookOnFile);
+  constexpr Score RookOnFile[] = { S(14, 1), S(50, 29) };
 
   // ThreatByMinor/ByRook[attacked PieceType] contains bonuses according to
   // which piece type attacks which one. Attacks on lesser pieces which are
@@ -133,16 +132,16 @@ namespace {
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
   constexpr Score KingProtector       = S(  7,  8);
-            Score KnightOnQueen       = S( 16, 11);
+  constexpr Score KnightOnQueen       = S( 15, 14);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
   constexpr Score Outpost             = S( 30, 21);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
-            Score RookOnQueenFile     = S(  5,  9);
-            Score RookOnQueen         = S( 59, 18);
-            Score BishopOnQueen       = S( 59, 18);
+  constexpr Score RookOnQueenFile     = S(  5,  7);
+  constexpr Score RookOnQueen         = S( 59, 20);
+  constexpr Score BishopOnQueen       = S( 69, 32);
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
   constexpr Score ThreatBySafePawn    = S(173, 94);
@@ -150,9 +149,6 @@ namespace {
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
-  TUNE(SetRange(0, 100), KnightOnQueen);
-  TUNE(SetRange(0, 200), BishopOnQueen, RookOnQueen);
-  TUNE(SetRange(0, 50), RookOnQueenFile);
 #undef S
 
   // Evaluation class computes and stores attacks tables and other working data
