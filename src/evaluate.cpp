@@ -142,12 +142,17 @@ namespace {
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
-  constexpr Score ThreatByPawnPush    = S( 48, 39);
+            Score ThreatByPawnPushN   = S( 48, 39);
+            Score ThreatByPawnPushB   = S( 48, 39);
+            Score ThreatByPawnPushR   = S( 48, 39);
+            Score ThreatByPawnPushK   = S( 48, 39);
+            Score ThreatByPawnPushQ   = S( 48, 39);
   constexpr Score ThreatBySafePawn    = S(173, 94);
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
+  TUNE(SetRange(0,150), ThreatByPawnPushN, ThreatByPawnPushB, ThreatByPawnPushR, ThreatByPawnPushK, ThreatByPawnPushQ);
 #undef S
 
   // Evaluation class computes and stores attacks tables and other working data
@@ -546,7 +551,11 @@ namespace {
 
     // Bonus for safe pawn threats on the next move
     b = pawn_attacks_bb<Us>(b) & nonPawnEnemies;
-    score += ThreatByPawnPush * popcount(b);
+    score += ThreatByPawnPushN * popcount(b & pos.pieces(KNIGHT));
+    score += ThreatByPawnPushB * popcount(b & pos.pieces(BISHOP));
+    score += ThreatByPawnPushQ * popcount(b & pos.pieces(QUEEN));
+    score += ThreatByPawnPushR * popcount(b & pos.pieces(ROOK));
+    score += ThreatByPawnPushK * popcount(b & pos.pieces(KING));
 
     // Bonus for threats on the next moves against enemy queen
     if (pos.count<QUEEN>(Them) == 1)
