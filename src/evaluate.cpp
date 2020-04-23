@@ -153,6 +153,9 @@ namespace {
 
   TUNE(SetRange(-10, 50), BishopBehindOurPawn, KnightBehindOurPawn,
                           BishopBehindTheirPawn, KnightBehindTheirPawn);
+
+  int isoEnemyPawnW = 100;
+  TUNE(SetRange(0, 300), isoEnemyPawnW);
 #undef S
 
   // Evaluation class computes and stores attacks tables and other working data
@@ -310,10 +313,18 @@ namespace {
                 else
                     score += KnightBehindOurPawn;
             } else if (shift<Down>(pos.pieces(Them, PAWN)) & s) {
-                if (Pt == BISHOP)
-                    score += BishopBehindTheirPawn;
-                else
-                    score += KnightBehindTheirPawn;
+                Bitboard neighbors = pos.pieces(Them, PAWN) & adjacent_files_bb(s);
+                if (!neighbors) {
+                    if (Pt == BISHOP)
+                        score += BishopBehindTheirPawn * isoEnemyPawnW / 100;
+                    else
+                        score += KnightBehindTheirPawn * isoEnemyPawnW / 100;
+                } else {
+                    if (Pt == BISHOP)
+                        score += BishopBehindTheirPawn;
+                    else
+                        score += KnightBehindTheirPawn;
+                }
             }
 
             // Penalty if the piece is far from the king
