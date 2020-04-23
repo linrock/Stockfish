@@ -90,7 +90,7 @@ namespace {
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
   // indexed by piece type and number of attacked squares in the mobility area.
-  constexpr Score MobilityBonus[][32] = {
+  Score MobilityBonus[][32] = {
     { S(-62,-81), S(-53,-56), S(-12,-30), S( -4,-14), S(  3,  8), S( 13, 15), // Knight
       S( 22, 23), S( 28, 27), S( 33, 33) },
     { S(-48,-59), S(-20,-23), S( 16, -3), S( 26, 13), S( 38, 24), S( 51, 42), // Bishop
@@ -105,6 +105,7 @@ namespace {
       S( 77,147), S( 79,150), S( 93,151), S(108,168), S(108,168), S(108,171),
       S(110,182), S(114,182), S(114,192), S(116,219) }
   };
+  TUNE(SetRange(-100, 150), MobilityBonus);
 
   // RookOnFile[semiopen/open] contains bonuses for each rook when there is
   // no (friendly) pawn on the rook file.
@@ -136,7 +137,6 @@ namespace {
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
             Score Outpost             = S( 30, 21);
-            Score RookOutpost         = S(  0,  0);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -150,12 +150,9 @@ namespace {
   constexpr Score WeakQueenProtection = S( 15,  0);
 
   TUNE(SetRange(0, 60), Outpost);
-  TUNE(SetRange(-20, 40), RookOutpost);
 
   int NOutpostW = 100; int BOutpostW = 100; int NOutpost2W = 100;
-  int ROutpostW = 100;
-
-  TUNE(SetRange(0, 300), NOutpostW, BOutpostW, NOutpost2W, ROutpostW);
+  TUNE(SetRange(0, 300), NOutpostW, BOutpostW, NOutpost2W);
 
 #undef S
 
@@ -345,11 +342,6 @@ namespace {
 
         if (Pt == ROOK)
         {
-            // Bonus if rook is on an outpost square or can reach one
-            bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
-            if (bb & s)
-                score += RookOutpost * ROutpostW/100;
-
             // Bonus for rook on the same file as a queen
             if (file_bb(s) & pos.pieces(QUEEN))
                 score += RookOnQueenFile;
