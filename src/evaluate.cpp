@@ -122,11 +122,11 @@ namespace {
   Score ThreatByMinor[PIECE_TYPE_NB] = {
     S(0, 0), S(5, 32), S(57, 41), S(77, 56), S(88, 119), S(79, 161)
   };
-  TUNE(SetRange(0, 250), ThreatByKnight, ThreatByBishop, ThreatByMinor);
-
-  constexpr Score ThreatByRook[PIECE_TYPE_NB] = {
+  Score ThreatByRook[PIECE_TYPE_NB] = {
     S(0, 0), S(3, 46), S(37, 68), S(42, 60), S(0, 38), S(58, 41)
   };
+
+  TUNE(SetRange(-25, 250), ThreatByKnight, ThreatByBishop, ThreatByMinor, ThreatByRook);
 
   // PassedRank[Rank] contains a bonus according to the rank of a passed pawn
   constexpr Score PassedRank[RANK_NB] = {
