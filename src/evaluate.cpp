@@ -132,7 +132,7 @@ namespace {
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
   constexpr Score KingProtector       = S(  7,  8);
-  constexpr Score KnightOnQueen       = S( 20, 12);
+  constexpr Score KnightOnQueen       = S( 19, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
   constexpr Score Outpost             = S( 30, 21);
@@ -140,8 +140,8 @@ namespace {
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
-  constexpr Score RookOnQueen         = S( 56,  8);
-  constexpr Score BishopOnQueen       = S( 62, 26);
+  constexpr Score RookOnQueen         = S( 65, 27);
+  constexpr Score BishopOnQueen       = S( 66, 22);
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
   constexpr Score ThreatBySafePawn    = S(173, 94);
