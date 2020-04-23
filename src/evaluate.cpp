@@ -121,6 +121,11 @@ namespace {
     S(0, 0), S(3, 46), S(37, 68), S(42, 60), S(0, 38), S(58, 41)
   };
 
+  Score HangingPiece[PIECE_TYPE_NB] = {
+    S(0, 0), S(69, 36), S(69, 36), S(69, 36), S(69, 36), S(69, 36), S(69, 36)
+  };
+  TUNE(SetRange(0, 120), HangingPiece);
+
   // PassedRank[Rank] contains a bonus according to the rank of a passed pawn
   constexpr Score PassedRank[RANK_NB] = {
     S(0, 0), S(10, 28), S(17, 33), S(15, 41), S(62, 72), S(168, 177), S(276, 260)
@@ -130,7 +135,6 @@ namespace {
   constexpr Score BishopPawns         = S(  3,  7);
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
-  constexpr Score Hanging             = S( 69, 36);
   constexpr Score KingProtector       = S(  7,  8);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
@@ -515,9 +519,9 @@ namespace {
         if (weak & attackedBy[Us][KING])
             score += ThreatByKing;
 
-        b =  ~attackedBy[Them][ALL_PIECES]
-           | (nonPawnEnemies & attackedBy2[Us]);
-        score += Hanging * popcount(weak & b);
+        b =  weak & (~attackedBy[Them][ALL_PIECES] | (nonPawnEnemies & attackedBy2[Us]));
+        while (b)
+            score += HangingPiece[type_of(pos.piece_on(pop_lsb(&b)))];
 
         // Additional bonus if weak piece is only protected by a queen
         score += WeakQueenProtection * popcount(weak & attackedBy[Them][QUEEN]);
