@@ -81,43 +81,10 @@ namespace {
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 81, 52, 44, 10 };
 
   // Penalties for enemy's safe checks
-  int QueenSafeCheck  = 780;
-  int RookSafeCheck   = 1078;
-  int BishopSafeCheck = 635;
-  int KnightSafeCheck = 790;
-
-  TUNE(SetRange(500, 1000), QueenSafeCheck);
-  TUNE(SetRange(700, 1500), RookSafeCheck);
-  TUNE(SetRange(300, 1000), BishopSafeCheck);
-  TUNE(SetRange(300, 1000), KnightSafeCheck);
-
-  int rSafeCheckW = 150;
-  int qSafeCheckW = 150;
-  int bSafeCheckW = 150;
-  int nSafeCheckW = 150;
-  TUNE(SetRange(0, 500), rSafeCheckW, qSafeCheckW, bSafeCheckW, nSafeCheckW);
-
-  int qSafeWeakCheckW = 0;
-  int bSafeWeakCheckW = 0;
-  TUNE(SetRange(-100, 500), qSafeWeakCheckW, bSafeWeakCheckW);
-
-  int unsafeChecksW = 148;
-  TUNE(SetRange(-100, 500), unsafeChecksW);
-
-  int safeChecksW = 0;
-  TUNE(SetRange(-500, 500), safeChecksW);
-
-  int unsafeChecksQuadW = 0;
-  TUNE(SetRange(-10, 10), unsafeChecksQuadW);
-
-  int usChecksRookW = 0;
-  int usChecksBishopW = 0;
-  int usChecksKnightW = 0;
-  int usChecksQueenW = 0;
-  TUNE(SetRange(-500, 200), usChecksRookW, usChecksBishopW, usChecksKnightW, usChecksQueenW);
-
-  int kdConstant = 0;
-  TUNE(SetRange(-500, 500), kdConstant);
+  constexpr int QueenSafeCheck  = 780;
+  constexpr int RookSafeCheck   = 1078;
+  constexpr int BishopSafeCheck = 635;
+  constexpr int KnightSafeCheck = 790;
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -444,7 +411,7 @@ namespace {
     rookChecks = b1 & attackedBy[Them][ROOK];
     safeRookChecks = rookChecks & safe;
     if (safeRookChecks) {
-        kingDanger += more_than_one(safeRookChecks) ? RookSafeCheck * rSafeCheckW/100
+        kingDanger += more_than_one(safeRookChecks) ? RookSafeCheck * 3/2
                                                     : RookSafeCheck;
         safeChecks |= safeRookChecks;
     } else {
@@ -459,11 +426,8 @@ namespace {
         if (safeQueenChecks & ~safeRookChecks) {
             // Safe queen checks from squares where we can't give a rook check
             // are worth more because rook checks are more valuable.
-            kingDanger += more_than_one(safeQueenChecks & ~safeRookChecks) ? QueenSafeCheck * qSafeCheckW/100
+            kingDanger += more_than_one(safeQueenChecks & ~safeRookChecks) ? QueenSafeCheck * 3/2
                                                                            : QueenSafeCheck;
-        } else {
-            // Safe queen checks from squares where rook checks are also possible
-            kingDanger += QueenSafeCheck * qSafeWeakCheckW/100;
         }
         safeChecks |= safeQueenChecks;
     } else {
@@ -481,11 +445,8 @@ namespace {
             // Safe bishop checks from squares where we can't give a queen or rook check
             // are worth more, because queen and rook checks are more valuable.
             kingDanger += more_than_one(
-              safeBishopChecks & ~safeQueenChecks & ~safeRookChecks) ? BishopSafeCheck * bSafeCheckW/100
+              safeBishopChecks & ~safeQueenChecks & ~safeRookChecks) ? BishopSafeCheck * 3/2
                                                                      : BishopSafeCheck;
-        } else {
-            // Safe bishopo checks where queen/rook checks are also possible
-            kingDanger += BishopSafeCheck * bSafeWeakCheckW/100;
         }
         safeChecks |= safeBishopChecks;
     }
@@ -494,7 +455,7 @@ namespace {
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
     safeKnightChecks = knightChecks & safe;
     if (safeKnightChecks) {
-        kingDanger += more_than_one(safeKnightChecks) ? KnightSafeCheck * nSafeCheckW/100
+        kingDanger += more_than_one(safeKnightChecks) ? KnightSafeCheck * 3/2
                                                       : KnightSafeCheck;
         safeChecks |= safeKnightChecks;
     } else {
