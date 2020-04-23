@@ -134,8 +134,10 @@ namespace {
   constexpr Score KingProtector       = S(  7,  8);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
-            Score BishopBehindPawn    = S( 18,  3);
-            Score KnightBehindPawn    = S( 18,  3);
+            Score BishopBehindOurPawn = S( 18,  3);
+            Score KnightBehindOurPawn = S( 18,  3);
+            Score BishopBehindTheirPawn = S( 18,  3);
+            Score KnightBehindTheirPawn = S( 18,  3);
   constexpr Score Outpost             = S( 30, 21);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
@@ -149,7 +151,8 @@ namespace {
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
-  TUNE(SetRange(-10, 50), BishopBehindPawn, KnightBehindPawn);
+  TUNE(SetRange(-10, 50), BishopBehindOurPawn, KnightBehindOurPawn,
+                          BishopBehindTheirPawn, KnightBehindTheirPawn);
 #undef S
 
   // Evaluation class computes and stores attacks tables and other working data
@@ -301,11 +304,16 @@ namespace {
                 score += Outpost;
 
             // Bonus for a knight or bishop shielded by pawn
-            if (shift<Down>(pos.pieces(PAWN)) & s) {
+            if (shift<Down>(pos.pieces(Us, PAWN)) & s) {
                 if (Pt == BISHOP)
-                    score += BishopBehindPawn;
+                    score += BishopBehindOurPawn;
                 else
-                    score += KnightBehindPawn;
+                    score += KnightBehindOurPawn;
+            } else if (shift<Down>(pos.pieces(Them, PAWN)) & s) {
+                if (Pt == BISHOP)
+                    score += BishopBehindTheirPawn;
+                else
+                    score += KnightBehindTheirPawn;
             }
 
             // Penalty if the piece is far from the king
