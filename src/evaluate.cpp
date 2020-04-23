@@ -108,7 +108,8 @@ namespace {
 
   // RookOnFile[semiopen/open] contains bonuses for each rook when there is
   // no (friendly) pawn on the rook file.
-  constexpr Score RookOnFile[] = { S(19, 7), S(48, 29) };
+  Score RookOnFile[] = { S(19, 7), S(48, 29) };
+  TUNE(SetRange(0, 100), RookOnFile);
 
   // ThreatByMinor/ByRook[attacked PieceType] contains bonuses according to
   // which piece type attacks which one. Attacks on lesser pieces which are
@@ -139,7 +140,7 @@ namespace {
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
-  constexpr Score RookOnQueenFile     = S(  5,  9);
+            Score RookOnQueenFile     = S(  5,  9);
             Score RookOnQueen         = S( 59, 18);
             Score BishopOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
@@ -151,6 +152,7 @@ namespace {
 
   TUNE(SetRange(0, 100), KnightOnQueen);
   TUNE(SetRange(0, 200), BishopOnQueen, RookOnQueen);
+  TUNE(SetRange(0, 50), RookOnQueenFile);
 #undef S
 
   // Evaluation class computes and stores attacks tables and other working data
