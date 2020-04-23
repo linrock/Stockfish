@@ -135,7 +135,7 @@ namespace {
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-            Score Outpost             = S( 30, 21);
+  constexpr Score Outpost             = S( 30, 21);
             Score RookOutpost         = S(  0,  0);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
@@ -149,13 +149,10 @@ namespace {
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
-  TUNE(SetRange(0, 60), Outpost);
-  TUNE(SetRange(-20, 40), RookOutpost);
+  TUNE(SetRange(-200, 200), RookOutpost);
 
   int NOutpostW = 100; int BOutpostW = 100; int NOutpost2W = 100;
-  int ROutpostW = 100;
-
-  TUNE(SetRange(0, 300), NOutpostW, BOutpostW, NOutpost2W, ROutpostW);
+  TUNE(SetRange(0, 300), NOutpostW, BOutpostW, NOutpost2W);
 
 #undef S
 
@@ -301,11 +298,14 @@ namespace {
         {
             // Bonus if piece is on an outpost square or can reach one
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
-            if (bb & s)
-                score += Outpost * (Pt == KNIGHT ? (2*NOutpostW/100) : (1*BOutpostW/100));
-
+            if (bb & s) {
+                if (Pt == KNIGHT)
+                    score += Outpost * NOutpostW / 50;
+                else
+                    score += Outpost * BOutpostW / 100;
+            }
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
-                score += Outpost * NOutpost2W/100;
+                score += Outpost * NOutpost2W / 100;
 
             // Bonus for a knight or bishop shielded by pawn
             if (shift<Down>(pos.pieces(PAWN)) & s)
@@ -348,7 +348,7 @@ namespace {
             // Bonus if rook is on an outpost square or can reach one
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s)
-                score += RookOutpost * ROutpostW/100;
+                score += RookOutpost;
 
             // Bonus for rook on the same file as a queen
             if (file_bb(s) & pos.pieces(QUEEN))
