@@ -513,13 +513,11 @@ namespace {
 
     kingDanger +=        kingAttackersCount[Them] * kingAttackersWeight[Them]
                  + 185 * popcount(kingRing[Us] & weak)
-                 + safeChecksW * popcount(safeChecks)
-                 + unsafeChecksW * popcount(unsafeChecks)
-                 + unsafeChecksQuadW * popcount(unsafeChecks) * popcount(unsafeChecks)
-                 + usChecksRookW * popcount(unsafeRookChecks)
-                 + usChecksBishopW * popcount(unsafeBishopChecks)
-                 + usChecksKnightW * popcount(unsafeKnightChecks)
-                 + usChecksQueenW * popcount(unsafeQueenChecks)
+                 +  20 * popcount(safeChecks)
+                 + 141 * popcount(unsafeChecks)
+                 +  21 * popcount(unsafeRookChecks)
+                 +  20 * popcount(unsafeBishopChecks)
+                 +  10 * popcount(unsafeQueenChecks)
                  +  98 * popcount(pos.blockers_for_king(Us))
                  +  69 * kingAttacksCount[Them]
                  +   3 * kingFlankAttack * kingFlankAttack / 8
@@ -528,8 +526,7 @@ namespace {
                  - 100 * bool(attackedBy[Us][KNIGHT] & attackedBy[Us][KING])
                  -   6 * mg_value(score) / 8
                  -   4 * kingFlankDefense
-                 +  37
-                 + kdConstant;
+                 -  15;
 
     // Transform the kingDanger units into a Score, and subtract it from the evaluation
     if (kingDanger > 100)
