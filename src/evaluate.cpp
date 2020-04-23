@@ -143,11 +143,11 @@ namespace {
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
-            Score ThreatBySafePawnN   = S(173, 94);
-            Score ThreatBySafePawnB   = S(173, 94);
-            Score ThreatBySafePawnQ   = S(173, 94);
-            Score ThreatBySafePawnR   = S(173, 94);
-            Score ThreatBySafePawnK   = S(173, 94);
+  constexpr Score ThreatBySafePawnN   = S(176, 91);
+  constexpr Score ThreatBySafePawnB   = S(179, 96);
+  constexpr Score ThreatBySafePawnQ   = S(166, 91);
+  constexpr Score ThreatBySafePawnR   = S(167,100);
+  constexpr Score ThreatBySafePawnK   = S(187, 90);
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
