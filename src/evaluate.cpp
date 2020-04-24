@@ -109,8 +109,7 @@ namespace {
 
   // RookOnFile[semiopen/open] contains bonuses for each rook when there is
   // no (friendly) pawn on the rook file.
-  Score RookOnFile[] = { S(19, 7), S(48, 29) };
-  TUNE(SetRange(0, 80), RookOnFile);
+  constexpr Score RookOnFile[] = { S(20, 7), S(53, 35) };
 
   // ThreatByMinor/ByRook[attacked PieceType] contains bonuses according to
   // which piece type attacks which one. Attacks on lesser pieces which are
@@ -119,10 +118,9 @@ namespace {
     S(0, 0), S(5, 32), S(57, 41), S(77, 56), S(88, 119), S(79, 161)
   };
 
-  Score ThreatByRook[PIECE_TYPE_NB] = {
-    S(0, 0), S(3, 46), S(37, 68), S(42, 60), S(0, 38), S(58, 41)
+  constexpr Score ThreatByRook[PIECE_TYPE_NB] = {
+    S(0, 0), S(5, 44), S(37, 70), S(48, 65), S(0, 38), S(54, 42)
   };
-  TUNE(SetRange(0, 90), ThreatByRook);
 
   // PassedRank[Rank] contains a bonus according to the rank of a passed pawn
   constexpr Score PassedRank[RANK_NB] = {
@@ -142,17 +140,14 @@ namespace {
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
-            Score RookOnQueenFile     = S(  5,  9);
+  constexpr Score RookOnQueenFile     = S(  7,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
   constexpr Score ThreatBySafePawn    = S(173, 94);
-            Score TrappedRook         = S( 55, 13);
-            Score WeakQueen           = S( 51, 14);
+  constexpr Score TrappedRook         = S( 60, 11);
+  constexpr Score WeakQueen           = S( 58, 18);
   constexpr Score WeakQueenProtection = S( 15,  0);
-
-  TUNE(SetRange(-10, 30), RookOnQueenFile);
-  TUNE(SetRange(0, 80), TrappedRook, WeakQueen);
 
 #undef S
 
