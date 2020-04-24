@@ -150,6 +150,9 @@ namespace {
 
 #undef S
 
+  int kdOppositeBishops = 0; int kdConst = 0;
+  TUNE(SetRange(-300, 300), kdOppositeBishops, kdConst);
+
   // Evaluation class computes and stores attacks tables and other working data
   template<Tracing T>
   class Evaluation {
@@ -451,6 +454,10 @@ namespace {
                  +  69 * kingAttacksCount[Them]
                  +   3 * kingFlankAttack * kingFlankAttack / 8
                  +       mg_value(mobility[Them] - mobility[Us])
+                 + kdOppositeBishops * (pos.opposite_bishops() &&
+                                        pos.non_pawn_material(WHITE) == BishopValueMg &&
+                                        pos.non_pawn_material(BLACK) == BishopValueMg)
+                 + kdConst
                  - 873 * !pos.count<QUEEN>(Them)
                  - 100 * bool(attackedBy[Us][KNIGHT] & attackedBy[Us][KING])
                  -   6 * mg_value(score) / 8
