@@ -304,7 +304,7 @@ namespace {
                 score += Outpost;
 
             // Bonus for a knight or bishop shielded by pawn
-            if (shift<Down>(pos.pieces(Us, PAWN)) & s) {
+            if (~Rank1BB & ~Rank8BB & shift<Down>(pos.pieces(Us, PAWN)) & s) {
                 if (Pt == BISHOP)
                     score += BishopBehindOurPawn;
                 else
