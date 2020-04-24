@@ -144,9 +144,15 @@ namespace {
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
   constexpr Score ThreatBySafePawn    = S(173, 94);
-  constexpr Score TrappedRook         = S( 55, 13);
+            Score TrappedKRook        = S( 55, 13);
+            Score TrappedKRookNC      = S(110, 26);
+            Score TrappedQRook        = S(  0,  0);
+            Score TrappedQRookNC      = S(  0,  0);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
+
+  TUNE(SetRange(0, 200), TrappedKRook, TrappedKRookNC);
+  TUNE(SetRange(-200, 200), TrappedQRook, TrappedQRookNC);
 
 #undef S
 
@@ -348,8 +354,17 @@ namespace {
             else if (mob <= 3)
             {
                 File kf = file_of(pos.square<KING>(Us));
-                if ((kf < FILE_E) == (file_of(s) < kf))
-                    score -= TrappedRook * (1 + !pos.castling_rights(Us));
+                if ((kf < FILE_E) == (file_of(s) < kf)) {
+                    if (pos.castling_rights(Us))
+                        score -= TrappedKRook;
+                    else
+                        score -= TrappedKRookNC;
+                } else if ((kf > FILE_E) == (file_of(s) > kf)) {
+                    if (pos.castling_rights(Us))
+                        score -= TrappedQRook;
+                    else
+                        score -= TrappedQRookNC;
+                }
             }
         }
 
