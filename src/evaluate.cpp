@@ -149,7 +149,7 @@ namespace {
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
-  TUNE(SetRange(-50, 50), ConnectedRooks);
+  TUNE(SetRange(-100, 100), ConnectedRooks);
 
 #undef S
 
@@ -343,8 +343,10 @@ namespace {
             if (file_bb(s) & pos.pieces(QUEEN))
                 score += RookOnQueenFile;
 
-            // Bonus for connected rooks
-            if (attackedBy[Us][ROOK] & s)
+            constexpr Bitboard SeventhRank = (Us == WHITE) ? Rank7BB : Rank2BB;
+
+            // Bonus for connected rooks on the 7th rank
+            if (SeventhRank & s & attackedBy[Us][ROOK])
                 score += ConnectedRooks;
 
             // Bonus for rook on an open or semi-open file
