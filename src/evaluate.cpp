@@ -131,14 +131,14 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
-            Score BishopKingProtector = S(  7,  8);
-            Score KnightKingProtector = S(  7,  8);
+  constexpr Score BishopKingProtector = S(  6,  9);
+  constexpr Score KnightKingProtector = S(  8,  9);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-            Score KnightOutpost       = S( 60, 42);
-            Score BishopOutpost       = S( 30, 21);
-            Score ReachableOutpost    = S( 30, 21);
+  constexpr Score KnightOutpost       = S( 56, 36);
+  constexpr Score BishopOutpost       = S( 30, 23);
+  constexpr Score ReachableOutpost    = S( 31, 22);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -150,10 +150,6 @@ namespace {
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
-
-  TUNE(SetRange(0, 200), KnightOutpost);
-  TUNE(SetRange(0, 100), BishopOutpost, ReachableOutpost);
-  TUNE(SetRange(-10, 50), BishopKingProtector, KnightKingProtector);
 
 #undef S
 
