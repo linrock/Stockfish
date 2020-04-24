@@ -86,12 +86,6 @@ namespace {
   constexpr int BishopSafeCheck = 635;
   constexpr int KnightSafeCheck = 790;
 
-  int rSafeCheckW = 150;
-  int qSafeCheckW = 150;
-  int bSafeCheckW = 150;
-  int nSafeCheckW = 150;
-  TUNE(SetRange(0, 500), rSafeCheckW, qSafeCheckW, bSafeCheckW, nSafeCheckW);
-
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
