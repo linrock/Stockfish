@@ -131,17 +131,14 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
-            Score BishopKingProtector = S(  7,  8);
-            Score KnightKingProtector = S(  7,  8);
+  constexpr Score BishopKingProtector = S(  6, 10);
+  constexpr Score KnightKingProtector = S(  7, 10);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-            Score KnightOutpost       = S( 60, 42);
-            Score BishopOutpost       = S( 30, 21);
-            Score ReachBishopOutpost  = S(  0,  0);
-            Score ReachKnightOutpost  = S( 30, 21);
-            Score RookOutpost         = S(  0,  0);
-            Score ReachRookOutpost    = S(  0,  0);
+  constexpr Score KnightOutpost       = S( 54, 48);
+  constexpr Score BishopOutpost       = S( 32, 23);
+  constexpr Score ReachKnightOutpost  = S( 30, 24);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -153,11 +150,6 @@ namespace {
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
-
-  TUNE(SetRange(0, 200), KnightOutpost);
-  TUNE(SetRange(0, 100), BishopOutpost, ReachKnightOutpost);
-  TUNE(SetRange(-20, 60), BishopKingProtector, KnightKingProtector);
-  TUNE(SetRange(-30, 100), ReachBishopOutpost, RookOutpost, ReachRookOutpost);
 
 #undef S
 
@@ -305,8 +297,8 @@ namespace {
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s)
                 score += (Pt == KNIGHT) ? KnightOutpost : BishopOutpost;
-            else if (bb & b & ~pos.pieces(Us))
-                score += (Pt == KNIGHT) ? ReachKnightOutpost : ReachBishopOutpost;
+            else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
+                score += ReachKnightOutpost;
 
             // Bonus for a knight or bishop shielded by pawn
             if (shift<Down>(pos.pieces(PAWN)) & s)
@@ -349,13 +341,6 @@ namespace {
 
         if (Pt == ROOK)
         {
-            // Bonus if rook is on an outpost square or can reach one
-            bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
-            if (bb & s)
-                score += RookOutpost;
-            else if (bb & b & ~pos.pieces(Us))
-                score += ReachRookOutpost;
-
             // Bonus for rook on the same file as a queen
             if (file_bb(s) & pos.pieces(QUEEN))
                 score += RookOnQueenFile;
