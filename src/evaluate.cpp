@@ -136,7 +136,9 @@ namespace {
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
   constexpr Score KnightOutpost       = S( 65, 38);
-  constexpr Score Outpost             = S( 33, 22);
+  constexpr Score BishopOutpost       = S( 33, 22);
+  constexpr Score ReachKnightOutpost  = S( 34, 18);
+  constexpr Score ReachBishopOutpost  = S(  4,  5);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -294,10 +296,10 @@ namespace {
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s) {
                 // Bonus if piece is on an outpost
-                score += (Pt == KNIGHT) ? KnightOutpost : Outpost;
-            } else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us)) {
-                // Bonus for knights on reachable outposts
-                score += Outpost;
+                score += (Pt == KNIGHT) ? KnightOutpost : BishopOutpost;
+            } else if (bb & b & ~pos.pieces(Us)) {
+                // Bonus for reachable outposts
+                score += (Pt == KNIGHT) ? ReachKnightOutpost : ReachBishopOutpost;
             }
 
             // Bonus for a knight or bishop shielded by pawn
