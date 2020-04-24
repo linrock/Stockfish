@@ -90,9 +90,9 @@ namespace {
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
   // indexed by piece type and number of attacked squares in the mobility area.
-  Score MobilityBonus[][32] = {
-    { S(-62,-81), S(-53,-56), S(-12,-30), S( -4,-14), S(  3,  8), S( 13, 15), // Knight
-      S( 22, 23), S( 28, 27), S( 33, 33) },
+  constexpr Score MobilityBonus[][32] = {
+    { S(-61,-70), S(-59,-50), S( -9,-33), S( -4,-14), S( 11,  8), S( 19, 19), // Knight
+      S( 20, 12), S( 36, 45), S( 33, 30) },
     { S(-48,-59), S(-20,-23), S( 16, -3), S( 26, 13), S( 38, 24), S( 51, 42), // Bishop
       S( 55, 54), S( 63, 57), S( 63, 65), S( 68, 73), S( 81, 78), S( 81, 86),
       S( 91, 88), S( 98, 97) },
@@ -105,7 +105,6 @@ namespace {
       S( 77,147), S( 79,150), S( 93,151), S(108,168), S(108,168), S(108,171),
       S(110,182), S(114,182), S(114,192), S(116,219) }
   };
-  TUNE(SetRange(-100, 150), MobilityBonus);
 
   // RookOnFile[semiopen/open] contains bonuses for each rook when there is
   // no (friendly) pawn on the rook file.
