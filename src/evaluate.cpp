@@ -140,8 +140,8 @@ namespace {
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
-            Score RookBehindOurPasser = S(  0,  0);
-            Score RookBehindTheirPasser = S( 0, 0);
+  constexpr Score RookBehindOurPasser = S(  8,  4);
+  constexpr Score RookBehindTheirPasser = S( 2, 2);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
@@ -151,8 +151,6 @@ namespace {
   constexpr Score WeakQueenProtection = S( 15,  0);
 
 #undef S
-
-  TUNE(SetRange(-100, 100), RookBehindOurPasser, RookBehindTheirPasser);
 
   // Evaluation class computes and stores attacks tables and other working data
   template<Tracing T>
