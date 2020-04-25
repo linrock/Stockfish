@@ -55,14 +55,12 @@ namespace {
   // RANK_1 = 0 is used for files where the enemy has no pawn, or their pawn
   // is behind our king. Note that UnblockedStorm[0][1-2] accommodate opponent pawn
   // on edge, likely blocked by our king.
-  Value UnblockedStorm[int(FILE_NB) / 2][RANK_NB] = {
-    { V( 85), V(-289), V(-166), V(97), V(50), V( 45), V( 50) },
-    { V( 46), V( -25), V( 122), V(45), V(37), V(-10), V( 20) },
-    { V( -6), V(  51), V( 168), V(34), V(-2), V(-22), V(-14) },
-    { V(-15), V( -11), V( 101), V( 4), V(11), V(-15), V(-29) }
+  constexpr Value UnblockedStorm[int(FILE_NB) / 2][RANK_NB] = {
+    { V( 92), V(-286), V(-132), V(69), V( 56), V( 50), V( 53) },
+    { V( 61), V( -54), V( 105), V(40), V( 43), V(  7), V( 46) },
+    { V(-14), V(  38), V( 157), V(20), V(-10), V(-12), V( -6) },
+    { V(-12), V( -22), V( 101), V(29), V( -3), V( -3), V( -6) }
   };
-
-  TUNE(SetRange(-300, 200), UnblockedStorm);
 
   #undef S
   #undef V
