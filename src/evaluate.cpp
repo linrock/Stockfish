@@ -141,7 +141,6 @@ namespace {
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
             Score RookBehindOurPasser = S(  0,  0);
-            Score RookBehindTheirPasser = S( 0, 0);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
@@ -152,7 +151,7 @@ namespace {
 
 #undef S
 
-  TUNE(SetRange(-100, 100), RookBehindOurPasser, RookBehindTheirPasser);
+  TUNE(SetRange(-100, 100), RookBehindOurPasser);
 
   // Evaluation class computes and stores attacks tables and other working data
   template<Tracing T>
@@ -339,12 +338,10 @@ namespace {
 
         if (Pt == ROOK)
         {
+            // Bonus for rook behind one of our passed pawns
             bb = file_bb(s);
-            if (bb & pe->passed_pawns(Us))
+            if (bb & pe->passed_pawns(Us) & forward_ranks_bb(Us, s))
                 score += RookBehindOurPasser;
-
-            if (bb & pe->passed_pawns(Them))
-                score += RookBehindTheirPasser;
 
             // Bonus for rook on the same file as a queen
             if (bb & pos.pieces(QUEEN))
