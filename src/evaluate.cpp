@@ -140,6 +140,8 @@ namespace {
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
+            Score RookBehindOurPasser = S(  0,  0);
+            Score RookBehindTheirPasser = S( 0, 0);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
   constexpr Score ThreatByPawnPush    = S( 48, 39);
@@ -149,6 +151,8 @@ namespace {
   constexpr Score WeakQueenProtection = S( 15,  0);
 
 #undef S
+
+  TUNE(SetRange(-100, 100), RookBehindOurPasser, RookBehindTheirPasser);
 
   // Evaluation class computes and stores attacks tables and other working data
   template<Tracing T>
@@ -294,7 +298,6 @@ namespace {
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s)
                 score += Outpost * (Pt == KNIGHT ? 2 : 1);
-
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
                 score += Outpost;
 
@@ -336,8 +339,15 @@ namespace {
 
         if (Pt == ROOK)
         {
+            bb = file_bb(s);
+            if (bb & pe->passed_pawns(Us))
+                score += RookBehindOurPasser;
+
+            if (bb & pe->passed_pawns(Them))
+                score += RookBehindTheirPasser;
+
             // Bonus for rook on the same file as a queen
-            if (file_bb(s) & pos.pieces(QUEEN))
+            if (bb & pos.pieces(QUEEN))
                 score += RookOnQueenFile;
 
             // Bonus for rook on an open or semi-open file
