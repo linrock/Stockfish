@@ -81,10 +81,20 @@ namespace {
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 81, 52, 44, 10 };
 
   // Penalties for enemy's safe checks
-  constexpr int QueenSafeCheck  = 780;
-  constexpr int RookSafeCheck   = 1078;
-  constexpr int BishopSafeCheck = 635;
-  constexpr int KnightSafeCheck = 790;
+  int QueenSafeCheck  = 772;
+  int RookSafeCheck   = 1084;
+  int BishopSafeCheck = 645;
+  int KnightSafeCheck = 792;
+  TUNE(SetRange(500, 1200), QueenSafeCheck);
+  TUNE(SetRange(700, 1400), RookSafeCheck);
+  TUNE(SetRange(400, 1000), BishopSafeCheck);
+  TUNE(SetRange(500, 1000), KnightSafeCheck);
+
+  int rSafeCheckW = 175;
+  int qSafeCheckW = 145;
+  int bSafeCheckW = 150;
+  int nSafeCheckW = 162;
+  TUNE(SetRange(0, 600), rSafeCheckW, qSafeCheckW, bSafeCheckW, nSafeCheckW);
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -131,14 +141,14 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
-            Score BishopKingProtector = S(  7,  8);
-            Score KnightKingProtector = S(  7,  8);
+            Score BishopKingProtector = S( 60, 90);
+            Score KnightKingProtector = S( 80, 90);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-            Score KnightOutpost       = S( 60, 42);
-            Score BishopOutpost       = S( 30, 21);
-            Score ReachableOutpost    = S( 30, 21);
+            Score KnightOutpost       = S( 56, 36);
+            Score BishopOutpost       = S( 30, 23);
+            Score ReachableOutpost    = S( 31, 22);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -153,7 +163,7 @@ namespace {
 
   TUNE(SetRange(0, 200), KnightOutpost);
   TUNE(SetRange(0, 100), BishopOutpost, ReachableOutpost);
-  TUNE(SetRange(-10, 50), BishopKingProtector, KnightKingProtector);
+  TUNE(SetRange(-100, 500), BishopKingProtector, KnightKingProtector);
 
 #undef S
 
@@ -310,9 +320,9 @@ namespace {
 
             // Penalty if the piece is far from the king
             if (Pt == KNIGHT)
-              score -= KnightKingProtector * distance(pos.square<KING>(Us), s);
+              score -= KnightKingProtector * distance(pos.square<KING>(Us), s) / 10;
             else
-              score -= BishopKingProtector * distance(pos.square<KING>(Us), s);
+              score -= BishopKingProtector * distance(pos.square<KING>(Us), s) / 10;
 
             if (Pt == BISHOP)
             {
@@ -408,7 +418,7 @@ namespace {
     // Enemy rooks checks
     rookChecks = b1 & safe & attackedBy[Them][ROOK];
     if (rookChecks)
-        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 3/2
+        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * rSafeCheckW/100
                                                 : RookSafeCheck;
     else
         unsafeChecks |= b1 & attackedBy[Them][ROOK];
@@ -421,7 +431,7 @@ namespace {
                  & ~attackedBy[Us][QUEEN]
                  & ~rookChecks;
     if (queenChecks)
-        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 3/2
+        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * qSafeCheckW/100
                                                  : QueenSafeCheck;
 
     // Enemy bishops checks: we count them only if they are from squares from
@@ -431,7 +441,7 @@ namespace {
                   & safe
                   & ~queenChecks;
     if (bishopChecks)
-        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * 3/2
+        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * bSafeCheckW/100
                                                   : BishopSafeCheck;
     else
         unsafeChecks |= b2 & attackedBy[Them][BISHOP];
@@ -439,7 +449,7 @@ namespace {
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
     if (knightChecks & safe)
-        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 3/2
+        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * nSafeCheckW/100
                                                          : KnightSafeCheck;
     else
         unsafeChecks |= knightChecks;
