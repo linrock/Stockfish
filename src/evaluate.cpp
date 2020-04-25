@@ -131,11 +131,14 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
-  constexpr Score KingProtector       = S(  7,  8);
+            Score BishopKingProtector = S(  7,  8);
+            Score KnightKingProtector = S(  7,  8);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-  constexpr Score Outpost             = S( 30, 21);
+            Score KnightOutpost       = S( 60, 42);
+            Score BishopOutpost       = S( 30, 21);
+            Score ReachableOutpost    = S( 30, 21);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -147,6 +150,10 @@ namespace {
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
+
+  TUNE(SetRange(0, 200), KnightOutpost);
+  TUNE(SetRange(0, 100), BishopOutpost, ReachableOutpost);
+  TUNE(SetRange(-10, 50), BishopKingProtector, KnightKingProtector);
 
 #undef S
 
@@ -293,17 +300,19 @@ namespace {
             // Bonus if piece is on an outpost square or can reach one
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s)
-                score += Outpost * (Pt == KNIGHT ? 2 : 1);
-
+                score += (Pt == KNIGHT) ? KnightOutpost : BishopOutpost;
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
-                score += Outpost;
+                score += ReachableOutpost;
 
             // Bonus for a knight or bishop shielded by pawn
             if (shift<Down>(pos.pieces(PAWN)) & s)
                 score += MinorBehindPawn;
 
             // Penalty if the piece is far from the king
-            score -= KingProtector * distance(pos.square<KING>(Us), s);
+            if (Pt == KNIGHT)
+              score -= KnightKingProtector * distance(pos.square<KING>(Us), s);
+            else
+              score -= BishopKingProtector * distance(pos.square<KING>(Us), s);
 
             if (Pt == BISHOP)
             {
