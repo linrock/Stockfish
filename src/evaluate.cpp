@@ -353,17 +353,20 @@ namespace {
             // Penalty when trapped by the king, even more if the king cannot castle
             else if (mob <= 3)
             {
-                File kf = file_of(pos.square<KING>(Us));
-                if ((kf < FILE_E) == (file_of(s) < kf)) {
-                    if (pos.castling_rights(Us))
-                        score -= TrappedKRook;
-                    else
-                        score -= TrappedKRookNC;
-                } else if ((kf > FILE_E) == (file_of(s) > kf)) {
-                    if (pos.castling_rights(Us))
-                        score -= TrappedQRook;
-                    else
-                        score -= TrappedQRookNC;
+                constexpr Bitboard FirstRank = (Us == WHITE ? Rank1BB : Rank8BB);
+                if (s & FirstRank) {
+                    File kf = file_of(pos.square<KING>(Us));
+                    if ((kf < FILE_E) == (file_of(s) < kf)) {
+                        if (pos.castling_rights(Us))
+                            score -= TrappedKRook;
+                        else
+                            score -= TrappedKRookNC;
+                    } else if ((kf > FILE_E) == (file_of(s) > kf)) {
+                        if (pos.castling_rights(Us))
+                            score -= TrappedQRook;
+                        else
+                            score -= TrappedQRookNC;
+                    }
                 }
             }
         }
