@@ -131,7 +131,6 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
-  constexpr Score KingProtector       = S(  7,  8);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
@@ -147,6 +146,15 @@ namespace {
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
+
+  // Penalties by distance from the king (distance range 1-7)
+  Score BishopKingProtector[8] = {
+    S(0, 0), S(6, 9), S(12, 18), S(18, 27), S(24, 36), S(30, 45), S(36, 54), S(42, 63)
+  };
+  Score KnightKingProtector[8] = {
+    S(0, 0), S(8, 9), S(16, 18), S(24, 27), S(32, 36), S(40, 45), S(48, 54), S(56, 63)
+  };
+  TUNE(SetRange(0, 120), BishopKingProtector, KnightKingProtector);
 
 #undef S
 
@@ -303,7 +311,10 @@ namespace {
                 score += MinorBehindPawn;
 
             // Penalty if the piece is far from the king
-            score -= KingProtector * distance(pos.square<KING>(Us), s);
+            if (Pt == KNIGHT)
+              score -= KnightKingProtector[distance(pos.square<KING>(Us), s)];
+            else
+              score -= BishopKingProtector[distance(pos.square<KING>(Us), s)];
 
             if (Pt == BISHOP)
             {
