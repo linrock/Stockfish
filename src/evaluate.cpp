@@ -149,12 +149,11 @@ namespace {
 
   // Penalties by distance from the king (distance range 1-7)
   Score BishopKingProtector[8] = {
-    S(0, 0), S(6, 9), S(12, 18), S(18, 27), S(24, 36), S(30, 45), S(36, 54), S(42, 63)
+    S(0, 0), S(2, 13), S(17, 23), S(20, 23), S(20, 34), S(29, 43), S(34, 52), S(44, 61)
   };
   Score KnightKingProtector[8] = {
-    S(0, 0), S(8, 9), S(16, 18), S(24, 27), S(32, 36), S(40, 45), S(48, 54), S(56, 63)
+    S(0, 0), S(8, 10), S(12, 16), S(22, 29), S(32, 32), S(41, 45), S(47, 53), S(48, 69)
   };
-  TUNE(SetRange(0, 120), BishopKingProtector, KnightKingProtector);
 
 #undef S
 
