@@ -305,10 +305,8 @@ namespace {
                 score += MinorBehindPawn;
 
             // Penalty if the piece is far from the king
-            if (Pt == KNIGHT)
-              score -= KnightKingProtector * distance(pos.square<KING>(Us), s);
-            else
-              score -= BishopKingProtector * distance(pos.square<KING>(Us), s);
+            score -= (Pt == KNIGHT ? KnightKingProtector
+                                   : BishopKingProtector) * distance(pos.square<KING>(Us), s);
 
             if (Pt == BISHOP)
             {
@@ -404,7 +402,7 @@ namespace {
     // Enemy rooks checks
     rookChecks = b1 & safe & attackedBy[Them][ROOK];
     if (rookChecks)
-        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 175/100
+        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 7/4
                                                 : RookSafeCheck;
     else
         unsafeChecks |= b1 & attackedBy[Them][ROOK];
@@ -417,7 +415,7 @@ namespace {
                  & ~attackedBy[Us][QUEEN]
                  & ~rookChecks;
     if (queenChecks)
-        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 145/100
+        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 185/128
                                                  : QueenSafeCheck;
 
     // Enemy bishops checks: we count them only if they are from squares from
@@ -435,7 +433,7 @@ namespace {
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
     if (knightChecks & safe)
-        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 162/100
+        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 207/128
                                                          : KnightSafeCheck;
     else
         unsafeChecks |= knightChecks;
