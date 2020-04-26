@@ -81,10 +81,10 @@ namespace {
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 81, 52, 44, 10 };
 
   // Penalties for enemy's safe checks
-  constexpr int QueenSafeCheck  = 780;
-  constexpr int RookSafeCheck   = 1078;
-  constexpr int BishopSafeCheck = 635;
-  constexpr int KnightSafeCheck = 790;
+  constexpr int QueenSafeCheck  = 772;
+  constexpr int RookSafeCheck   = 1084;
+  constexpr int BishopSafeCheck = 645;
+  constexpr int KnightSafeCheck = 792;
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -131,7 +131,8 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
-  constexpr Score KingProtector       = S(  7,  8);
+  constexpr Score BishopKingProtector = S(  6,  9);
+  constexpr Score KnightKingProtector = S(  8,  9);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
@@ -294,7 +295,6 @@ namespace {
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s)
                 score += Outpost * (Pt == KNIGHT ? 2 : 1);
-
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
                 score += Outpost;
 
@@ -303,7 +303,8 @@ namespace {
                 score += MinorBehindPawn;
 
             // Penalty if the piece is far from the king
-            score -= KingProtector * distance(pos.square<KING>(Us), s);
+            int dist = distance(pos.square<KING>(Us), s);
+            score -= (Pt == KNIGHT ? KnightKingProtector : BishopKingProtector) * dist;
 
             if (Pt == BISHOP)
             {
@@ -399,7 +400,7 @@ namespace {
     // Enemy rooks checks
     rookChecks = b1 & safe & attackedBy[Them][ROOK];
     if (rookChecks)
-        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 3/2
+        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 7/4
                                                 : RookSafeCheck;
     else
         unsafeChecks |= b1 & attackedBy[Them][ROOK];
@@ -412,7 +413,7 @@ namespace {
                  & ~attackedBy[Us][QUEEN]
                  & ~rookChecks;
     if (queenChecks)
-        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 3/2
+        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 29/20
                                                  : QueenSafeCheck;
 
     // Enemy bishops checks: we count them only if they are from squares from
@@ -430,7 +431,7 @@ namespace {
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
     if (knightChecks & safe)
-        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 3/2
+        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 81/50
                                                          : KnightSafeCheck;
     else
         unsafeChecks |= knightChecks;
