@@ -81,20 +81,15 @@ namespace {
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 81, 52, 44, 10 };
 
   // Penalties for enemy's safe checks
-  int QueenSafeCheck  = 772;
-  int RookSafeCheck   = 1084;
-  int BishopSafeCheck = 645;
-  int KnightSafeCheck = 792;
-  TUNE(SetRange(500, 1200), QueenSafeCheck);
-  TUNE(SetRange(700, 1400), RookSafeCheck);
-  TUNE(SetRange(400, 1000), BishopSafeCheck);
-  TUNE(SetRange(500, 1000), KnightSafeCheck);
+  constexpr int QueenSafeCheck  = 777;
+  constexpr int RookSafeCheck   = 1037;
+  constexpr int BishopSafeCheck = 655;
+  constexpr int KnightSafeCheck = 798;
 
-  int rSafeCheckW = 175;
-  int qSafeCheckW = 145;
-  int bSafeCheckW = 150;
-  int nSafeCheckW = 162;
-  TUNE(SetRange(0, 600), rSafeCheckW, qSafeCheckW, bSafeCheckW, nSafeCheckW);
+  constexpr int rSafeCheckW = 175;
+  constexpr int qSafeCheckW = 128;
+  constexpr int bSafeCheckW = 148;
+  constexpr int nSafeCheckW = 137;
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -141,14 +136,14 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
-            Score BishopKingProtector = S( 60, 90);
-            Score KnightKingProtector = S( 80, 90);
+  constexpr Score BishopKingProtector = S( 55, 79);
+  constexpr Score KnightKingProtector = S( 82, 84);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-            Score KnightOutpost       = S( 56, 36);
-            Score BishopOutpost       = S( 30, 23);
-            Score ReachableOutpost    = S( 31, 22);
+  constexpr Score KnightOutpost       = S( 61, 29);
+  constexpr Score BishopOutpost       = S( 32, 20);
+  constexpr Score ReachableOutpost    = S( 35, 22);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -160,10 +155,6 @@ namespace {
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
-
-  TUNE(SetRange(0, 200), KnightOutpost);
-  TUNE(SetRange(0, 100), BishopOutpost, ReachableOutpost);
-  TUNE(SetRange(-100, 500), BishopKingProtector, KnightKingProtector);
 
 #undef S
 
