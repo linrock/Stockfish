@@ -131,14 +131,14 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
-            Score BishopKingProtector = S( 60, 90);
-            Score KnightKingProtector = S( 80, 90);
+  constexpr Score BishopKingProtector = S( 66, 75);
+  constexpr Score KnightKingProtector = S( 80, 99);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-            Score KnightOutpost       = S( 56, 36);
-            Score BishopOutpost       = S( 30, 23);
-            Score ReachableOutpost    = S( 31, 22);
+  constexpr Score KnightOutpost       = S( 55, 42);
+  constexpr Score BishopOutpost       = S( 23, 20);
+  constexpr Score ReachableOutpost    = S( 31, 21);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -150,10 +150,6 @@ namespace {
   constexpr Score TrappedRook         = S( 55, 13);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
-
-  TUNE(SetRange(0, 200), KnightOutpost);
-  TUNE(SetRange(0, 100), BishopOutpost, ReachableOutpost);
-  TUNE(SetRange(-100, 500), BishopKingProtector, KnightKingProtector);
 
 #undef S
 
@@ -309,10 +305,8 @@ namespace {
                 score += MinorBehindPawn;
 
             // Penalty if the piece is far from the king
-            if (Pt == KNIGHT)
-              score -= KnightKingProtector * distance(pos.square<KING>(Us), s) / 10;
-            else
-              score -= BishopKingProtector * distance(pos.square<KING>(Us), s) / 10;
+            score -= (Pt == KNIGHT ? KnightKingProtector
+                                   : BishopKingProtector) * distance(pos.square<KING>(Us), s) / 10;
 
             if (Pt == BISHOP)
             {
