@@ -81,15 +81,15 @@ namespace {
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 81, 52, 44, 10 };
 
   // Penalties for enemy's safe checks
-  constexpr int QueenSafeCheck  = 777;
+  constexpr int QueenSafeCheck  = 781;
   constexpr int RookSafeCheck   = 1037;
-  constexpr int BishopSafeCheck = 655;
+  constexpr int BishopSafeCheck = 659;
   constexpr int KnightSafeCheck = 798;
 
-  constexpr int rSafeCheckW = 175;
-  constexpr int qSafeCheckW = 128;
-  constexpr int bSafeCheckW = 148;
-  constexpr int nSafeCheckW = 137;
+  constexpr int rSafeCheckW = 182;
+  constexpr int qSafeCheckW = 130;
+  constexpr int bSafeCheckW = 147;
+  constexpr int nSafeCheckW = 132;
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -137,13 +137,13 @@ namespace {
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
   constexpr Score BishopKingProtector = S( 55, 79);
-  constexpr Score KnightKingProtector = S( 82, 84);
+  constexpr Score KnightKingProtector = S( 81, 77);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-  constexpr Score KnightOutpost       = S( 61, 29);
+  constexpr Score KnightOutpost       = S( 61, 26);
   constexpr Score BishopOutpost       = S( 32, 20);
-  constexpr Score ReachableOutpost    = S( 35, 22);
+  constexpr Score ReachableOutpost    = S( 36, 22);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
