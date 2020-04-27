@@ -154,7 +154,7 @@ namespace {
   Score KnightKingProtector[8] = {
     S(0, 0), S(8, 9), S(16, 18), S(24, 27), S(32, 36), S(40, 45), S(48, 54), S(56, 63)
   };
-  TUNE(SetRange(0, 120), BishopKingProtector, KnightKingProtector);
+  TUNE(SetRange(-20, 100), BishopKingProtector, KnightKingProtector);
 
 #undef S
 
