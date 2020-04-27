@@ -398,11 +398,17 @@ namespace {
 
     // Enemy rooks checks
     rookChecks = b1 & safe & attackedBy[Them][ROOK];
-    if (rookChecks)
-        kingDanger += more_than_one(rookChecks) ? RookSafeCheck * 3/2
-                                                : RookSafeCheck;
-    else
+    if (rookChecks) {
+        int nRookChecks = popcount(rookChecks);
+        if (nRookChecks > 1)
+            kingDanger += RookSafeCheck * 3/2;
+        else
+            kingDanger += RookSafeCheck;
+        if (nRookChecks > 2)
+            kingDanger += RookSafeCheck / 4;
+    } else {
         unsafeChecks |= b1 & attackedBy[Them][ROOK];
+    }
 
     // Enemy queen safe checks: we count them only if they are from squares from
     // which we can't give a rook check, because rook checks are more valuable.
@@ -411,9 +417,15 @@ namespace {
                  & safe
                  & ~attackedBy[Us][QUEEN]
                  & ~rookChecks;
-    if (queenChecks)
-        kingDanger += more_than_one(queenChecks) ? QueenSafeCheck * 3/2
-                                                 : QueenSafeCheck;
+    if (queenChecks) {
+        int nQueenChecks = popcount(queenChecks);
+        if (nQueenChecks > 1)
+            kingDanger += QueenSafeCheck * 3/2;
+        else
+            kingDanger += QueenSafeCheck;
+        if (nQueenChecks > 2)
+            kingDanger += QueenSafeCheck / 4;
+    }
 
     // Enemy bishops checks: we count them only if they are from squares from
     // which we can't give a queen check, because queen checks are more valuable.
@@ -421,19 +433,31 @@ namespace {
                   & attackedBy[Them][BISHOP]
                   & safe
                   & ~queenChecks;
-    if (bishopChecks)
-        kingDanger += more_than_one(bishopChecks) ? BishopSafeCheck * 3/2
-                                                  : BishopSafeCheck;
-    else
+    if (bishopChecks) {
+        int nBishopChecks = popcount(bishopChecks);
+        if (nBishopChecks > 1)
+            kingDanger += BishopSafeCheck * 3/2;
+        else
+            kingDanger += BishopSafeCheck;
+        if (nBishopChecks > 2)
+            kingDanger += BishopSafeCheck / 4;
+    } else {
         unsafeChecks |= b2 & attackedBy[Them][BISHOP];
+    }
 
     // Enemy knights checks
     knightChecks = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
-    if (knightChecks & safe)
-        kingDanger += more_than_one(knightChecks & safe) ? KnightSafeCheck * 3/2
-                                                         : KnightSafeCheck;
-    else
+    if (knightChecks & safe) {
+        int nKnightChecks = popcount(knightChecks & safe);
+        if (nKnightChecks > 1)
+            kingDanger += KnightSafeCheck * 3/2;
+        else
+            kingDanger += KnightSafeCheck;
+        if (nKnightChecks > 2)
+            kingDanger += KnightSafeCheck / 4;
+    } else {
         unsafeChecks |= knightChecks;
+    }
 
     // Find the squares that opponent attacks in our king flank, the squares
     // which they attack twice in that flank, and the squares that we defend.
