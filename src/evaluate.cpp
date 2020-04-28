@@ -148,13 +148,12 @@ namespace {
   constexpr Score WeakQueenProtection = S( 15,  0);
 
   // Penalties by distance from the king (distance range 1-7)
-  Score BishopKingProtector[8] = {
-    S(0, 0), S(6, 9), S(12, 18), S(18, 27), S(24, 36), S(30, 45), S(36, 54), S(42, 63)
+  constexpr Score BishopKingProtector[8] = {
+    S(0, 0), S(5, 18), S(13, 19), S(18, 29), S(27, 42), S(33, 45), S(33, 56), S(35, 62)
   };
-  Score KnightKingProtector[8] = {
-    S(0, 0), S(8, 9), S(16, 18), S(24, 27), S(32, 36), S(40, 45), S(48, 54), S(56, 63)
+  constexpr Score KnightKingProtector[8] = {
+    S(0, 0), S(10, 13), S(13, 12), S(27, 27), S(30, 38), S(42, 44), S(48, 45), S(54, 67)
   };
-  TUNE(SetRange(-20, 100), BishopKingProtector, KnightKingProtector);
 
 #undef S
 
