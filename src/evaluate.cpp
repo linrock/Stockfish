@@ -131,8 +131,8 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
-  constexpr Score BishopKingProtector = S(  5,  9);
-  constexpr Score KnightKingProtector = S(  8,  9);
+  constexpr Score BishopKingProtector = S(  6,  9);
+  constexpr Score KnightKingProtector = S( 17, 22);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
@@ -295,6 +295,7 @@ namespace {
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s)
                 score += Outpost * (Pt == KNIGHT ? 2 : 1);
+
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
                 score += Outpost;
 
@@ -304,7 +305,7 @@ namespace {
 
             // Penalty if the piece is far from the king
             if (Pt == KNIGHT)
-                score -= KnightKingProtector * distance(pos.square<KING>(Us), s);
+                score -= KnightKingProtector * distance(pos.square<KING>(Us), s) / 2;
             else
                 score -= BishopKingProtector * distance(pos.square<KING>(Us), s);
 
