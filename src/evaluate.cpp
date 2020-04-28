@@ -149,10 +149,10 @@ namespace {
 
   // Penalties by distance from the king (distance range 1-7)
   constexpr Score BishopKingProtector[8] = {
-    S(0, 0), S(5, 18), S(13, 19), S(18, 29), S(27, 42), S(33, 45), S(33, 56), S(35, 62)
+    S(0, 0), S(5, 18), S(14, 21), S(18, 27), S(26, 43), S(34, 43), S(35, 59), S(36, 63)
   };
   constexpr Score KnightKingProtector[8] = {
-    S(0, 0), S(10, 13), S(13, 12), S(27, 27), S(30, 38), S(42, 44), S(48, 45), S(54, 67)
+    S(0, 0), S(9, 14), S(13, 11), S(27, 26), S(30, 38), S(43, 43), S(48, 43), S(52, 67)
   };
 
 #undef S
