@@ -132,7 +132,13 @@ namespace {
         // Passed pawns will be properly scored later in evaluation when we have
         // full attack info.
         if (passed)
+        {
             e->passedPawns[Us] |= s;
+
+            // More bonus if there are neighbouring passers
+            if (e->passedPawns[Us] & adjacent_files_bb(s))
+                score += make_score(0, 10);
+        }
 
         // Score this pawn
         if (support | phalanx)
