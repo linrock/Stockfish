@@ -151,9 +151,13 @@ namespace {
             score -=   Backward
                      + WeakUnopposed * !opposed;
 
-        if (!support)
-            score -=   Doubled * doubled
-                     + WeakLever * more_than_one(lever);
+        if (!support) {
+            score -= WeakLever * more_than_one(lever);
+            if (doubled) {
+                score -= Doubled * popcount(ourPawns & forward_file_bb(Them, s));
+            }
+        }
+
     }
 
     return score;
