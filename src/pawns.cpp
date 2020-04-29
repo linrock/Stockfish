@@ -151,9 +151,14 @@ namespace {
             score -=   Backward
                      + WeakUnopposed * !opposed;
 
-        if (!support)
-            score -=   Doubled * doubled
-                     + WeakLever * more_than_one(lever);
+        if (!support) {
+            score -=   WeakLever * more_than_one(lever);
+            if (!neighbours)
+                score -= Doubled * doubled * 3/2;
+            else
+                score -= Doubled * doubled;
+        }
+
     }
 
     return score;
