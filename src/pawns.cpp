@@ -36,6 +36,7 @@ namespace {
   constexpr Score BlockedStorm  = S(82, 82);
   constexpr Score Doubled       = S(11, 56);
   constexpr Score Isolated      = S( 5, 15);
+  constexpr Score DoubleIsolated = S( 5, 10);
   constexpr Score WeakLever     = S( 0, 56);
   constexpr Score WeakUnopposed = S(13, 27);
 
@@ -72,7 +73,7 @@ namespace {
     constexpr Direction Up   = pawn_push(Us);
 
     Bitboard neighbours, stoppers, support, phalanx, opposed;
-    Bitboard lever, leverPush, blocked;
+    Bitboard lever, leverPush, blocked, isolated = 0;
     Square s;
     bool backward, passed, doubled;
     Score score = SCORE_ZERO;
@@ -144,9 +145,12 @@ namespace {
         }
 
         else if (!neighbours)
-            score -=   Isolated
-                     + WeakUnopposed * !opposed;
-
+        {
+            score -= Isolated + WeakUnopposed * !opposed;
+            if (isolated & file_bb(s))
+                score -= DoubleIsolated;
+            isolated |= s;
+        }
         else if (backward)
             score -=   Backward
                      + WeakUnopposed * !opposed;
