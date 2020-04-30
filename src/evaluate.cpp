@@ -128,7 +128,7 @@ namespace {
 
   // OutpostRank[Rank] contains a bonus according to the rank of the outpost
   constexpr Score OutpostRank[RANK_NB] = {
-    S(0, 0), S(0, 0), S(0, 0), S(30, 21), S(30, 21), S(30, 21)
+    S(0, 0), S(0, 0), S(0, 0), S(30, 21), S(30, 21), S(30, 21), S(10, 7)
   };
 
   // Assorted bonuses and penalties
@@ -259,8 +259,8 @@ namespace {
 
     constexpr Color     Them = ~Us;
     constexpr Direction Down = -pawn_push(Us);
-    constexpr Bitboard OutpostRanks = (Us == WHITE ? Rank4BB | Rank5BB | Rank6BB
-                                                   : Rank5BB | Rank4BB | Rank3BB);
+    constexpr Bitboard OutpostRanks = (Us == WHITE ? Rank4BB | Rank5BB | Rank6BB | Rank7BB
+                                                   : Rank5BB | Rank4BB | Rank3BB | Rank2BB);
     const Square* pl = pos.squares<Pt>(Us);
 
     Bitboard b, bb;
