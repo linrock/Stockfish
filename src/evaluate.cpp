@@ -135,7 +135,7 @@ namespace {
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-  constexpr Score Outpost             = S( 30, 21);
+  constexpr Score Outpost             = S( 26, 15);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -301,7 +301,7 @@ namespace {
 
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us)) {
                 if (pawn_double_attacks_bb<Us>(pos.pieces(Us, PAWN)) & s)
-                    score += Outpost * 3/2;
+                    score += Outpost * 5/4;
                 else
                     score += Outpost;
             }
