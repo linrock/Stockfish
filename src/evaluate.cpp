@@ -135,8 +135,9 @@ namespace {
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-  constexpr Score CentralOutpost      = S( 32, 23);
   constexpr Score Outpost             = S( 28, 19);
+  constexpr Score CentralOutpost      = S( 32, 23);
+  constexpr Score StrongKnightOutpost = S(  6,  4);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -257,6 +258,8 @@ namespace {
     constexpr Direction Down = -pawn_push(Us);
     constexpr Bitboard OutpostRanks = (Us == WHITE ? Rank4BB | Rank5BB | Rank6BB
                                                    : Rank5BB | Rank4BB | Rank3BB);
+    constexpr Bitboard StrongOutpostRanks = (Us == WHITE ? Rank6BB : Rank3BB);
+
     const Square* pl = pos.squares<Pt>(Us);
 
     Bitboard b, bb;
@@ -294,15 +297,25 @@ namespace {
             // Bonus if piece is on an outpost square or can reach one
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s) {
-                if (CenterFiles & s)
-                    score += CentralOutpost * (Pt == KNIGHT ? 2 : 1);
+                if (CenterFiles & s) {
+                    if (Pt == KNIGHT) {
+                        score += CentralOutpost * 2;
+                        if (StrongOutpostRanks & s)
+                            score += StrongKnightOutpost;
+                    } else {
+                        score += CentralOutpost;
+                    }
+                }
                 else
                     score += Outpost * (Pt == KNIGHT ? 2 : 1);
             }
 
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us)) {
-                if (CenterFiles & s)
+                if (CenterFiles & s) {
                     score += CentralOutpost;
+                    if (StrongOutpostRanks & s)
+                        score += StrongKnightOutpost;
+                }
                 else
                     score += Outpost;
             }
