@@ -294,14 +294,14 @@ namespace {
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s) {
                 if (pawn_double_attacks_bb<Us>(pos.pieces(Us, PAWN)) & s)
-                    score += Outpost * (Pt == KNIGHT ? 2 : 1) * 3/2;
+                    score += Outpost * (Pt == KNIGHT ? 2 : 1) * 5/4;
                 else
                     score += Outpost * (Pt == KNIGHT ? 2 : 1);
             }
 
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us)) {
                 if (pawn_double_attacks_bb<Us>(pos.pieces(Us, PAWN)) & s)
-                    score += Outpost * 3/2;
+                    score += Outpost * 5/4;
                 else
                     score += Outpost;
             }
