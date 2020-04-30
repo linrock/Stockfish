@@ -137,6 +137,7 @@ namespace {
   constexpr Score MinorBehindPawn     = S( 18,  3);
   constexpr Score CentralOutpost      = S( 32, 23);
   constexpr Score Outpost             = S( 28, 19);
+  constexpr Score EdgeOutpost         = S( 21, 14);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -257,6 +258,7 @@ namespace {
     constexpr Direction Down = -pawn_push(Us);
     constexpr Bitboard OutpostRanks = (Us == WHITE ? Rank4BB | Rank5BB | Rank6BB
                                                    : Rank5BB | Rank4BB | Rank3BB);
+    constexpr Bitboard EdgeFiles    = FileABB | FileHBB;
     const Square* pl = pos.squares<Pt>(Us);
 
     Bitboard b, bb;
@@ -296,6 +298,8 @@ namespace {
             if (bb & s) {
                 if (CenterFiles & s)
                     score += CentralOutpost * (Pt == KNIGHT ? 2 : 1);
+                else if (EdgeFiles & s)
+                    score += EdgeOutpost * (Pt == KNIGHT ? 2 : 1);
                 else
                     score += Outpost * (Pt == KNIGHT ? 2 : 1);
             }
@@ -303,6 +307,8 @@ namespace {
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us)) {
                 if (CenterFiles & s)
                     score += CentralOutpost;
+                else if (EdgeFiles & s)
+                    score += EdgeOutpost;
                 else
                     score += Outpost;
             }
