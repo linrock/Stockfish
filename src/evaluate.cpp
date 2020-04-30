@@ -299,8 +299,12 @@ namespace {
                     score += Outpost * (Pt == KNIGHT ? 2 : 1);
             }
 
-            else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
-                score += Outpost;
+            else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us)) {
+                if (pawn_double_attacks_bb<Us>(pos.pieces(Us, PAWN)) & s)
+                    score += Outpost * 3/2;
+                else
+                    score += Outpost;
+            }
 
             // Bonus for a knight or bishop shielded by pawn
             if (shift<Down>(pos.pieces(PAWN)) & s)
