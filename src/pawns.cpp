@@ -80,6 +80,7 @@ namespace {
 
     Bitboard ourPawns   = pos.pieces(  Us, PAWN);
     Bitboard theirPawns = pos.pieces(Them, PAWN);
+    Bitboard edgeFiles  = FileABB | FileHBB;
 
     Bitboard doubleAttackThem = pawn_double_attacks_bb<Them>(theirPawns);
 
@@ -151,9 +152,12 @@ namespace {
             score -=   Backward
                      + WeakUnopposed * !opposed;
 
-        if (!support)
+        if (!support) {
             score -=   Doubled * doubled
                      + WeakLever * more_than_one(lever);
+            if (edgeFiles & s)
+                score -= Doubled * doubled / 4;
+        }
     }
 
     return score;
