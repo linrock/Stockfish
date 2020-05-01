@@ -127,6 +127,7 @@ namespace {
   };
 
   // Assorted bonuses and penalties
+  constexpr Score AdjacentBishops     = S( 16, 16);
   constexpr Score BishopPawns         = S(  3,  7);
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
@@ -263,6 +264,9 @@ namespace {
 
     attackedBy[Us][Pt] = 0;
 
+    bool oneBishop = false;
+    Square bishopSq;
+
     for (Square s = *pl; s != SQ_NONE; s = *++pl)
     {
         // Find attacked squares, including x-ray attacks for bishops and rooks
@@ -314,6 +318,14 @@ namespace {
 
                 score -= BishopPawns * pos.pawns_on_same_color_squares(Us, s)
                                      * (!(attackedBy[Us][PAWN] & s) + popcount(blocked & CenterFiles));
+
+                if (!oneBishop) {
+                  oneBishop = true;
+                  bishopSq = s;
+                } else if (distance(s, bishopSq) == 1) {
+                  // Bonus for adjacent bishop pair
+                  score += AdjacentBishops;
+                }
 
                 // Bonus for bishop on a long diagonal which can "see" both center squares
                 if (more_than_one(attacks_bb<BISHOP>(s, pos.pieces(PAWN)) & Center))
