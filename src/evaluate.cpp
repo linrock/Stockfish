@@ -136,6 +136,7 @@ namespace {
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
   constexpr Score Outpost             = S( 30, 21);
+  constexpr Score StrongKnightOutpost = S( 15,  0);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -256,6 +257,7 @@ namespace {
     constexpr Direction Down = -pawn_push(Us);
     constexpr Bitboard OutpostRanks = (Us == WHITE ? Rank4BB | Rank5BB | Rank6BB
                                                    : Rank5BB | Rank4BB | Rank3BB);
+    constexpr Bitboard StrongKnightOutposts = (Us == WHITE ? Rank6BB : Rank3BB) & CenterFiles;
     const Square* pl = pos.squares<Pt>(Us);
 
     Bitboard b, bb;
@@ -293,12 +295,13 @@ namespace {
             // Bonus if piece is on an outpost square or can reach one
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s) {
-                if (Pt == KNIGHT)
+                if (Pt == KNIGHT) {
                     score += Outpost * 2;
-                else if (Center & s)
-                    score += Outpost * 5/4;
-                else
+                    if (StrongKnightOutposts & s)
+                        score += StrongKnightOutpost;
+                } else {
                     score += Outpost;
+                }
             }
 
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
