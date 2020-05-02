@@ -126,6 +126,9 @@ namespace {
     S(0, 0), S(10, 28), S(17, 33), S(15, 41), S(62, 72), S(168, 177), S(276, 260)
   };
 
+  constexpr Score MinorPieceBlockade  = S( 12, 12);
+  constexpr Score RookBlockade        = S( 10, 10);
+
   // Assorted bonuses and penalties
   constexpr Score BishopPawns         = S(  3,  7);
   constexpr Score CorneredBishop      = S( 50, 50);
@@ -362,6 +365,14 @@ namespace {
             Bitboard queenPinners;
             if (pos.slider_blockers(pos.pieces(Them, ROOK, BISHOP), s, queenPinners))
                 score -= WeakQueen;
+        }
+
+        // Bonus for a piece on a weak square blocking their pawn
+        if (~pe->pawn_attacks_span(Them) & shift<Down>(pos.pieces(Them, PAWN)) & s) {
+            if (Pt == KNIGHT || Pt == BISHOP)
+                score += MinorPieceBlockade;
+            else if (Pt == ROOK)
+                score += RookBlockade;
         }
     }
     if (T)
