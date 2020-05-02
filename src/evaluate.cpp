@@ -292,8 +292,14 @@ namespace {
         {
             // Bonus if piece is on an outpost square or can reach one
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
-            if (bb & s)
-                score += Outpost * (Pt == KNIGHT ? 2 : 1);
+            if (bb & s) {
+                if (Pt == KNIGHT)
+                    score += Outpost * 2;
+                else if (Center & s)
+                    score += Outpost * 5/4;
+                else
+                    score += Outpost;
+            }
 
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
                 score += Outpost;
