@@ -142,6 +142,7 @@ namespace {
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
+  constexpr Score RookFlankOutpost    = S( 10, 10);
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
@@ -291,10 +292,11 @@ namespace {
 
         mobility[Us] += MobilityBonus[Pt - 2][mob];
 
+        bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
+
         if (Pt == BISHOP || Pt == KNIGHT)
         {
             // Bonus if piece is on an outpost square or can reach one
-            bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s)
                 score += (Pt == KNIGHT) ? KnightOutpost : BishopOutpost;
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
@@ -346,6 +348,10 @@ namespace {
             // Bonus for rook on an open or semi-open file
             if (pos.is_on_semiopen_file(Us, s))
                 score += RookOnFile[pos.is_on_semiopen_file(Them, s)];
+
+            // Bonus for rook on a flank outpost
+            if (bb & ~CenterFiles & s)
+                score += RookFlankOutpost;
 
             // Penalty when trapped by the king, even more if the king cannot castle
             else if (mob <= 3)
