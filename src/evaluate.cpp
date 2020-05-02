@@ -142,6 +142,7 @@ namespace {
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
+  constexpr Score QueenBlockade       = S(  0, 15);
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
@@ -362,6 +363,10 @@ namespace {
             Bitboard queenPinners;
             if (pos.slider_blockers(pos.pieces(Them, ROOK, BISHOP), s, queenPinners))
                 score -= WeakQueen;
+
+            // Bonus for queen on a weak square blocking their pawn
+            if (~pe->pawn_attacks_span(Them) & shift<Down>(pos.pieces(Them, PAWN)) & s)
+                score += QueenBlockade;
         }
     }
     if (T)
