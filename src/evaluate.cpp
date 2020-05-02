@@ -131,6 +131,7 @@ namespace {
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
+  constexpr Score HeavyInfiltration   = S(  0, 15);
   constexpr Score BishopKingProtector = S(  6,  9);
   constexpr Score KnightKingProtector = S(  8,  9);
   constexpr Score KnightOnQueen       = S( 16, 11);
@@ -362,6 +363,12 @@ namespace {
             Bitboard queenPinners;
             if (pos.slider_blockers(pos.pieces(Them, ROOK, BISHOP), s, queenPinners))
                 score -= WeakQueen;
+        }
+
+        if (Pt == ROOK || Pt == QUEEN) {
+            // Bonus for a heavy piece infiltrating a weak square in enemy ranks
+            if (relative_rank(Us, s) > RANK_4 && (~pe->pawn_attacks_span(Them) & s))
+                score += HeavyInfiltration;
         }
     }
     if (T)
