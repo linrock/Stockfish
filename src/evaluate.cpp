@@ -290,10 +290,15 @@ namespace {
 
         if (Pt == BISHOP || Pt == KNIGHT)
         {
+            int dKing = distance(pos.square<KING>(Them), s);
+
             // Bonus if piece is on an outpost square or can reach one
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
-            if (bb & s)
+            if (bb & s) {
                 score += Outpost * (Pt == KNIGHT ? 2 : 1);
+                if (Pt == KNIGHT)
+                    score += make_score(16 - 4 * dKing, 0);
+            }
 
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
                 score += Outpost;
@@ -305,11 +310,8 @@ namespace {
             // Penalty if the piece is far from the king
             score -= KingProtector * distance(pos.square<KING>(Us), s);
 
-            if (Pt == KNIGHT) {
-                int d = 16 - 4 * distance(pos.square<KING>(Them), s);
-                if (d > 0)
-                    score += make_score(d, 0);
-            }
+            if (Pt == KNIGHT && dKing >= 2 && dKing <= 4)
+                score += make_score(3 * (5 - dKing), 0);
 
             if (Pt == BISHOP)
             {
