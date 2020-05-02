@@ -139,6 +139,7 @@ namespace {
   constexpr Score KnightOutpost       = S( 56, 36);
   constexpr Score BishopOutpost       = S( 30, 23);
   constexpr Score ReachableOutpost    = S( 31, 22);
+  constexpr Score OutflankedKnight    = S(  0, 10);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
@@ -307,6 +308,11 @@ namespace {
             // Penalty if the piece is far from the king
             score -= (Pt == KNIGHT ? KnightKingProtector
                                    : BishopKingProtector) * distance(pos.square<KING>(Us), s);
+
+            // Penalty for knights in the endgame vs. enemy pawns on both flanks
+            if (Pt == KNIGHT)
+                if ((pos.pieces(Them, PAWN) & QueenSide) && (pos.pieces(Them, PAWN) & KingSide))
+                    score -= OutflankedKnight;
 
             if (Pt == BISHOP)
             {
