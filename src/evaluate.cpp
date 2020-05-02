@@ -128,6 +128,7 @@ namespace {
 
   // Assorted bonuses and penalties
   constexpr Score BishopPawns         = S(  3,  7);
+  constexpr Score ConnectableRooks    = S( 10,  0);
   constexpr Score CorneredBishop      = S( 50, 50);
   constexpr Score FlankAttacks        = S(  8,  0);
   constexpr Score Hanging             = S( 69, 36);
@@ -346,6 +347,10 @@ namespace {
             // Bonus for rook on an open or semi-open file
             if (pos.is_on_semiopen_file(Us, s))
                 score += RookOnFile[pos.is_on_semiopen_file(Them, s)];
+
+            // Bonus for rook connectable with another rook
+            if (attackedBy[Us][ROOK] & ~pos.pieces() & b)
+                score += ConnectableRooks;
 
             // Penalty when trapped by the king, even more if the king cannot castle
             else if (mob <= 3)
