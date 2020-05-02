@@ -297,7 +297,7 @@ namespace {
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s)
                 score += (Pt == KNIGHT) ? KnightOutpost : BishopOutpost;
-            else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
+            else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us, PAWN))
                 score += ReachableOutpost;
 
             // Bonus for a knight or bishop shielded by pawn
