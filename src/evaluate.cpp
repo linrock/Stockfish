@@ -142,6 +142,7 @@ namespace {
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
   constexpr Score RestrictedPiece     = S(  7,  7);
+  constexpr Score RookBlockade        = S( 10,  0);
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
   constexpr Score ThreatByKing        = S( 24, 89);
@@ -342,6 +343,10 @@ namespace {
             // Bonus for rook on the same file as a queen
             if (file_bb(s) & pos.pieces(QUEEN))
                 score += RookOnQueenFile;
+
+            // Bonus for rook on a weak square blocking their pawn
+            if (~pe->pawn_attacks_span(Them) & shift<Down>(pos.pieces(Them, PAWN)) & s)
+                score += RookBlockade;
 
             // Bonus for rook on an open or semi-open file
             if (pos.is_on_semiopen_file(Us, s))
