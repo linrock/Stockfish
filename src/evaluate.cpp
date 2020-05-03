@@ -141,7 +141,7 @@ namespace {
   constexpr Score ReachableOutpost    = S( 31, 22);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
-  constexpr Score QueenInfiltration   = S(  0, 13);
+  constexpr Score QueenInfiltration   = S(  3,  3);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
@@ -260,6 +260,9 @@ namespace {
     constexpr Direction Down = -pawn_push(Us);
     constexpr Bitboard OutpostRanks = (Us == WHITE ? Rank4BB | Rank5BB | Rank6BB
                                                    : Rank5BB | Rank4BB | Rank3BB);
+    constexpr Bitboard WeakSquareRanks = (Us == WHITE ? Rank5BB | Rank6BB
+                                                      : Rank4BB | Rank3BB);
+
     const Square* pl = pos.squares<Pt>(Us);
 
     Bitboard b, bb;
@@ -364,9 +367,9 @@ namespace {
             if (pos.slider_blockers(pos.pieces(Them, ROOK, BISHOP), s, queenPinners))
                 score -= WeakQueen;
 
-            // Bonus for queen on weak square in enemy camp
-            if (relative_rank(Us, s) > RANK_4 && (~pe->pawn_attacks_span(Them) & s))
-                score += QueenInfiltration;
+            // Bonus for weak square complexes
+            score +=  QueenInfiltration
+                    * popcount(WeakSquareRanks & ~pe->pawn_attacks_span(Them));
         }
     }
     if (T)
