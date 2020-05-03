@@ -135,12 +135,14 @@ namespace {
   constexpr Score KnightKingProtector = S(  8,  9);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
-  constexpr Score MinorBehindPawn     = S( 18,  3);
+  constexpr Score MinorBehindOurPawn  = S( 16,  0);
+  constexpr Score MinorPawnBlockade   = S( 15, 15);
   constexpr Score KnightOutpost       = S( 56, 36);
   constexpr Score BishopOutpost       = S( 30, 23);
   constexpr Score ReachableOutpost    = S( 31, 22);
   constexpr Score PassedFile          = S( 11,  8);
   constexpr Score PawnlessFlank       = S( 17, 95);
+  constexpr Score QueenInfiltration   = S(  0, 15);
   constexpr Score RestrictedPiece     = S(  7,  7);
   constexpr Score RookOnQueenFile     = S(  5,  9);
   constexpr Score SliderOnQueen       = S( 59, 18);
@@ -301,8 +303,11 @@ namespace {
                 score += ReachableOutpost;
 
             // Bonus for a knight or bishop shielded by pawn
-            if (shift<Down>(pos.pieces(PAWN)) & s)
-                score += MinorBehindPawn;
+            if (shift<Down>(pos.pieces(Us, PAWN)) & s)
+                score += MinorBehindOurPawn;
+
+            else if (~pe->pawn_attacks_span(Them) & shift<Down>(pos.pieces(Them, PAWN)) & s)
+                score += MinorPawnBlockade;
 
             // Penalty if the piece is far from the king
             score -= (Pt == KNIGHT ? KnightKingProtector
@@ -362,6 +367,10 @@ namespace {
             Bitboard queenPinners;
             if (pos.slider_blockers(pos.pieces(Them, ROOK, BISHOP), s, queenPinners))
                 score -= WeakQueen;
+
+            // Bonus for queen on weak square in enemy camp
+            if (relative_rank(Us, s) > RANK_4 && (~pe->pawn_attacks_span(Them) & s))
+                score += QueenInfiltration;
         }
     }
     if (T)
