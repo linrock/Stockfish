@@ -136,6 +136,7 @@ namespace {
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
+  constexpr Score MinorClosedCenter   = S( 10, 10);
   constexpr Score KnightOutpost       = S( 56, 36);
   constexpr Score BishopOutpost       = S( 30, 23);
   constexpr Score ReachableOutpost    = S( 31, 22);
@@ -307,6 +308,11 @@ namespace {
             // Penalty if the piece is far from the king
             score -= (Pt == KNIGHT ? KnightKingProtector
                                    : BishopKingProtector) * distance(pos.square<KING>(Us), s);
+
+            // Bonus for knights when the center is closed. Penalty for bishops
+            if (popcount(pos.pieces(PAWN) & Center) > 2) {
+                score += (Pt == KNIGHT) ? MinorClosedCenter : -MinorClosedCenter;
+            }
 
             if (Pt == BISHOP)
             {
