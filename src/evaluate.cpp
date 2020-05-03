@@ -135,7 +135,8 @@ namespace {
   constexpr Score KnightKingProtector = S(  8,  9);
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
-  constexpr Score MinorBehindPawn     = S( 18,  3);
+  constexpr Score MinorBehindOurPawn  = S( 12,  0);
+  constexpr Score MinorPawnBlockade   = S( 20, 20);
   constexpr Score KnightOutpost       = S( 56, 36);
   constexpr Score BishopOutpost       = S( 30, 23);
   constexpr Score ReachableOutpost    = S( 31, 22);
@@ -301,8 +302,11 @@ namespace {
                 score += ReachableOutpost;
 
             // Bonus for a knight or bishop shielded by pawn
-            if (shift<Down>(pos.pieces(PAWN)) & s)
-                score += MinorBehindPawn;
+            if (shift<Down>(pos.pieces(Us, PAWN)) & s)
+                score += MinorBehindOurPawn;
+
+            else if (~pe->pawn_attacks_span(Them) & shift<Down>(pos.pieces(Them, PAWN)) & s)
+                score += MinorPawnBlockade;
 
             // Penalty if the piece is far from the king
             score -= (Pt == KNIGHT ? KnightKingProtector
