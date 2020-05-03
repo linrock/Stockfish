@@ -148,6 +148,7 @@ namespace {
   constexpr Score ThreatByPawnPush    = S( 48, 39);
   constexpr Score ThreatBySafePawn    = S(173, 94);
   constexpr Score TrappedRook         = S( 55, 13);
+  constexpr Score WeakSquareComplex   = S(  5,  0);
   constexpr Score WeakQueen           = S( 51, 14);
   constexpr Score WeakQueenProtection = S( 15,  0);
 
@@ -321,6 +322,15 @@ namespace {
                 // Bonus for bishop on a long diagonal which can "see" both center squares
                 if (more_than_one(attacks_bb<BISHOP>(s, pos.pieces(PAWN)) & Center))
                     score += LongDiagonalBishop;
+
+                // Bonus for weak square complexes if they're missing the same-colored bishop
+                Bitboard bishopSquares = (DarkSquares & s) ? DarkSquares : ~DarkSquares;
+                if (bishopSquares & ~pos.pieces(Them, BISHOP)) {
+                    constexpr Bitboard WeakSquareRanks = (Us == WHITE ? Rank5BB | Rank6BB
+                                                                      : Rank4BB | Rank3BB);
+                    score +=  WeakSquareComplex
+                            * popcount(WeakSquareRanks & bishopSquares & ~pe->pawn_attacks_span(Them));
+                }
 
                 // An important Chess960 pattern: a cornered bishop blocked by a friendly
                 // pawn diagonally in front of it is a very serious problem, especially
