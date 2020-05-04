@@ -126,6 +126,10 @@ namespace {
     S(0, 0), S(10, 28), S(17, 33), S(15, 41), S(62, 72), S(168, 177), S(276, 260)
   };
 
+  constexpr Score KnightOutpostRank[RANK_NB] = {
+    S(0, 0), S(0, 0), S(0, 0), S(49, 36), S(56, 36), S(63, 36)
+  };
+
   // Assorted bonuses and penalties
   constexpr Score BishopPawns         = S(  3,  7);
   constexpr Score CorneredBishop      = S( 50, 50);
@@ -136,7 +140,6 @@ namespace {
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-  constexpr Score KnightOutpost       = S( 56, 36);
   constexpr Score BishopOutpost       = S( 30, 23);
   constexpr Score ReachableOutpost    = S( 31, 22);
   constexpr Score PassedFile          = S( 11,  8);
@@ -296,7 +299,8 @@ namespace {
             // Bonus if piece is on an outpost square or can reach one
             bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
             if (bb & s)
-                score += (Pt == KNIGHT) ? KnightOutpost : BishopOutpost;
+                score += (Pt == KNIGHT) ? KnightOutpostRank[relative_rank(Us, s)] : BishopOutpost;
+
             else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
                 score += ReachableOutpost;
 
