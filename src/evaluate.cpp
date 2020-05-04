@@ -126,6 +126,10 @@ namespace {
     S(0, 0), S(10, 28), S(17, 33), S(15, 41), S(62, 72), S(168, 177), S(276, 260)
   };
 
+  constexpr Score KnightOutpostRank[RANK_NB] = {
+    S(0, 0), S(0, 0), S(0, 0), S(56, 36), S(56, 36), S(56, 36), S(16, 0)
+  };
+
   // Assorted bonuses and penalties
   constexpr Score BishopPawns         = S(  3,  7);
   constexpr Score CorneredBishop      = S( 50, 50);
@@ -136,7 +140,6 @@ namespace {
   constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
-  constexpr Score KnightOutpost       = S( 56, 36);
   constexpr Score BishopOutpost       = S( 30, 23);
   constexpr Score ReachableOutpost    = S( 31, 22);
   constexpr Score PassedFile          = S( 11,  8);
@@ -259,9 +262,11 @@ namespace {
     constexpr Direction Down = -pawn_push(Us);
     constexpr Bitboard OutpostRanks = (Us == WHITE ? Rank4BB | Rank5BB | Rank6BB
                                                    : Rank5BB | Rank4BB | Rank3BB);
+    constexpr Bitboard NOutpostRanks = (Us == WHITE ? Rank4BB | Rank5BB | Rank6BB | Rank7BB
+                                                    : Rank5BB | Rank4BB | Rank3BB | Rank2BB);
     const Square* pl = pos.squares<Pt>(Us);
 
-    Bitboard b, bb;
+    Bitboard b, outpostSquares;
     Score score = SCORE_ZERO;
 
     attackedBy[Us][Pt] = 0;
@@ -293,13 +298,6 @@ namespace {
 
         if (Pt == BISHOP || Pt == KNIGHT)
         {
-            // Bonus if piece is on an outpost square or can reach one
-            bb = OutpostRanks & attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
-            if (bb & s)
-                score += (Pt == KNIGHT) ? KnightOutpost : BishopOutpost;
-            else if (Pt == KNIGHT && bb & b & ~pos.pieces(Us))
-                score += ReachableOutpost;
-
             // Bonus for a knight or bishop shielded by pawn
             if (shift<Down>(pos.pieces(PAWN)) & s)
                 score += MinorBehindPawn;
@@ -308,8 +306,22 @@ namespace {
             score -= (Pt == KNIGHT ? KnightKingProtector
                                    : BishopKingProtector) * distance(pos.square<KING>(Us), s);
 
+            // Bonus if piece is on an outpost square or can reach one
+            outpostSquares = attackedBy[Us][PAWN] & ~pe->pawn_attacks_span(Them);
+
+            if (Pt == KNIGHT) {
+                if (NOutpostRanks & outpostSquares & s)
+                    score += KnightOutpostRank[relative_rank(Us, s)];
+
+                else if (OutpostRanks & outpostSquares & b & ~pos.pieces(Us))
+                    score += ReachableOutpost;
+            }
+
             if (Pt == BISHOP)
             {
+                if (OutpostRanks & outpostSquares & s)
+                    score += BishopOutpost;
+
                 // Penalty according to number of pawns on the same color square as the
                 // bishop, bigger when the center files are blocked with pawns and smaller
                 // when the bishop is outside the pawn chain.
