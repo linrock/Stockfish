@@ -34,10 +34,18 @@ namespace {
   // Pawn penalties
   constexpr Score Backward      = S( 9, 24);
   constexpr Score BlockedStorm  = S(82, 82);
-  constexpr Score Doubled       = S(11, 56);
+            Score Doubled;
   constexpr Score Isolated      = S( 5, 15);
   constexpr Score WeakLever     = S( 0, 56);
   constexpr Score WeakUnopposed = S(13, 27);
+
+  // vondele's suggestion
+  // https://github.com/linrock/Stockfish/commit/762858#commitcomment-39091769
+  int mg = 11, delta = 45;
+  void set_doubled_score() {
+    Doubled = make_score(mg, mg + delta);
+  };
+  TUNE(SetRange(-30, 120), mg, SetRange(10, 80), delta, set_doubled_score);
 
   // Connected pawn bonus
   constexpr int Connected[RANK_NB] = { 0, 7, 8, 12, 29, 48, 86 };
