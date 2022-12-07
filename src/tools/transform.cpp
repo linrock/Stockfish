@@ -10,6 +10,7 @@
 #include "search.h"
 
 #include "nnue/evaluate_nnue.h"
+#include "../extra/nnue_data_binpack_format.h"
 
 #include "extra/nnue_data_binpack_format.h"
 
@@ -172,7 +173,7 @@ namespace Stockfish::Tools
                 out->write(buffer);
                 buffer.clear();
 
-                std::cout << "Processed " << num_processed << " positions.\n";
+                std::cout << "Processed " << num_processed << " positions. whoa\n";
             }
         }
 
@@ -183,7 +184,7 @@ namespace Stockfish::Tools
             out->write(buffer);
             buffer.clear();
 
-            std::cout << "Processed " << num_processed << " positions.\n";
+            std::cout << "Processed " << num_processed << " positions. nice\n";
         }
 
         std::cout << "Finished.\n";
@@ -408,6 +409,7 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped = 0;
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
@@ -424,26 +426,70 @@ namespace Stockfish::Tools
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
 
-                    for (int cnt = 0; cnt < params.research_count; ++cnt)
-                        Search::search(pos, params.depth, 1);
-
-                    auto [search_value, search_pv] = Search::search(pos, params.depth, 1);
-
-                    if (search_pv.empty())
+                    auto [search_value7, search_pv7] = Search::search(pos, 7, 1);
+                    if (search_pv7.empty())
                         continue;
+                    // std::cout << "d7 Move " << search_pv7[0] << std::endl;
+                    // std::cout << "Capture or promotion? " << pos.capture_or_promotion(search_pv7[0]) << std::endl;
+                    if (pos.capture_or_promotion(search_pv7[0])) {
+                        // don't save positions where capture or promo at depth 7
+                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
+                        auto p = num_processed.fetch_add(1) + 1;
+                        if (p % 10000 == 0)
+                        {
+                            std::cout << "Processed " << p << " positions. Skipped " << s << " positions.\n";
+                        }
+                        continue;
+                    }
+
+                    auto [search_value8, search_pv8] = Search::search(pos, 8, 1);
+                    if (search_pv8.empty())
+                        continue;
+                    // std::cout << "d8 Move " << search_pv8[0] << std::endl;
+                    // std::cout << "Capture or promotion? " << pos.capture_or_promotion(search_pv8[0]) << std::endl;
+                    if (pos.capture_or_promotion(search_pv8[0])) {
+                        // don't save positions where capture or promo at depth 8
+                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
+                        auto p = num_processed.fetch_add(1) + 1;
+                        if (p % 10000 == 0)
+                        {
+                            std::cout << "Processed " << p << " positions. Skipped " << s << " positions.\n";
+                        }
+                        continue;
+                    }
+
+                    auto [search_value9, search_pv9] = Search::search(pos, 9, 1);
+                    if (search_pv9.empty())
+                        continue;
+                    // std::cout << "d9 Move " << search_pv9[0] << std::endl;
+                    // std::cout << "Capture or promotion? " << pos.capture_or_promotion(search_pv9[0]) << std::endl;
+                    if (pos.capture_or_promotion(search_pv9[0])) {
+                        // don't save positions where capture or promo at depth 9
+                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
+                        auto p = num_processed.fetch_add(1) + 1;
+                        if (p % 10000 == 0)
+                        {
+                            std::cout << "Processed " << p << " positions. Skipped " << s << " positions.\n";
+                        }
+                        continue;
+                    }
 
                     pos.sfen_pack(ps.sfen, false);
+                    // Don't overwrite the score
                     // ps.score = search_value;
+
+                    // Update the bestmove to the depth 9 bestmove
                     if (!params.keep_moves)
-                        ps.move = search_pv[0];
+                        ps.move = search_pv9[0];
                     ps.padding = 0;
 
                     out.write(th.id(), ps);
 
+                    auto s = num_capture_or_promo_skipped.load();
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 10000 == 0)
                     {
-                        std::cout << "Processed " << p << " positions.\n";
+                        std::cout << "Processed " << p << " positions. Skipped " << s << " positions.\n";
                     }
                 }
             }
