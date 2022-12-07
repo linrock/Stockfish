@@ -424,7 +424,7 @@ namespace Stockfish::Tools
                         continue;
 
                     pos.sfen_pack(ps.sfen, false);
-                    ps.score = search_value;
+                    // ps.score = search_value;
                     if (!params.keep_moves)
                         ps.move = search_pv[0];
                     ps.padding = 0;
