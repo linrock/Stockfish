@@ -1,0 +1,36 @@
+fen r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 51
+move g3d8
+score 32002
+ply 100
+result 0
+e
+fen rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 51
+move a2a3
+score 32002
+ply 100
+result 1
+e
+fen rnbqkb1r/pppppppp/5n2/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 51
+move f6e4
+score 32002
+ply 100
+result 0
+e
+fen rnb1k2r/pppp1ppp/8/4P3/8/3PbK1R/PPP5/RN1Q1nN1 b kq - 1 51
+move d7d6
+score 32002
+ply 100
+result 0
+e
+fen 8/ppp4k/6pp/7n/1P1P4/3r3P/2P1R1K1/8 w - - 0 51
+move g2h1
+score 32002
+ply 100
+result 0
+e
+fen 8/ppp4k/6pp/7n/1P1P4/3r3P/2P1R1K1/8 w - - 0 51
+move g2h1
+score 32002
+ply 100
+result 0
+e
