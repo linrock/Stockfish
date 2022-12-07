@@ -401,6 +401,9 @@ namespace Stockfish::Tools
 
         std::atomic<std::uint64_t> num_processed = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7 = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d8 = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d9 = 0;
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
@@ -424,11 +427,15 @@ namespace Stockfish::Tools
                     // std::cout << "Capture or promotion? " << pos.capture_or_promotion(search_pv7[0]) << std::endl;
                     if (pos.capture_or_promotion(search_pv7[0])) {
                         // don't save positions where capture or promo at depth 7
-                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
                         auto p = num_processed.fetch_add(1) + 1;
+                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
+                        auto sd7 = num_capture_or_promo_skipped_d7.fetch_add(1) + 1;
                         if (p % 10000 == 0)
                         {
-                            std::cout << "Processed " << p << " positions. Skipped " << s << " positions.\n";
+                            auto sd8 = num_capture_or_promo_skipped_d8.load();
+                            auto sd9 = num_capture_or_promo_skipped_d9.load();
+                            std::cout << "Processed " << p << " positions. Skipped " << s
+                                      << " positions (d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << std::endl;
                         }
                         continue;
                     }
@@ -440,11 +447,15 @@ namespace Stockfish::Tools
                     // std::cout << "Capture or promotion? " << pos.capture_or_promotion(search_pv8[0]) << std::endl;
                     if (pos.capture_or_promotion(search_pv8[0])) {
                         // don't save positions where capture or promo at depth 8
-                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
                         auto p = num_processed.fetch_add(1) + 1;
+                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
+                        auto sd8 = num_capture_or_promo_skipped_d8.fetch_add(1) + 1;
                         if (p % 10000 == 0)
                         {
-                            std::cout << "Processed " << p << " positions. Skipped " << s << " positions.\n";
+                            auto sd7 = num_capture_or_promo_skipped_d7.load();
+                            auto sd9 = num_capture_or_promo_skipped_d9.load();
+                            std::cout << "Processed " << p << " positions. Skipped " << s
+                                      << " positions (d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << std::endl;
                         }
                         continue;
                     }
@@ -456,11 +467,15 @@ namespace Stockfish::Tools
                     // std::cout << "Capture or promotion? " << pos.capture_or_promotion(search_pv9[0]) << std::endl;
                     if (pos.capture_or_promotion(search_pv9[0])) {
                         // don't save positions where capture or promo at depth 9
-                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
                         auto p = num_processed.fetch_add(1) + 1;
+                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
+                        auto sd9 = num_capture_or_promo_skipped_d9.fetch_add(1) + 1;
                         if (p % 10000 == 0)
                         {
-                            std::cout << "Processed " << p << " positions. Skipped " << s << " positions.\n";
+                            auto sd7 = num_capture_or_promo_skipped_d7.load();
+                            auto sd8 = num_capture_or_promo_skipped_d8.load();
+                            std::cout << "Processed " << p << " positions. Skipped " << s
+                                      << " positions (d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << std::endl;
                         }
                         continue;
                     }
@@ -476,11 +491,15 @@ namespace Stockfish::Tools
 
                     out.write(th.id(), ps);
 
-                    auto s = num_capture_or_promo_skipped.load();
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 10000 == 0)
                     {
-                        std::cout << "Processed " << p << " positions. Skipped " << s << " positions.\n";
+                        auto s = num_capture_or_promo_skipped.load();
+                        auto sd7 = num_capture_or_promo_skipped_d7.load();
+                        auto sd8 = num_capture_or_promo_skipped_d8.load();
+                        auto sd9 = num_capture_or_promo_skipped_d9.load();
+                        std::cout << "Processed " << p << " positions. Skipped " << s
+                                    << " positions (d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << std::endl;
                     }
                 }
             }
