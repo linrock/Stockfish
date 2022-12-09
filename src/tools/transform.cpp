@@ -423,7 +423,7 @@ namespace Stockfish::Tools
 
 		    // Skip if the written move is already a capture or promotion
 		    if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
-		        sync_cout << "Move: " << ps.move << " is capture. Fen: " << pos.fen() << sync_endl;
+		        // sync_cout << "Move: " << ps.move << " is capture. Fen: " << pos.fen() << sync_endl;
                         auto p = num_processed.fetch_add(1) + 1;
                         auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
                         auto a = num_move_already_is_capture.fetch_add(1) + 1;
