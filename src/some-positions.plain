@@ -58,3 +58,15 @@ score 175
 ply 1
 result 0
 e
+fen rnbqkb1r/pppppppp/5n2/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2
+move f6e4
+score 111
+ply 1
+result 0
+e
+fen rnbqkb1r/pppppppp/8/8/3Pn3/8/PPP2PPP/RNBQKBNR w KQkq - 0 1
+move e1e2
+score 111
+ply 1
+result 1
+e

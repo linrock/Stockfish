@@ -6,7 +6,7 @@ output_binpack=some-positions.rescored.binpack
 output_plain=some-positions.rescored.plain
 
 rm -f $input_binpack $output_binpack
-stockfish convert $input_plain $input_binpack
+./stockfish convert $input_plain $input_binpack
 options="
 uci
 setoption name PruneAtShallowDepth value false
@@ -20,6 +20,6 @@ printf "$options" | ./stockfish
 # stockfish transform rescore depth 9 input_file ${input_binpack} output_file ${output_binpack}
 
 ls -lth $output_binpack
-stockfish convert $output_binpack $output_plain
+./stockfish convert $output_binpack $output_plain
 
 diff --color $input_plain $output_plain
