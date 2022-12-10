@@ -28,3 +28,9 @@ score 111
 ply 1
 result 0
 e
+fen rnb1k2r/pppp1ppp/8/4P3/8/3PbK1R/PPP5/RN1Q1nN1 b kq - 1 11
+move d7d6
+score 111
+ply 1
+result 0
+e
