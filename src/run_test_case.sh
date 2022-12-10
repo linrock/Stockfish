@@ -2,7 +2,7 @@
 
 tests=(
   test.change-moves
-  test.remove-positions
+  test.remove-captures
   test.remove-in-check
 )
 for test in ${tests[@]}; do
