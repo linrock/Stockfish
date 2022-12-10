@@ -413,6 +413,7 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d8 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d9 = 0;
+        std::atomic<std::uint64_t> num_position_in_check = 0;
         std::atomic<std::uint64_t> num_move_already_is_capture = 0;
 
         Threads.execute_with_workers([&](auto& th){
@@ -430,14 +431,18 @@ namespace Stockfish::Tools
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
 
-		    bool should_write_fen = true;
-
-		    // Skip if the written move is already a capture or promotion
-		    if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
+		    if (pos.checkers()) {
+                        // Skip if in check
+		        // sync_cout << "Position is in check. Fen: " << pos.fen() << sync_endl;
+                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
+                        auto c = num_position_in_check.fetch_add(1) + 1;
+			continue;
+		    } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
+		        // Skip if the written move is already a capture or promotion
 		        // sync_cout << "Move: " << ps.move << " is capture. Fen: " << pos.fen() << sync_endl;
                         auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
                         auto a = num_move_already_is_capture.fetch_add(1) + 1;
-			should_write_fen = false;
+			continue;
 		    }
 
                     auto [search_value7, search_pv7] = Search::search(pos, 7, 1);
@@ -448,7 +453,7 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 7
                         auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
                         auto sd7 = num_capture_or_promo_skipped_d7.fetch_add(1) + 1;
-			should_write_fen = false;
+			continue;
                     }
 
                     auto [search_value8, search_pv8] = Search::search(pos, 8, 1);
@@ -459,7 +464,7 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 8
                         auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
                         auto sd8 = num_capture_or_promo_skipped_d8.fetch_add(1) + 1;
-			should_write_fen = false;
+			continue;
                     }
 
                     auto [search_value9, search_pv9] = Search::search(pos, 9, 1);
@@ -470,33 +475,37 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 9
                         auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
                         auto sd9 = num_capture_or_promo_skipped_d9.fetch_add(1) + 1;
-			should_write_fen = false;
+			continue;
                     }
 
-		    // only write the position if not documented as a capture, and bestmove is not a capture at depths 7,8,9
-		    if (should_write_fen) {
-                        pos.sfen_pack(ps.sfen, false);
-                        // Don't overwrite the score
-                        // ps.score = search_value;
+		    // only write the position if:
+		    // - position is not in check
+		    // - the provided move was not a capture
+		    // - bestmove at depths 7,8,9 are not captures
+                    pos.sfen_pack(ps.sfen, false);
 
-                        // if (!params.keep_moves)
-                        // Update the move to the depth 9 bestmove
-                        ps.move = search_pv9[0];
-                        ps.padding = 0;
+                    // Don't overwrite the score
+                    // ps.score = search_value;
 
-                        out.write(th.id(), ps);
-		    }
+                    // if (!params.keep_moves)
+                    // Update the move to the depth 9 bestmove
+                    ps.move = search_pv9[0];
+                    ps.padding = 0;
+
+                    out.write(th.id(), ps);
 
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 10000 == 0)
                     {
                         auto s = num_capture_or_promo_skipped.load();
                         auto a = num_move_already_is_capture.load();
+                        auto c = num_position_in_check.load();
                         auto sd7 = num_capture_or_promo_skipped_d7.load();
                         auto sd8 = num_capture_or_promo_skipped_d8.load();
                         auto sd9 = num_capture_or_promo_skipped_d9.load();
                         sync_cout << "Processed " << p << " positions. Skipped " << s
-                                  << " positions (already: " << a << ", d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << sync_endl;
+                                  << " positions (in check: " << c << ", capture: " << a
+				  << ", d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << sync_endl;
                     }
                 }
             }
