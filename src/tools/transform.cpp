@@ -434,14 +434,14 @@ namespace Stockfish::Tools
 		    if (pos.checkers()) {
                         // Skip if in check
 		        // sync_cout << "Position is in check. Fen: " << pos.fen() << sync_endl;
-                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
-                        auto c = num_position_in_check.fetch_add(1) + 1;
+                        num_capture_or_promo_skipped.fetch_add(1);
+                        num_position_in_check.fetch_add(1);
 			continue;
 		    } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
 		        // Skip if the written move is already a capture or promotion
 		        // sync_cout << "Move: " << ps.move << " is capture. Fen: " << pos.fen() << sync_endl;
-                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
-                        auto a = num_move_already_is_capture.fetch_add(1) + 1;
+                        num_capture_or_promo_skipped.fetch_add(1);
+                        num_move_already_is_capture.fetch_add(1);
 			continue;
 		    }
 
@@ -451,8 +451,8 @@ namespace Stockfish::Tools
                     // std::cout << "d7 Move " << search_pv7[0] << std::endl;
                     if (pos.capture_or_promotion(search_pv7[0])) {
                         // don't save positions where capture or promo at depth 7
-                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
-                        auto sd7 = num_capture_or_promo_skipped_d7.fetch_add(1) + 1;
+                        num_capture_or_promo_skipped.fetch_add(1);
+                        num_capture_or_promo_skipped_d7.fetch_add(1);
 			continue;
                     }
 
@@ -462,8 +462,8 @@ namespace Stockfish::Tools
                     // std::cout << "d8 Move " << search_pv8[0] << std::endl;
                     if (pos.capture_or_promotion(search_pv8[0])) {
                         // don't save positions where capture or promo at depth 8
-                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
-                        auto sd8 = num_capture_or_promo_skipped_d8.fetch_add(1) + 1;
+                        num_capture_or_promo_skipped.fetch_add(1);
+                        num_capture_or_promo_skipped_d8.fetch_add(1);
 			continue;
                     }
 
@@ -473,8 +473,8 @@ namespace Stockfish::Tools
                     // std::cout << "d9 Move " << search_pv9[0] << std::endl;
                     if (pos.capture_or_promotion(search_pv9[0])) {
                         // don't save positions where capture or promo at depth 9
-                        auto s = num_capture_or_promo_skipped.fetch_add(1) + 1;
-                        auto sd9 = num_capture_or_promo_skipped_d9.fetch_add(1) + 1;
+                        num_capture_or_promo_skipped.fetch_add(1);
+                        num_capture_or_promo_skipped_d9.fetch_add(1);
 			continue;
                     }
 
