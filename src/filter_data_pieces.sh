@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in {200..999}; do
+for i in {300..999}; do
 input_binpack="data-pieces/master_dataset_$i.binpack"
 output_binpack="data-pieces-skip789/master_dataset_$i.binpack"
 options="
