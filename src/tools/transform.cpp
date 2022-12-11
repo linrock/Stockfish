@@ -431,19 +431,19 @@ namespace Stockfish::Tools
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
 
-		    if (pos.checkers()) {
+                    if (pos.checkers()) {
                         // Skip if in check
-		        // sync_cout << "Position is in check. Fen: " << pos.fen() << sync_endl;
+                        // sync_cout << "Position is in check. Fen: " << pos.fen() << sync_endl;
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_position_in_check.fetch_add(1);
-			continue;
-		    } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
-		        // Skip if the written move is already a capture or promotion
-		        // sync_cout << "Move: " << ps.move << " is capture. Fen: " << pos.fen() << sync_endl;
+                        continue;
+                    } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
+                        // Skip if the written move is already a capture or promotion
+                        // sync_cout << "Move: " << ps.move << " is capture. Fen: " << pos.fen() << sync_endl;
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_move_already_is_capture.fetch_add(1);
-			continue;
-		    }
+                        continue;
+                    }
 
                     auto [search_value7, search_pv7] = Search::search(pos, 7, 1);
                     if (search_pv7.empty())
@@ -453,7 +453,7 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 7
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d7.fetch_add(1);
-			continue;
+                        continue;
                     }
 
                     auto [search_value8, search_pv8] = Search::search(pos, 8, 1);
@@ -464,7 +464,7 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 8
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d8.fetch_add(1);
-			continue;
+                        continue;
                     }
 
                     auto [search_value9, search_pv9] = Search::search(pos, 9, 1);
@@ -475,7 +475,7 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 9
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d9.fetch_add(1);
-			continue;
+                        continue;
                     }
 
 		    // only write the position if:
