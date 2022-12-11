@@ -405,6 +405,7 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d8 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d9 = 0;
         std::atomic<std::uint64_t> num_position_in_check = 0;
+        std::atomic<std::uint64_t> num_multipv_eval_diff_large = 0;
         std::atomic<std::uint64_t> num_move_already_is_capture = 0;
 
         Threads.execute_with_workers([&](auto& th){
@@ -412,6 +413,7 @@ namespace Stockfish::Tools
             StateInfo si;
             const bool frc = Options["UCI_Chess960"];
 
+            const bool debug_print = true;
             for (;;)
             {
                 PSVector psv = readsome(5000);
@@ -424,16 +426,55 @@ namespace Stockfish::Tools
 
                     if (pos.checkers()) {
                         // Skip if in check
-                        // sync_cout << "Position is in check. Fen: " << pos.fen() << sync_endl;
+                        if (debug_print) {
+                            sync_cout << " - Position is in check. Fen: " << pos.fen() << sync_endl;
+                        }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_position_in_check.fetch_add(1);
                         continue;
                     } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
                         // Skip if the written move is already a capture or promotion
-                        // sync_cout << "Move: " << ps.move << " is capture. Fen: " << pos.fen() << sync_endl;
+                        if (debug_print) {
+                            sync_cout << " - Move: " << UCI::move((Stockfish::Move)ps.move, false)
+                                      << " is capture. Provided move. Fen: " << pos.fen() << sync_endl;
+                        }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_move_already_is_capture.fetch_add(1);
                         continue;
+                    }
+
+                    // get a sense of whether the position is quiet
+                    // depth 6, multipv 2
+                    auto [search_value6, pvs] = Search::search(pos, 6, 2);
+                    if (pvs.empty())
+                        continue;
+                    if (debug_print) {
+                        sync_cout << " - FEN:            " << pos.fen() << sync_endl;
+                        sync_cout << " -   Main PV move: " << UCI::move(th.rootMoves[0].pv[0], false) << " "
+                                                    << th.rootMoves[0].score << " " << sync_endl;
+                        sync_cout << " -   2nd PV move:  " << UCI::move(th.rootMoves[1].pv[0], false) << " "
+                                                    << th.rootMoves[1].score << " " << sync_endl;
+                    }
+                    // skip if either one of the multipv bestmoves are captures or promos
+                    if (pos.capture_or_promotion(th.rootMoves[0].pv[0])) {
+                        num_capture_or_promo_skipped.fetch_add(1);
+                        if (debug_print) {
+                            sync_cout << " - Move: " << UCI::move(th.rootMoves[0].pv[0], false)
+                                      << " is capture. Found at depth 6 multipv 2. Fen: " << pos.fen() << sync_endl;
+                        }
+                    } else if (pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
+                        num_capture_or_promo_skipped.fetch_add(1);
+                        if (debug_print) {
+                            sync_cout << " - Move: " << UCI::move(th.rootMoves[1].pv[0], false)
+                                      << " is capture. 2nd move. Found at depth 6 multipv 2. Fen: " << pos.fen() << sync_endl;
+                        }
+                    }
+                    // if the eval difference between the two multipv values is large
+                    if (abs(th.rootMoves[0].score - th.rootMoves[1].score) > 100) {
+                        num_multipv_eval_diff_large.fetch_add(1);
+                        if (debug_print) {
+                            sync_cout << " - Multipv score diff is large! Throwing position away" << sync_endl;
+                        }
                     }
 
                     auto [search_value7, search_pv7] = Search::search(pos, 7, 1);
@@ -444,6 +485,10 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 7
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d7.fetch_add(1);
+                        if (debug_print) {
+                            sync_cout << " - Move: " << UCI::move(search_pv7[0], false)
+                                      << " is capture. Found at depth 7. Fen: " << pos.fen() << sync_endl;
+                        }
                         continue;
                     }
 
@@ -455,6 +500,10 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 8
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d8.fetch_add(1);
+                        if (debug_print) {
+                            sync_cout << " - Move: " << UCI::move(search_pv8[0], false)
+                                      << " is capture. Found at depth 8. Fen: " << pos.fen() << sync_endl;
+                        }
                         continue;
                     }
 
@@ -466,6 +515,10 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 9
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d9.fetch_add(1);
+                        if (debug_print) {
+                            sync_cout << " - Move: " << UCI::move(search_pv9[0], false)
+                                      << " is capture. Found at depth 9. Fen: " << pos.fen() << sync_endl;
+                        }
                         continue;
                     }
 
