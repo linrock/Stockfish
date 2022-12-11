@@ -409,13 +409,15 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
+        std::atomic<std::uint64_t> num_position_in_check = 0;
+        std::atomic<std::uint64_t> num_move_already_is_capture = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv0 = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv1 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d8 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d9 = 0;
-        std::atomic<std::uint64_t> num_position_in_check = 0;
-        std::atomic<std::uint64_t> num_multipv_eval_diff_large = 0;
-        std::atomic<std::uint64_t> num_move_already_is_capture = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv_eval_diff = 0;
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
@@ -440,6 +442,7 @@ namespace Stockfish::Tools
                         }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_position_in_check.fetch_add(1);
+                        num_processed.fetch_add(1);
                         continue;
                     } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
                         // Skip if the written move is already a capture or promotion
@@ -449,6 +452,7 @@ namespace Stockfish::Tools
                         }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_move_already_is_capture.fetch_add(1);
+                        num_processed.fetch_add(1);
                         continue;
                     }
 
@@ -464,23 +468,29 @@ namespace Stockfish::Tools
                         sync_cout << " -   2nd PV move:  " << UCI::move(th.rootMoves[1].pv[0], false) << " "
                                                     << th.rootMoves[1].score << " " << sync_endl;
                     }
-                    // skip if either one of the multipv bestmoves are captures or promos
                     if (pos.capture_or_promotion(th.rootMoves[0].pv[0])) {
+			// skip if multipv 1st line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
+                        num_capture_or_promo_skipped_d7_multipv0.fetch_add(1);
+                        num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << " - Move: " << UCI::move(th.rootMoves[0].pv[0], false)
                                       << " is capture. Found at depth 6 multipv 2. Fen: " << pos.fen() << sync_endl;
                         }
                     } else if (pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
+			// skip if multipv 2nd line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
+                        num_capture_or_promo_skipped_d7_multipv1.fetch_add(1);
+                        num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << " - Move: " << UCI::move(th.rootMoves[1].pv[0], false)
                                       << " is capture. 2nd move. Found at depth 6 multipv 2. Fen: " << pos.fen() << sync_endl;
                         }
-                    }
-                    // if the eval difference between the two multipv values is large
-                    if (abs(th.rootMoves[0].score - th.rootMoves[1].score) > 100) {
-                        num_multipv_eval_diff_large.fetch_add(1);
+                    } else if (abs(th.rootMoves[0].score - th.rootMoves[1].score) > 150) {
+                        // skip if large eval difference between the two multipv bestmove score
+                        num_capture_or_promo_skipped.fetch_add(1);
+                        num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
+                        num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << " - Multipv score diff is large! Throwing position away" << sync_endl;
                         }
@@ -494,6 +504,7 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 7
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d7.fetch_add(1);
+                        num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << " - Move: " << UCI::move(search_pv7[0], false)
                                       << " is capture. Found at depth 7. Fen: " << pos.fen() << sync_endl;
@@ -509,6 +520,7 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 8
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d8.fetch_add(1);
+                        num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << " - Move: " << UCI::move(search_pv8[0], false)
                                       << " is capture. Found at depth 8. Fen: " << pos.fen() << sync_endl;
@@ -524,6 +536,7 @@ namespace Stockfish::Tools
                         // don't save positions where capture or promo at depth 9
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d9.fetch_add(1);
+                        num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << " - Move: " << UCI::move(search_pv9[0], false)
                                       << " is capture. Found at depth 9. Fen: " << pos.fen() << sync_endl;
@@ -556,9 +569,18 @@ namespace Stockfish::Tools
                         auto sd7 = num_capture_or_promo_skipped_d7.load();
                         auto sd8 = num_capture_or_promo_skipped_d8.load();
                         auto sd9 = num_capture_or_promo_skipped_d9.load();
+
+                        auto multipv_cap0 = num_capture_or_promo_skipped_d7_multipv0.load();
+                        auto multipv_cap1 = num_capture_or_promo_skipped_d7_multipv1.load();
+                        auto multipv_eval_diff = num_capture_or_promo_skipped_d7_multipv_eval_diff.load();
+
                         sync_cout << "Processed " << p << " positions. Skipped " << s
                                   << " positions (in check: " << c << ", capture: " << a
-				  << ", d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << sync_endl;
+				  << ", d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")"
+				  << sync_endl
+                                  << "  MultiPV filter: (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1
+				  << ", eval diff: " << multipv_eval_diff << ")"
+				  << sync_endl;
                     }
                 }
             }
