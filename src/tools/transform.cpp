@@ -415,7 +415,7 @@ namespace Stockfish::Tools
             StateInfo si;
             const bool frc = Options["UCI_Chess960"];
 
-            const bool debug_print = true;
+            const bool debug_print = false; // true;
             for (;;)
             {
                 PSVector psv = readsome(5000);
@@ -468,7 +468,8 @@ namespace Stockfish::Tools
                             sync_cout << " - Move: " << UCI::move(th.rootMoves[0].pv[0], false)
                                       << " is capture. Found at depth 6 multipv 2. Fen: " << pos.fen() << sync_endl;
                         }
-                    } else if (pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
+			// continue;
+                    } else if (th.rootMoves.size() > 1 && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
 			// skip if multipv 2nd line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d7_multipv1.fetch_add(1);
@@ -477,7 +478,9 @@ namespace Stockfish::Tools
                             sync_cout << " - Move: " << UCI::move(th.rootMoves[1].pv[0], false)
                                       << " is capture. 2nd move. Found at depth 6 multipv 2. Fen: " << pos.fen() << sync_endl;
                         }
-                    } else if (abs(th.rootMoves[0].score - th.rootMoves[1].score) > 150) {
+			// continue;
+                    } else if (th.rootMoves.size() > 1 &&
+			       (abs(th.rootMoves[0].score) > 400 && abs(th.rootMoves[0].score - th.rootMoves[1].score) > 200)) {
                         // skip if large eval difference between the two multipv bestmove score
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
@@ -485,6 +488,7 @@ namespace Stockfish::Tools
                         if (debug_print) {
                             sync_cout << " - Multipv score diff is large! Throwing position away" << sync_endl;
                         }
+			// continue;
                     }
 
                     auto [search_value7, search_pv7] = Search::search(pos, 7, 1);
