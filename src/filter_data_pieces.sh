@@ -1,14 +1,14 @@
 #!/bin/bash
 
-for i in {300..999}; do
-input_binpack="data-pieces/master_dataset_$i.binpack"
-output_binpack="data-pieces-skip789/master_dataset_$i.binpack"
+# for i in {300..999}; do
+input_binpack="data-pieces/master_dataset_900.binpack"
+output_binpack="/tmp/master_dataset_900.binpack"
 options="
 uci
 setoption name PruneAtShallowDepth value false
 setoption name Use NNUE value true
 setoption name Threads value 95
-setoption name Hash value 950000
+setoption name Hash value 50000
 isready
 transform rescore depth 100 keep_moves 0 input_file ${input_binpack} output_file ${output_binpack}
 quit"
@@ -18,7 +18,7 @@ else
   printf "$options" | taskset -c 0-94 ./stockfish | \
     tee data-pieces-wrong-nnue/stockfish-out-$i.txt
 fi
-done
+# done
 
 # stockfish transform rescore depth 9 input_file ${input_binpack} output_file ${output_binpack}
 
