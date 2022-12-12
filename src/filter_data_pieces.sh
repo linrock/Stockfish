@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # for i in {300..999}; do
+rm -f /tmp/master_dataset_900.binpack
 input_binpack="data-pieces/master_dataset_900.binpack"
 output_binpack="/tmp/master_dataset_900.binpack"
 options="
