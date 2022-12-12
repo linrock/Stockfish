@@ -417,21 +417,21 @@ namespace Stockfish::Tools
                 auto s = num_capture_or_promo_skipped.load();
                 auto a = num_move_already_is_capture.load();
                 auto c = num_position_in_check.load();
-                auto sd7 = num_capture_or_promo_skipped_d7.load();
-                auto sd8 = num_capture_or_promo_skipped_d8.load();
-                auto sd9 = num_capture_or_promo_skipped_d9.load();
                 auto st = num_start_positions.load();
+                // auto sd7 = num_capture_or_promo_skipped_d7.load();
+                // auto sd8 = num_capture_or_promo_skipped_d8.load();
+                // auto sd9 = num_capture_or_promo_skipped_d9.load();
 
                 auto multipv_cap0 = num_capture_or_promo_skipped_d7_multipv0.load();
                 auto multipv_cap1 = num_capture_or_promo_skipped_d7_multipv1.load();
                 auto multipv_eval_diff = num_capture_or_promo_skipped_d7_multipv_eval_diff.load();
 
-                sync_cout << "Processed " << p << " positions. Skipped " << s
-                            << " positions (in check: " << c << ", capture: " << a << ", start pos: " << st << ")" << sync_endl
-                            << "  Depth filter: (d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << sync_endl
-                            << "  MultiPV filter: (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1
-                            << ", eval diff: " << multipv_eval_diff << ")"
-                            << sync_endl;
+                sync_cout << "Processed " << p << " positions. Skipped " << (s+st) << " positions." << sync_endl
+                          << "  Static filter: " << (c+a+st) << " (in check: " << c << ", capture: " << a << ", start pos: " << st << ")" << sync_endl
+                          // << "  Depth filter: (d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << sync_endl
+                          << "  MultiPV filter: " << (multipv_cap0+multipv_cap1) << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1
+                          << ", eval diff: " << multipv_eval_diff << ") depth 6"
+                          << sync_endl;
             }
         };
 
