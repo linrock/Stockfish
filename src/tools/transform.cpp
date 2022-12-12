@@ -409,6 +409,7 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d8 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d9 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv_eval_diff = 0;
+        std::atomic<std::uint64_t> num_start_positions = 0;
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
@@ -425,6 +426,7 @@ namespace Stockfish::Tools
                 for(auto& ps : psv)
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
+                    // sync_cout << pos.fen() << sync_endl;
 
                     if (pos.checkers()) {
                         // Skip if in check
@@ -443,6 +445,11 @@ namespace Stockfish::Tools
                         }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_move_already_is_capture.fetch_add(1);
+                        num_processed.fetch_add(1);
+                        continue;
+                    } else if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
+                        // sync_cout << " Skipping start position" << sync_endl;
+                        num_start_positions.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
                     }
@@ -566,13 +573,14 @@ namespace Stockfish::Tools
                         auto sd7 = num_capture_or_promo_skipped_d7.load();
                         auto sd8 = num_capture_or_promo_skipped_d8.load();
                         auto sd9 = num_capture_or_promo_skipped_d9.load();
+                        auto st = num_start_positions.load();
 
                         auto multipv_cap0 = num_capture_or_promo_skipped_d7_multipv0.load();
                         auto multipv_cap1 = num_capture_or_promo_skipped_d7_multipv1.load();
                         auto multipv_eval_diff = num_capture_or_promo_skipped_d7_multipv_eval_diff.load();
 
                         sync_cout << "Processed " << p << " positions. Skipped " << s
-                                  << " positions (in check: " << c << ", capture: " << a << ")" << sync_endl
+                                  << " positions (in check: " << c << ", capture: " << a << ", start pos: " << st << ")" << sync_endl
                                   << "  Depth filter: (d7: " << sd7 << ", d8: " << sd8 << ", d9: " << sd9 << ")" << sync_endl
                                   << "  MultiPV filter: (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1
                                   << ", eval diff: " << multipv_eval_diff << ")"
