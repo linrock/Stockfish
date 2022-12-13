@@ -568,7 +568,7 @@ namespace Stockfish::Tools
                         }
                         continue;
                     }
-
+*/
                     auto [search_value9, search_pv9] = Search::search(pos, 9, 1);
                     if (search_pv9.empty())
                         continue;
@@ -584,19 +584,19 @@ namespace Stockfish::Tools
                         }
                         continue;
                     }
-*/
+
                     // only write the position if:
                     // - position is not in check
                     // - the provided move was not a capture
                     // - bestmove at depths 7,8,9 are not captures
                     pos.sfen_pack(ps.sfen, false);
 
-                    // Don't overwrite the score
-                    // ps.score = search_value;
+                    // Rescore with depth 9 eval
+                    ps.score = search_value9;
 
                     // if (!params.keep_moves)
                     // Update the move to the depth 9 bestmove
-                    // ps.move = search_pv9[0];
+                    ps.move = search_pv9[0];
                     ps.padding = 0;
 
                     out.write(th.id(), ps);
