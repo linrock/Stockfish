@@ -473,8 +473,10 @@ namespace Stockfish::Tools
                         continue;
                       } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
                         // Skip if the written move is already a capture or promotion
+                        if (debug_print) {
                             sync_cout << " - Move: " << UCI::move((Stockfish::Move)ps.move, false)
                                       << " is capture. Provided move. Fen: " << pos.fen() << sync_endl;
+                        }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_move_already_is_capture.fetch_add(1);
                         num_processed.fetch_add(1);
