@@ -1,3 +1,3 @@
 #!/bin/bash
 
-make -j profile-build ARCH=x86-64-modern
+make -j profile-build ARCH=x86-64-bmi2
