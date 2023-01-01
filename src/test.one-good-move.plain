@@ -10,3 +10,9 @@ move g1h1
 ply 100
 result 0
 e
+fen 3k4/8/8/3q4/8/8/2K5/6R1 w - - 0 51
+score 0
+move g1h1
+ply 100
+result 0
+e
