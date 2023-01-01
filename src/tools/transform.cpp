@@ -516,6 +516,7 @@ namespace Stockfish::Tools
                         }
                     }
                     auto best_move = th.rootMoves[0].pv[0];
+                    bool more_than_one_valid_move = th.rootMoves.size() > 1;
                     if (pos.capture_or_promotion(best_move)) {
                         // skip if multipv 1st line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
@@ -528,10 +529,9 @@ namespace Stockfish::Tools
                                       << "[debug]" << sync_endl;
                         }
                         continue;
-                    } else if (th.rootMoves.size() > 1) {
-                        if (pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
-                            // skip if multipv 2nd line bestmove is a capture or promo
-                            num_capture_or_promo_skipped.fetch_add(1);
+                    } else if (more_than_one_valid_move && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
+                        // skip if multipv 2nd line bestmove is a capture or promo
+                        num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d7_multipv1.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
@@ -541,7 +541,7 @@ namespace Stockfish::Tools
                                       << "[debug]" << sync_endl;
                         }
                         continue;
-                    } else if (th.rootMoves.size() > 1) {
+                    } else if (more_than_one_valid_move) {
                       // remove positions with only 1 good move
                       Value m1_score = th.rootMoves[0].score;
                       Value m2_score = th.rootMoves[1].score;
