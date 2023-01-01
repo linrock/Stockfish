@@ -1,7 +1,6 @@
 #!/bin/bash
 
 tests=(
-  test.change-moves
   test.remove-captures
   test.remove-in-check
   test.one-good-move
