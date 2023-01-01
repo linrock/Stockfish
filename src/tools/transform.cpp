@@ -646,14 +646,11 @@ namespace Stockfish::Tools
 
         params.enforce_constraints();
 
-        std::cout << "Performing transform rescore with parameters:\n";
-        std::cout << "depth               : " << params.depth << '\n';
+        std::cout << "Performing transform filter with parameters:\n";
         std::cout << "filter_depth        : " << params.filter_depth << '\n';
         std::cout << "filter_multipv      : " << params.filter_multipv << '\n';
         std::cout << "input_file          : " << params.input_filename << '\n';
         std::cout << "output_file         : " << params.output_filename << '\n';
-        std::cout << "keep_moves          : " << params.keep_moves << '\n';
-        std::cout << "research_count      : " << params.research_count << '\n';
         std::cout << "debug_print         : " << params.debug_print << '\n';
         std::cout << '\n';
 
