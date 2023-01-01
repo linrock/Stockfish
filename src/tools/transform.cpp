@@ -455,8 +455,9 @@ namespace Stockfish::Tools
                     if (pos.checkers()) {
                         // Skip if in check
                         if (debug_print) {
-                            sync_cout << "[debug] FEN: " << pos.fen() << sync_endl
-                                      << "[debug] Position is in check" << sync_endl;
+                            sync_cout << "[debug] " << pos.fen() << sync_endl
+                                      << "[debug] Position is in check" << sync_endl
+				      << "[debug]" << sync_endl;
                         }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_position_in_check.fetch_add(1);
@@ -465,10 +466,11 @@ namespace Stockfish::Tools
                       } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
                         // Skip if the written move is already a capture or promotion
                         if (debug_print) {
-                            sync_cout << "[debug] FEN: " << pos.fen() << sync_endl
+                            sync_cout << "[debug] " << pos.fen() << sync_endl
                                       << "[debug] Provided move is capture: "
 				      << UCI::move((Stockfish::Move)ps.move, false)
-				      << sync_endl;
+				      << sync_endl
+				      << "[debug]" << sync_endl;
                         }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_move_already_is_capture.fetch_add(1);
@@ -489,13 +491,19 @@ namespace Stockfish::Tools
                     auto [search_val, pvs] = Search::search(pos, 7, 2);
                     if (pvs.empty())
                         continue;
+                    if (th.rootMoves.size() == 0)
+                        continue;
                     if (debug_print) {
-                        sync_cout << "[debug] FEN: " << pos.fen() << sync_endl;
-                        sync_cout << "[debug] Main PV move:   " << UCI::move(th.rootMoves[0].pv[0], false) << " "
-                                                                << th.rootMoves[0].score << " " << sync_endl;
+                        sync_cout << "[debug] " << pos.fen() << sync_endl;
+                        sync_cout << "[debug] Main PV move:    "
+				  << UCI::move(th.rootMoves[0].pv[0], false) << " "
+                                  << th.rootMoves[0].score << " " << sync_endl;
                         if (th.rootMoves.size() > 1) {
-                            sync_cout << "[debug] 2nd PV move:    " << UCI::move(th.rootMoves[1].pv[0], false) << " "
-                                                                    << th.rootMoves[1].score << " " << sync_endl;
+                            sync_cout << "[debug] 2nd PV move:     "
+				      << UCI::move(th.rootMoves[1].pv[0], false) << " "
+                                      << th.rootMoves[1].score << " " << sync_endl;
+                        } else {
+                            sync_cout << "[debug] The only valid move" << sync_endl;
                         }
                     }
                     if (th.rootMoves.size() > 0 && pos.capture_or_promotion(th.rootMoves[0].pv[0])) {
@@ -504,10 +512,10 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped_d7_multipv0.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
-                            sync_cout << "[debug] FEN: " << pos.fen() << sync_endl;
                             sync_cout << "[debug] Move is capture: " << UCI::move(th.rootMoves[0].pv[0], false)
 				      << sync_endl
-                                      << "[debug] 1st best move at depth 7 multipv 2" << sync_endl;
+                                      << "[debug] 1st best move at depth 7 multipv 2" << sync_endl
+				      << "[debug]" << sync_endl;
                         }
                         continue;
                     } else if (th.rootMoves.size() > 1 && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
@@ -516,10 +524,10 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped_d7_multipv1.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
-                            sync_cout << "[debug] FEN: " << pos.fen() << sync_endl;
                             sync_cout << "[debug] Move is capture: " << UCI::move(th.rootMoves[0].pv[0], false)
 				      << sync_endl
-                                      << "[debug] 2nd best move at depth 7 multipv 2" << sync_endl;
+                                      << "[debug] 2nd best move at depth 7 multipv 2" << sync_endl
+				      << "[debug]" << sync_endl;
                         }
                         continue;
                     } else if (th.rootMoves.size() > 1) {
@@ -527,18 +535,21 @@ namespace Stockfish::Tools
 		      Value m1_score = th.rootMoves[0].score;
 		      Value m2_score = th.rootMoves[1].score;
 		      if (abs(m1_score) < 100 && abs(m2_score) > 300) {
-                        // best move is about equal, 2nd best move is losing
+                        sync_cout << "[debug] best move is about equal, 2nd best move is losing" << sync_endl
+				  << "[debug]" << sync_endl;
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
 		      } else if (abs(m1_score) > 300 && abs(m2_score) < 100) {
-                        // best move gains an advantage, 2nd best move equalizes
+                        sync_cout << "[debug] best move gains advantage, 2nd best move equalizes" << sync_endl
+				  << "[debug]" << sync_endl;
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
 		      } else if (abs(m1_score) > 300 &&
 				 (abs(m2_score) > 300 && ((m1_score > 0) != (m2_score > 0)))) {
-                        // best move gains an advantage, 2nd best move loses
+                        sync_cout << "[debug] best move gains an advantage, 2nd best move loses " << sync_endl
+				  << "[debug]" << sync_endl;
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
