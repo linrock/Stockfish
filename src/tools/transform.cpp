@@ -455,7 +455,8 @@ namespace Stockfish::Tools
                     if (pos.checkers()) {
                         // Skip if in check
                         if (debug_print) {
-                            sync_cout << " - Position is in check. Fen: " << pos.fen() << sync_endl;
+                            sync_cout << "[debug] FEN: " << pos.fen() << sync_endl
+                                      << "[debug] Position is in check" << sync_endl;
                         }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_position_in_check.fetch_add(1);
@@ -464,8 +465,10 @@ namespace Stockfish::Tools
                       } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
                         // Skip if the written move is already a capture or promotion
                         if (debug_print) {
-                            sync_cout << " - Move: " << UCI::move((Stockfish::Move)ps.move, false)
-                                      << " is capture. Provided move. Fen: " << pos.fen() << sync_endl;
+                            sync_cout << "[debug] FEN: " << pos.fen() << sync_endl
+                                      << "[debug] Provided move is capture: "
+				      << UCI::move((Stockfish::Move)ps.move, false)
+				      << sync_endl;
                         }
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_move_already_is_capture.fetch_add(1);
@@ -487,12 +490,12 @@ namespace Stockfish::Tools
                     if (pvs.empty())
                         continue;
                     if (debug_print) {
-                        sync_cout << " - FEN:            " << pos.fen() << sync_endl;
-                        sync_cout << " -   Main PV move: " << UCI::move(th.rootMoves[0].pv[0], false) << " "
-                                                    << th.rootMoves[0].score << " " << sync_endl;
+                        sync_cout << "[debug] FEN: " << pos.fen() << sync_endl;
+                        sync_cout << "[debug] Main PV move:   " << UCI::move(th.rootMoves[0].pv[0], false) << " "
+                                                                << th.rootMoves[0].score << " " << sync_endl;
                         if (th.rootMoves.size() > 1) {
-                            sync_cout << " -   2nd PV move:  " << UCI::move(th.rootMoves[1].pv[0], false) << " "
-                                                        << th.rootMoves[1].score << " " << sync_endl;
+                            sync_cout << "[debug] 2nd PV move:    " << UCI::move(th.rootMoves[1].pv[0], false) << " "
+                                                                    << th.rootMoves[1].score << " " << sync_endl;
                         }
                     }
                     if (th.rootMoves.size() > 0 && pos.capture_or_promotion(th.rootMoves[0].pv[0])) {
@@ -501,8 +504,10 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped_d7_multipv0.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
-                            sync_cout << " - Move: " << UCI::move(th.rootMoves[0].pv[0], false)
-                                      << " is capture. Found at depth 6 multipv 2. Fen: " << pos.fen() << sync_endl;
+                            sync_cout << "[debug] FEN: " << pos.fen() << sync_endl;
+                            sync_cout << "[debug] Move is capture: " << UCI::move(th.rootMoves[0].pv[0], false)
+				      << sync_endl
+                                      << "[debug] 1st best move at depth 7 multipv 2" << sync_endl;
                         }
                         continue;
                     } else if (th.rootMoves.size() > 1 && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
@@ -511,8 +516,10 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped_d7_multipv1.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
-                            sync_cout << " - Move: " << UCI::move(th.rootMoves[1].pv[0], false)
-                                      << " is capture. 2nd move. Found at depth 6 multipv 2. Fen: " << pos.fen() << sync_endl;
+                            sync_cout << "[debug] FEN: " << pos.fen() << sync_endl;
+                            sync_cout << "[debug] Move is capture: " << UCI::move(th.rootMoves[0].pv[0], false)
+				      << sync_endl
+                                      << "[debug] 2nd best move at depth 7 multipv 2" << sync_endl;
                         }
                         continue;
                     } else if (th.rootMoves.size() > 1) {
@@ -529,7 +536,8 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
-		      } else if (abs(m1_score) > 300 && (abs(m2_score) > 300 && ((m1_score > 0) != (m2_score > 0)))) {
+		      } else if (abs(m1_score) > 300 &&
+				 (abs(m2_score) > 300 && ((m1_score > 0) != (m2_score > 0)))) {
                         // best move gains an advantage, 2nd best move loses
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
