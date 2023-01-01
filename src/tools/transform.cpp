@@ -58,6 +58,7 @@ namespace Stockfish::Tools
         int depth = 3;
         int research_count = 0;
         bool keep_moves = true;
+        bool debug_print = false;
 
         void enforce_constraints()
         {
@@ -447,7 +448,7 @@ namespace Stockfish::Tools
             StateInfo si;
             const bool frc = Options["UCI_Chess960"];
 
-            const bool debug_print = false; // true;
+            const bool debug_print = params.debug_print;  // false;
             for (;;)
             {
                 PSVector psv = readsome(5000);
@@ -525,8 +526,8 @@ namespace Stockfish::Tools
                         continue;
                     } else if (th.rootMoves.size() > 1) {
 		      // remove positions with only 1 good move
-		      Score m1_score = th.rootMoves[0].score;
-		      Score m2_score = th.rootMoves[1].score;
+		      Value m1_score = th.rootMoves[0].score;
+		      Value m2_score = th.rootMoves[1].score;
 		      if (abs(m1_score) < 100 && abs(m2_score) > 300) {
                         // if the best move is about equal and 2nd best move is losing
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
@@ -604,6 +605,8 @@ namespace Stockfish::Tools
                 is >> params.keep_moves;
             else if (token == "research_count")
                 is >> params.research_count;
+            else if (token == "debug_print")
+                is >> params.debug_print;
             else
             {
                 std::cout << "ERROR: Unknown option " << token << ". Exiting...\n";
@@ -619,6 +622,7 @@ namespace Stockfish::Tools
         std::cout << "output_file         : " << params.output_filename << '\n';
         std::cout << "keep_moves          : " << params.keep_moves << '\n';
         std::cout << "research_count      : " << params.research_count << '\n';
+        std::cout << "debug_print         : " << params.debug_print << '\n';
         std::cout << '\n';
 
         do_rescore(params);
