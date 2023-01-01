@@ -14,7 +14,7 @@ output_binpack=$test.filtered.binpack
 output_plain=$test.filtered.plain
 
 rm -f $input_binpack $output_binpack
-./stockfish-filter-multipv2-eval-diff convert $input_plain $input_binpack
+./stockfish-filter-multipv2-eval-diff convert $input_plain $input_binpack > /dev/null
 options="
 uci
 setoption name PruneAtShallowDepth value false
@@ -28,10 +28,11 @@ transform rescore \
   input_file ${input_binpack} \
   output_file ${output_binpack}
 quit"
-printf "$options" | ./stockfish-filter-multipv2-eval-diff | grep -v "option name"
+printf "$options" | ./stockfish-filter-multipv2-eval-diff | \
+  grep -v "option name" | grep -v readyok | grep -v uciready
 
 ls -lth $output_binpack
-./stockfish-filter-multipv2-eval-diff convert $output_binpack $output_plain
+./stockfish-filter-multipv2-eval-diff convert $output_binpack $output_plain > /dev/null
 
 diff --color $input_plain $output_plain
 echo
