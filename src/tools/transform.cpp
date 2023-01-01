@@ -495,9 +495,10 @@ namespace Stockfish::Tools
                         continue;
                     }
 
-                    // get a sense of whether the position is quiet
-                    // depth 7, multipv 2
-                    auto [search_val, pvs] = Search::search(pos, 7, 2);
+                    // use multipv search to get a sense of whether the position is tactical or quiet
+                    constexpr int filter_depth = 7;
+                    constexpr int filter_multipv = 2;
+                    auto [search_val, pvs] = Search::search(pos, filter_depth, filter_multipv);
                     if (pvs.empty())
                         continue;
                     if (th.rootMoves.size() == 0)
