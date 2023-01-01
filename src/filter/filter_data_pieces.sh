@@ -11,10 +11,10 @@ setoption name Use NNUE value true
 setoption name Threads value 95
 setoption name Hash value 100000
 isready
-transform rescore
+transform rescore \
   filter_depth 7 filter_multipv 2 \
   input_file ${input_binpack} \
-  output_file ${output_binpack} \
+  output_file ${output_binpack}
 quit"
 
 if [ -f $output_binpack ]; then
