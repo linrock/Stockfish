@@ -515,13 +515,14 @@ namespace Stockfish::Tools
                             sync_cout << "[debug] The only valid move" << sync_endl;
                         }
                     }
-                    if (th.rootMoves.size() > 0 && pos.capture_or_promotion(th.rootMoves[0].pv[0])) {
+                    auto best_move = th.rootMoves[0].pv[0];
+                    if (pos.capture_or_promotion(best_move)) {
                         // skip if multipv 1st line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d7_multipv0.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
-                            sync_cout << "[debug] Move is capture: " << UCI::move(th.rootMoves[0].pv[0], false)
+                            sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
 				      << sync_endl
                                       << "[debug] 1st best move at depth 7 multipv 2" << sync_endl
 				      << "[debug]" << sync_endl;
@@ -533,7 +534,7 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped_d7_multipv1.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
-                            sync_cout << "[debug] Move is capture: " << UCI::move(th.rootMoves[0].pv[0], false)
+                            sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
 				      << sync_endl
                                       << "[debug] 2nd best move at depth 7 multipv 2" << sync_endl
 				      << "[debug]" << sync_endl;
