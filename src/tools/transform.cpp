@@ -520,12 +520,17 @@ namespace Stockfish::Tools
 		      Value m1_score = th.rootMoves[0].score;
 		      Value m2_score = th.rootMoves[1].score;
 		      if (abs(m1_score) < 100 && abs(m2_score) > 300) {
-                        // if the best move is about equal and 2nd best move is losing
+                        // best move is about equal, 2nd best move is losing
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
 		      } else if (abs(m1_score) > 300 && abs(m2_score) < 100) {
-                        // if the best move gains an advantage and 2nd best move equalizes
+                        // best move gains an advantage, 2nd best move equalizes
+                        num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
+                        num_processed.fetch_add(1);
+                        continue;
+		      } else if (abs(m1_score) > 300 && (abs(m2_score) > 300 && ((m1_score > 0) != (m2_score > 0)))) {
+                        // best move gains an advantage, 2nd best move loses
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
