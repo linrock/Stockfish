@@ -10,8 +10,8 @@ for test in ${tests[@]}; do
 echo $test
 input_plain=$test.plain
 input_binpack=$test.binpack
-output_binpack=$test.rescored.binpack
-output_plain=$test.rescored.plain
+output_binpack=$test.filtered.binpack
+output_plain=$test.filtered.plain
 
 rm -f $input_binpack $output_binpack
 ./stockfish-filter-multipv2-eval-diff convert $input_plain $input_binpack
