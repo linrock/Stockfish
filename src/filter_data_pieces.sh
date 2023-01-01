@@ -11,7 +11,7 @@ setoption name Use NNUE value true
 setoption name Threads value 95
 setoption name Hash value 100000
 isready
-transform rescore depth 100 keep_moves 0 input_file ${input_binpack} output_file ${output_binpack}
+transform rescore depth 100 input_file ${input_binpack} output_file ${output_binpack}
 quit"
 
 if [ -f $output_binpack ]; then
