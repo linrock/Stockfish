@@ -54,6 +54,8 @@ namespace Stockfish::Tools
         std::string input_filename = "in.epd";
         std::string output_filename = "out.binpack";
         int depth = 3;
+        int filter_depth = 6;
+        int filter_multipv = 2;
         int research_count = 0;
         bool keep_moves = true;
         bool debug_print = false;
@@ -406,9 +408,6 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_capture_or_promo_skipped = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv0 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv1 = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7 = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d8 = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d9 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv_eval_diff = 0;
         std::atomic<std::uint64_t> num_start_positions = 0;
         std::atomic<std::uint64_t> num_early_plies = 0;
@@ -487,9 +486,7 @@ namespace Stockfish::Tools
                     }
 
                     // use multipv search to get a sense of whether the position is tactical or quiet
-                    constexpr int filter_depth = 7;
-                    constexpr int filter_multipv = 2;
-                    auto [search_val, pvs] = Search::search(pos, filter_depth, filter_multipv);
+                    auto [search_val, pvs] = Search::search(pos, params.filter_depth, params.filter_multipv);
                     if (pvs.empty())
                         continue;
                     if (th.rootMoves.size() == 0)
@@ -615,6 +612,10 @@ namespace Stockfish::Tools
 
             if (token == "depth")
                 is >> params.depth;
+            else if (token == "filter_depth")
+                is >> params.filter_depth;
+            else if (token == "filter_multipv")
+                is >> params.filter_multipv;
             else if (token == "input_file")
                 is >> params.input_filename;
             else if (token == "output_file")
@@ -636,6 +637,8 @@ namespace Stockfish::Tools
 
         std::cout << "Performing transform rescore with parameters:\n";
         std::cout << "depth               : " << params.depth << '\n';
+        std::cout << "filter_depth        : " << params.filter_depth << '\n';
+        std::cout << "filter_multipv      : " << params.filter_multipv << '\n';
         std::cout << "input_file          : " << params.input_filename << '\n';
         std::cout << "output_file         : " << params.output_filename << '\n';
         std::cout << "keep_moves          : " << params.keep_moves << '\n';

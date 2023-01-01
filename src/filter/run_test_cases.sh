@@ -22,7 +22,11 @@ setoption name Use NNUE value true
 setoption name Threads value 1
 setoption name Hash value 8
 isready
-transform rescore depth 100 debug_print 1 input_file ${input_binpack} output_file ${output_binpack}
+transform rescore \
+  filter_depth 7 filter_multipv 2 \
+  debug_print 1 \
+  input_file ${input_binpack} \
+  output_file ${output_binpack}
 quit"
 printf "$options" | ./stockfish-filter-multipv2-eval-diff | grep -v "option name"
 
