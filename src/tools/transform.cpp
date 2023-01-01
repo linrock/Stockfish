@@ -435,10 +435,12 @@ namespace Stockfish::Tools
                 auto multipv_eval_diff = num_capture_or_promo_skipped_d7_multipv_eval_diff.load();
 
                 sync_cout << "Processed " << p << " positions. Skipped " << (s+st+ep) << " positions." << sync_endl
-                          << "  Static filter: " << (a+c+st+ep) << " (in check: " << c << ", capture: " << a << ")" << sync_endl
-			  << "    " << "(start pos: " << st << ", " << "early ply: " << ep << ")" << sync_endl
-                          << "  MultiPV filter: " << (multipv_cap0+multipv_cap1) << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1
-                          << ", eval diff: " << multipv_eval_diff << ") depth 7" << sync_endl;
+                          << "  Static filter: " << (a+c+st+ep)
+                          << " (capture: " << a << ", in check: " << c << ", start pos: " << st << ", " << "early ply: " << ep << ")"
+                          << sync_endl
+                          << "  MultiPV filter: " << (multipv_cap0+multipv_cap1)
+                          << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ", eval diff: " << multipv_eval_diff << ")"
+                          << " depth " << params.filter_depth << sync_endl;
             }
         };
 
@@ -544,21 +546,30 @@ namespace Stockfish::Tools
                       Value m1_score = th.rootMoves[0].score;
                       Value m2_score = th.rootMoves[1].score;
                       if (abs(m1_score) < 100 && abs(m2_score) > 300) {
-                        sync_cout << "[debug] best move is about equal, 2nd best move is losing" << sync_endl
-                                  << "[debug]" << sync_endl;
+                        if (debug_print) {
+                            sync_cout << "[debug] best move is about equal, 2nd best move is losing"
+                                      << sync_endl
+                                      << "[debug]" << sync_endl;
+                        }
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
                       } else if (abs(m1_score) > 300 && abs(m2_score) < 100) {
-                        sync_cout << "[debug] best move gains advantage, 2nd best move equalizes" << sync_endl
-                                  << "[debug]" << sync_endl;
+                        if (debug_print) {
+                            sync_cout << "[debug] best move gains advantage, 2nd best move equalizes"
+                                      << sync_endl
+                                      << "[debug]" << sync_endl;
+                        }
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
                       } else if (abs(m1_score) > 300 &&
                                  (abs(m2_score) > 300 && ((m1_score > 0) != (m2_score > 0)))) {
-                        sync_cout << "[debug] best move gains an advantage, 2nd best move loses " << sync_endl
-                                  << "[debug]" << sync_endl;
+                        if (debug_print) {
+                            sync_cout << "[debug] best move gains an advantage, 2nd best move loses "
+                                      << sync_endl
+                                      << "[debug]" << sync_endl;
+                        }
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
