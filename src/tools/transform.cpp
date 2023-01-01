@@ -524,6 +524,7 @@ namespace Stockfish::Tools
                         }
                         continue;
                     } else if (th.rootMoves.size() > 1) {
+		      // remove positions with only 1 good move
 		      Score m1_score = th.rootMoves[0].score;
 		      Score m2_score = th.rootMoves[1].score;
 		      if (abs(m1_score) < 100 && abs(m2_score) > 300) {
@@ -539,65 +540,18 @@ namespace Stockfish::Tools
 		      }
                     }
 
-/*
-                    auto [search_value7, search_pv7] = Search::search(pos, 7, 1);
-                    if (search_pv7.empty())
-                        continue;
-                    // std::cout << "d7 Move " << search_pv7[0] << std::endl;
-                    if (pos.capture_or_promotion(search_pv7[0])) {
-                        // don't save positions where capture or promo at depth 7
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_d7.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        if (debug_print) {
-                            sync_cout << " - Move: " << UCI::move(search_pv7[0], false)
-                                      << " is capture. Found at depth 7. Fen: " << pos.fen() << sync_endl;
-                        }
-                        continue;
-                    }
-
-                    auto [search_value8, search_pv8] = Search::search(pos, 8, 1);
-                    if (search_pv8.empty())
-                        continue;
-                    // std::cout << "d8 Move " << search_pv8[0] << std::endl;
-                    if (pos.capture_or_promotion(search_pv8[0])) {
-                        // don't save positions where capture or promo at depth 8
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_d8.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        if (debug_print) {
-                            sync_cout << " - Move: " << UCI::move(search_pv8[0], false)
-                                      << " is capture. Found at depth 8. Fen: " << pos.fen() << sync_endl;
-                        }
-                        continue;
-                    }
-                    auto [search_value9, search_pv9] = Search::search(pos, 9, 1);
-                    if (search_pv9.empty())
-                        continue;
-                    // std::cout << "d9 Move " << search_pv9[0] << std::endl;
-                    if (pos.capture_or_promotion(search_pv9[0])) {
-                        // don't save positions where capture or promo at depth 9
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_d9.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        if (debug_print) {
-                            sync_cout << " - Move: " << UCI::move(search_pv9[0], false)
-                                      << " is capture. Found at depth 9. Fen: " << pos.fen() << sync_endl;
-                        }
-                        continue;
-                    }
-*/
                     // only write the position if:
                     // - position is not in check
                     // - the provided move was not a capture
-                    // - bestmove at depths 7,8,9 are not captures
+                    // - neither bestmove at depth7 multipv2 search is a capture
+                    // - only one good move according to depth7 multipv2 search
                     pos.sfen_pack(ps.sfen, false);
 
-                    // Don't change the score, which is expected to be at least depth 9 already
+                    // Don't change the score
                     // ps.score = search_value9;
 
                     // if (!params.keep_moves)
-                    // Don't change the score, which is expected to be at least depth 9 bestmove already
+                    // Don't change the move
                     // ps.move = search_pv9[0];
                     ps.padding = 0;
 
