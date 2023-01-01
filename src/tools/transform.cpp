@@ -410,6 +410,7 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d9 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv_eval_diff = 0;
         std::atomic<std::uint64_t> num_start_positions = 0;
+        std::atomic<std::uint64_t> num_early_plies = 0;
 
         auto print_stats = [&]() {
             auto p = num_processed.load();
@@ -418,20 +419,17 @@ namespace Stockfish::Tools
                 auto a = num_move_already_is_capture.load();
                 auto c = num_position_in_check.load();
                 auto st = num_start_positions.load();
-                // auto sd7 = num_capture_or_promo_skipped_d7.load();
-                // auto sd8 = num_capture_or_promo_skipped_d8.load();
-                // auto sd9 = num_capture_or_promo_skipped_d9.load();
+                auto ep = num_early_plies.load();
 
                 auto multipv_cap0 = num_capture_or_promo_skipped_d7_multipv0.load();
                 auto multipv_cap1 = num_capture_or_promo_skipped_d7_multipv1.load();
                 auto multipv_eval_diff = num_capture_or_promo_skipped_d7_multipv_eval_diff.load();
 
-                sync_cout << "Processed " << p << " positions. Skipped " << (s+st) << " positions." << sync_endl
-                          << "  Static filter: " << (c+a+st) << " (in check: " << c << ", capture: " << a << ", start pos: " << st << ")" << sync_endl
+                sync_cout << "Processed " << p << " positions. Skipped " << (s+st+ep) << " positions." << sync_endl
+                          << "  Static filter: " << (a+c+st+ep) << " (in check: " << c << ", capture: " << a << ")" << sync_endl
+			  << "    " << "(start pos: " << st << ", " << "early ply: " << ep << ")" << sync_endl
                           << "  MultiPV filter: " << (multipv_cap0+multipv_cap1) << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1
-                          << ", eval diff: " << multipv_eval_diff << ") depth 6" << sync_endl;
-                          // << "  Depth filter: (d9: " << sd9 << ")" << sync_endl
-                          // << sync_endl;
+                          << ", eval diff: " << multipv_eval_diff << ") depth 7" << sync_endl;
             }
         };
 
@@ -473,15 +471,18 @@ namespace Stockfish::Tools
                         num_processed.fetch_add(1);
                         continue;
                     } else if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
-                        // sync_cout << " Skipping start position" << sync_endl;
                         num_start_positions.fetch_add(1);
+                        num_processed.fetch_add(1);
+                        continue;
+                    } else if (pos.game_ply() <= 20) {
+                        num_early_plies.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
                     }
 
                     // get a sense of whether the position is quiet
-                    // depth 6, multipv 2
-                    auto [search_val, pvs] = Search::search(pos, 6, 2);
+                    // depth 7, multipv 2
+                    auto [search_val, pvs] = Search::search(pos, 7, 2);
                     if (pvs.empty())
                         continue;
                     if (debug_print) {
@@ -493,7 +494,7 @@ namespace Stockfish::Tools
                                                         << th.rootMoves[1].score << " " << sync_endl;
                         }
                     }
-                    if (pos.capture_or_promotion(th.rootMoves[0].pv[0])) {
+                    if (th.rootMoves.size() > 0 && pos.capture_or_promotion(th.rootMoves[0].pv[0])) {
                         // skip if multipv 1st line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_d7_multipv0.fetch_add(1);
@@ -513,19 +514,21 @@ namespace Stockfish::Tools
                                       << " is capture. 2nd move. Found at depth 6 multipv 2. Fen: " << pos.fen() << sync_endl;
                         }
                         continue;
-                    }
-                    /* else if (th.rootMoves.size() > 1 &&
-                               (abs(th.rootMoves[0].score) > 400 && abs(th.rootMoves[0].score - th.rootMoves[1].score) > 200)) {
-                        // skip if large eval difference between the two multipv bestmove score
-                        num_capture_or_promo_skipped.fetch_add(1);
+                    } else if (th.rootMoves.size() > 1) {
+		      Score m1_score = th.rootMoves[0].score;
+		      Score m2_score = th.rootMoves[1].score;
+		      if (abs(m1_score) < 100 && abs(m2_score) > 300) {
+                        // if the best move is about equal and 2nd best move is losing
                         num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
                         num_processed.fetch_add(1);
-                        if (debug_print) {
-                            sync_cout << " - Multipv score diff is large! Throwing position away" << sync_endl;
-                        }
-                        // continue;
+                        continue;
+		      } else if (abs(m1_score) > 300 && abs(m2_score) < 100) {
+                        // if the best move gains an advantage and 2nd best move equalizes
+                        num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
+                        num_processed.fetch_add(1);
+                        continue;
+		      }
                     }
-                    */
 
 /*
                     auto [search_value7, search_pv7] = Search::search(pos, 7, 1);
