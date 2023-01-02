@@ -1,4 +1,5 @@
 *.binpack
 data-pieces-*/*
 stockfish*
+test80*
 *.swp
