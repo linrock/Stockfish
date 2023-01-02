@@ -46,3 +46,9 @@ move a4a5
 ply 100
 result 0
 e
+fen 8/8/4k1p1/p1p2p2/P1P2K1P/1P5P/8/8 b - - 0 44
+score 0
+move e6d7
+ply 100
+result 0
+e
