@@ -3,7 +3,7 @@
 tests=(
   test.remove-captures
   test.remove-in-check
-  test.one-good-move
+  test.remove-one-good-move
 )
 for test in ${tests[@]}; do
 
