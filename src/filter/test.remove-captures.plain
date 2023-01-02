@@ -34,3 +34,15 @@ score 111
 ply 100
 result 0
 e
+fen 8/ppp4k/6pp/7n/1P1P4/3r3P/2P1R1K1/8 w - - 0 39
+score 0
+move g2h1
+ply 100
+result 0
+e
+fen 8/ppp4k/6pp/7n/1P1P4/3r3P/2P1R1K1/8 w - - 0 39
+score 0
+move g2h1
+ply 100
+result 0
+e
