@@ -16,3 +16,21 @@ move g1h1
 ply 100
 result 0
 e
+fen 8/4k1pp/2R5/pP1P1p2/K7/2P1q1P1/7P/8 w - - 0 51
+score 0
+move a4a3
+ply 100
+result 0
+e
+fen 2k2r2/1pp2Pp1/1p6/2q3rp/6n1/2P5/PP2QPPP/R4RK1 w - - 1 19
+score 0
+move e2e1
+ply 100
+result 0
+e
+fen 8/2p2Npk/7p/2R5/1P6/7P/5nPK/1r6 b - - 2 36
+score 0
+move b1a1
+ply 100
+result 0
+e
