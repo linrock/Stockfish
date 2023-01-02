@@ -490,7 +490,7 @@ namespace Stockfish::Tools
                         num_start_positions.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
-                    } else if (pos.game_ply() <= 20) {
+                    } else if (pos.game_ply() <= 24) {
                         num_early_plies.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
