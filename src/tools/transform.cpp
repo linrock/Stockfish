@@ -545,7 +545,7 @@ namespace Stockfish::Tools
                       // remove positions with only 1 good move
                       Value m1_score = th.rootMoves[0].score;
                       Value m2_score = th.rootMoves[1].score;
-                      if (abs(m1_score) < 100 && abs(m2_score) > 300) {
+                      if (abs(m1_score) < 110 && abs(m2_score) > 290) {
                         if (debug_print) {
                             sync_cout << "[debug] best move is about equal, 2nd best move is losing"
                                       << sync_endl
