@@ -417,7 +417,7 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_capture_or_promo_skipped = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv0 = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv1 = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv_eval_diff = 0;
+        std::atomic<std::uint64_t> num_one_good_move_skipped = 0;
         std::atomic<std::uint64_t> num_start_positions = 0;
         std::atomic<std::uint64_t> num_early_plies = 0;
 
@@ -432,14 +432,14 @@ namespace Stockfish::Tools
 
                 auto multipv_cap0 = num_capture_or_promo_skipped_d7_multipv0.load();
                 auto multipv_cap1 = num_capture_or_promo_skipped_d7_multipv1.load();
-                auto multipv_eval_diff = num_capture_or_promo_skipped_d7_multipv_eval_diff.load();
+                auto multipv_one_good_move = num_one_good_move_skipped.load();
 
-                sync_cout << "Processed " << p << " positions. Skipped " << (s+st+ep) << " positions." << sync_endl
+                sync_cout << "Processed " << p << " positions. Skipped " << (s+st+ep+multipv_one_good_move) << " positions." << sync_endl
                           << "  Static filter: " << (a+c+st+ep)
                           << " (capture: " << a << ", in check: " << c << ", start pos: " << st << ", " << "early ply: " << ep << ")"
                           << sync_endl
-                          << "  MultiPV filter: " << (multipv_cap0+multipv_cap1)
-                          << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ", eval diff: " << multipv_eval_diff << ")"
+                          << "  MultiPV filter: " << (multipv_cap0+multipv_cap1+multipv_one_good_move)
+                          << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ", eval diff: " << multipv_one_good_move << ")"
                           << " depth " << params.filter_depth << sync_endl;
             }
         };
@@ -551,7 +551,7 @@ namespace Stockfish::Tools
                                       << sync_endl
                                       << "[debug]" << sync_endl;
                         }
-                        num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
+                        num_one_good_move_skipped.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
                       } else if (abs(m1_score) > 300 && abs(m2_score) < 100) {
@@ -560,7 +560,7 @@ namespace Stockfish::Tools
                                       << sync_endl
                                       << "[debug]" << sync_endl;
                         }
-                        num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
+                        num_one_good_move_skipped.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
                       } else if (abs(m1_score) > 300 &&
@@ -570,7 +570,7 @@ namespace Stockfish::Tools
                                       << sync_endl
                                       << "[debug]" << sync_endl;
                         }
-                        num_capture_or_promo_skipped_d7_multipv_eval_diff.fetch_add(1);
+                        num_one_good_move_skipped.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
                       }
