@@ -33,6 +33,7 @@ printf "$options" | ./stockfish-filter-multipv2-eval-diff | \
 
 ls -lth $output_binpack
 ./stockfish-filter-multipv2-eval-diff convert $output_binpack $output_plain > /dev/null
+rm test.*.binpack
 
 diff --color $input_plain $output_plain
 echo
