@@ -54,11 +54,8 @@ namespace Stockfish::Tools
         std::string input_filename = "in.epd";
         std::string output_filename = "out.binpack";
         int depth = 3;
-        int filter_depth = 6;
-        int filter_multipv = 2;
         int research_count = 0;
         bool keep_moves = true;
-        bool debug_print = false;
 
         void enforce_constraints()
         {
@@ -416,45 +413,13 @@ namespace Stockfish::Tools
         // depth is also processed by the one passed as an argument of Tools::search().
         limits.depth = 0;
 
-        std::atomic<std::uint64_t> num_processed = 0;
-        std::atomic<std::uint64_t> num_position_in_check = 0;
-        std::atomic<std::uint64_t> num_move_already_is_capture = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap0 = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap1 = 0;
-        std::atomic<std::uint64_t> num_one_good_move_skipped = 0;
-        std::atomic<std::uint64_t> num_start_positions = 0;
-        std::atomic<std::uint64_t> num_early_plies = 0;
-
-        auto print_stats = [&]() {
-            auto p = num_processed.load();
-            if (p % 10000 == 0) {
-                auto s = num_capture_or_promo_skipped.load();
-                auto a = num_move_already_is_capture.load();
-                auto c = num_position_in_check.load();
-                auto st = num_start_positions.load();
-                auto ep = num_early_plies.load();
-
-                auto multipv_cap0 = num_capture_or_promo_skipped_multipv_cap0.load();
-                auto multipv_cap1 = num_capture_or_promo_skipped_multipv_cap1.load();
-                auto multipv_one_good_move = num_one_good_move_skipped.load();
-
-                sync_cout << "Processed " << p << " positions. Skipped " << (s+st+ep+multipv_one_good_move) << " positions." << sync_endl
-                          << "  Static filter: " << (a+c+st+ep)
-                          << " (capture: " << a << ", in check: " << c << ", start pos: " << st << ", " << "early ply: " << ep << ")"
-                          << sync_endl
-                          << "  MultiPV filter: " << (multipv_cap0+multipv_cap1+multipv_one_good_move)
-                          << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ", eval diff: " << multipv_one_good_move << ")"
-                          << " depth " << params.filter_depth << sync_endl;
-            }
-        };
+	std::atomic<std::uint64_t> num_processed = 0;
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
             StateInfo si;
             const bool frc = Options["UCI_Chess960"];
 
-            const bool debug_print = params.debug_print;  // false;
             for (;;)
             {
                 PSVector psv = readsome(5000);
@@ -464,141 +429,28 @@ namespace Stockfish::Tools
                 for(auto& ps : psv)
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
-                    // sync_cout << pos.fen() << sync_endl;
 
-                    print_stats();
-                    if (pos.checkers()) {
-                        // Skip if in check
-                        if (debug_print) {
-                            sync_cout << "[debug] " << pos.fen() << sync_endl
-                                      << "[debug] Position is in check" << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_position_in_check.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                      } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
-                        // Skip if the written move is already a capture or promotion
-                        if (debug_print) {
-                            sync_cout << "[debug] " << pos.fen() << sync_endl
-                                      << "[debug] Provided move is capture: "
-                                      << UCI::move((Stockfish::Move)ps.move, false)
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_move_already_is_capture.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                    } else if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
-                        num_start_positions.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                    } else if (pos.game_ply() <= 24) {
-                        num_early_plies.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                    }
+                    for (int cnt = 0; cnt < params.research_count; ++cnt)
+                        Search::search(pos, params.depth, 1);
 
-                    // use multipv search to get a sense of whether the position is tactical or quiet
-                    auto [search_val, pvs] = Search::search(pos, params.filter_depth, params.filter_multipv);
-                    if (pvs.empty())
-                        continue;
-                    if (th.rootMoves.size() == 0)
-                        continue;
-                    if (debug_print) {
-                        sync_cout << "[debug] " << pos.fen() << sync_endl;
-                        sync_cout << "[debug] Main PV move:    "
-                                  << UCI::move(th.rootMoves[0].pv[0], false) << " "
-                                  << th.rootMoves[0].score << " " << sync_endl;
-                        if (th.rootMoves.size() > 1) {
-                            sync_cout << "[debug] 2nd PV move:     "
-                                      << UCI::move(th.rootMoves[1].pv[0], false) << " "
-                                      << th.rootMoves[1].score << " " << sync_endl;
-                        } else {
-                            sync_cout << "[debug] The only valid move" << sync_endl;
-                        }
-                    }
-                    auto best_move = th.rootMoves[0].pv[0];
-                    bool more_than_one_valid_move = th.rootMoves.size() > 1;
-                    if (pos.capture_or_promotion(best_move)) {
-                        // skip if multipv 1st line bestmove is a capture or promo
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_multipv_cap0.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        if (debug_print) {
-                            sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
-                                      << sync_endl
-                                      << "[debug] 1st best move at depth 7 multipv 2" << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        continue;
-                    } else if (more_than_one_valid_move && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
-                        // skip if multipv 2nd line bestmove is a capture or promo
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_multipv_cap1.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        if (debug_print) {
-                            sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
-                                      << sync_endl
-                                      << "[debug] 2nd best move at depth 7 multipv 2" << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        continue;
-                    } else if (more_than_one_valid_move) {
-                      // remove positions with only 1 good move
-                      Value m1_score = th.rootMoves[0].score;
-                      Value m2_score = th.rootMoves[1].score;
-                      if (abs(m1_score) < 110 && abs(m2_score) > 290) {
-                        if (debug_print) {
-                            sync_cout << "[debug] best move is about equal, 2nd best move is losing"
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_one_good_move_skipped.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                      } else if (abs(m1_score) > 300 && abs(m2_score) < 100) {
-                        if (debug_print) {
-                            sync_cout << "[debug] best move gains advantage, 2nd best move equalizes"
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_one_good_move_skipped.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                      } else if (abs(m1_score) > 300 &&
-                                 (abs(m2_score) > 300 && ((m1_score > 0) != (m2_score > 0)))) {
-                        if (debug_print) {
-                            sync_cout << "[debug] best move gains an advantage, 2nd best move loses "
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_one_good_move_skipped.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                      }
-                    }
+                    auto [search_value, search_pv] = Search::search(pos, params.depth, 1);
 
-                    // only write the position if:
-                    // - position is not in check
-                    // - the provided move was not a capture
-                    // - neither bestmove at depth7 multipv2 search is a capture
-                    // - only one good move according to depth7 multipv2 search
+                    if (search_pv.empty())
+                        continue;
+
                     pos.sfen_pack(ps.sfen, false);
-
-                    // Don't change the score
-                    // ps.score = search_value9;
-
-                    // if (!params.keep_moves)
-                    // Don't change the move
-                    // ps.move = search_pv9[0];
+                    ps.score = search_value;
+                    if (!params.keep_moves)
+                        ps.move = search_pv[0];
                     ps.padding = 0;
 
                     out.write(th.id(), ps);
 
-                    num_processed.fetch_add(1);
+                    auto p = num_processed.fetch_add(1) + 1;
+                    if (p % 10000 == 0)
+                    {
+                        std::cout << "Processed " << p << " positions.\n";
+                    }
                 }
             }
         });
@@ -637,10 +489,6 @@ namespace Stockfish::Tools
 
             if (token == "depth")
                 is >> params.depth;
-            else if (token == "filter_depth")
-                is >> params.filter_depth;
-            else if (token == "filter_multipv")
-                is >> params.filter_multipv;
             else if (token == "input_file")
                 is >> params.input_filename;
             else if (token == "output_file")
@@ -649,8 +497,6 @@ namespace Stockfish::Tools
                 is >> params.keep_moves;
             else if (token == "research_count")
                 is >> params.research_count;
-            else if (token == "debug_print")
-                is >> params.debug_print;
             else
             {
                 std::cout << "ERROR: Unknown option " << token << ". Exiting...\n";
@@ -660,12 +506,12 @@ namespace Stockfish::Tools
 
         params.enforce_constraints();
 
-        std::cout << "Performing transform filter with parameters:\n";
-        std::cout << "filter_depth        : " << params.filter_depth << '\n';
-        std::cout << "filter_multipv      : " << params.filter_multipv << '\n';
+        std::cout << "Performing transform rescore with parameters:\n";
+        std::cout << "depth               : " << params.depth << '\n';
         std::cout << "input_file          : " << params.input_filename << '\n';
         std::cout << "output_file         : " << params.output_filename << '\n';
-        std::cout << "debug_print         : " << params.debug_print << '\n';
+        std::cout << "keep_moves          : " << params.keep_moves << '\n';
+        std::cout << "research_count      : " << params.research_count << '\n';
         std::cout << '\n';
 
         do_rescore(params);
@@ -920,7 +766,6 @@ namespace Stockfish::Tools
 
         std::cout << "Finished.\n";
     }
-
 
     void do_filter(FilterParams& params)
     {
