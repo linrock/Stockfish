@@ -22,7 +22,7 @@ setoption name Use NNUE value true
 setoption name Threads value 1
 setoption name Hash value 8
 isready
-transform rescore \
+transform filter \
   filter_depth 7 filter_multipv 2 \
   debug_print 1 \
   input_file ${input_binpack} \

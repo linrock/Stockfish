@@ -77,9 +77,9 @@ namespace Stockfish::Tools
 
         void enforce_constraints()
         {
-            depth = std::max(1, depth);
+            filter_depth = std::max(1, filter_depth);
         }
-    }
+    };
 
     [[nodiscard]] std::int16_t nudge(NudgedStaticParams& params, std::int16_t static_eval_i16, std::int16_t deep_eval_i16)
     {
@@ -420,8 +420,8 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_position_in_check = 0;
         std::atomic<std::uint64_t> num_move_already_is_capture = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv0 = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv1 = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap0 = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap1 = 0;
         std::atomic<std::uint64_t> num_one_good_move_skipped = 0;
         std::atomic<std::uint64_t> num_start_positions = 0;
         std::atomic<std::uint64_t> num_early_plies = 0;
@@ -435,8 +435,8 @@ namespace Stockfish::Tools
                 auto st = num_start_positions.load();
                 auto ep = num_early_plies.load();
 
-                auto multipv_cap0 = num_capture_or_promo_skipped_d7_multipv0.load();
-                auto multipv_cap1 = num_capture_or_promo_skipped_d7_multipv1.load();
+                auto multipv_cap0 = num_capture_or_promo_skipped_multipv_cap0.load();
+                auto multipv_cap1 = num_capture_or_promo_skipped_multipv_cap1.load();
                 auto multipv_one_good_move = num_one_good_move_skipped.load();
 
                 sync_cout << "Processed " << p << " positions. Skipped " << (s+st+ep+multipv_one_good_move) << " positions." << sync_endl
@@ -525,7 +525,7 @@ namespace Stockfish::Tools
                     if (pos.capture_or_promotion(best_move)) {
                         // skip if multipv 1st line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_d7_multipv0.fetch_add(1);
+                        num_capture_or_promo_skipped_multipv_cap0.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
@@ -537,7 +537,7 @@ namespace Stockfish::Tools
                     } else if (more_than_one_valid_move && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
                         // skip if multipv 2nd line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_d7_multipv1.fetch_add(1);
+                        num_capture_or_promo_skipped_multipv_cap1.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
@@ -726,8 +726,8 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_position_in_check = 0;
         std::atomic<std::uint64_t> num_move_already_is_capture = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv0 = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_d7_multipv1 = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap0 = 0;
+        std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap1 = 0;
         std::atomic<std::uint64_t> num_one_good_move_skipped = 0;
         std::atomic<std::uint64_t> num_start_positions = 0;
         std::atomic<std::uint64_t> num_early_plies = 0;
@@ -741,8 +741,8 @@ namespace Stockfish::Tools
                 auto st = num_start_positions.load();
                 auto ep = num_early_plies.load();
 
-                auto multipv_cap0 = num_capture_or_promo_skipped_d7_multipv0.load();
-                auto multipv_cap1 = num_capture_or_promo_skipped_d7_multipv1.load();
+                auto multipv_cap0 = num_capture_or_promo_skipped_multipv_cap0.load();
+                auto multipv_cap1 = num_capture_or_promo_skipped_multipv_cap1.load();
                 auto multipv_one_good_move = num_one_good_move_skipped.load();
 
                 sync_cout << "Processed " << p << " positions. Skipped " << (s+st+ep+multipv_one_good_move) << " positions." << sync_endl
@@ -831,7 +831,7 @@ namespace Stockfish::Tools
                     if (pos.capture_or_promotion(best_move)) {
                         // skip if multipv 1st line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_d7_multipv0.fetch_add(1);
+                        num_capture_or_promo_skipped_multipv_cap0.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
@@ -843,7 +843,7 @@ namespace Stockfish::Tools
                     } else if (more_than_one_valid_move && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
                         // skip if multipv 2nd line bestmove is a capture or promo
                         num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_d7_multipv1.fetch_add(1);
+                        num_capture_or_promo_skipped_multipv_cap1.fetch_add(1);
                         num_processed.fetch_add(1);
                         if (debug_print) {
                             sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
@@ -894,7 +894,7 @@ namespace Stockfish::Tools
                     // - only one good move according to depth7 multipv2 search
                     pos.sfen_pack(ps.sfen, false);
 
-                    // Don't change the score
+                    // TODO set score to VALUE_NONE 32002 if skipping
                     // ps.score = search_value9;
 
                     // if (!params.keep_moves)

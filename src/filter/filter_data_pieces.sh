@@ -1,7 +1,7 @@
 #!/bin/bash
 
-for input_binpack in $(ls -1 ./test80-nov2022-12tb7p/*.binpack); do
-output_binpack=./test80-nov2022-12tb7p-d7pv2-filtered/$(basename $input_binpack).filtered.binpack
+for input_binpack in $(ls -1 ./leela99gb-data-pieces/*.binpack); do
+output_binpack=./filtered/$(basename $input_binpack).filtered.binpack
 echo $input_binpack
 echo $output_binpack
 options="
@@ -11,7 +11,7 @@ setoption name Use NNUE value true
 setoption name Threads value 95
 setoption name Hash value 100000
 isready
-transform rescore \
+transform filter \
   filter_depth 6 filter_multipv 2 \
   input_file ${input_binpack} \
   output_file ${output_binpack}
