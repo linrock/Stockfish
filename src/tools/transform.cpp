@@ -770,6 +770,7 @@ namespace Stockfish::Tools
                 for(auto& ps : psv)
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
+                    bool should_skip_position = false;
                     // sync_cout << pos.fen() << sync_endl;
 
                     print_stats();
@@ -783,6 +784,7 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_position_in_check.fetch_add(1);
                         num_processed.fetch_add(1);
+                        should_skip_position = true;
                         continue;
                       } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
                         // Skip if the written move is already a capture or promotion
@@ -796,14 +798,17 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_move_already_is_capture.fetch_add(1);
                         num_processed.fetch_add(1);
+                        should_skip_position = true;
                         continue;
                     } else if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
                         num_start_positions.fetch_add(1);
                         num_processed.fetch_add(1);
+                        should_skip_position = true;
                         continue;
                     } else if (pos.game_ply() <= 24) {
                         num_early_plies.fetch_add(1);
                         num_processed.fetch_add(1);
+                        should_skip_position = true;
                         continue;
                     }
 
@@ -833,6 +838,7 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_multipv_cap0.fetch_add(1);
                         num_processed.fetch_add(1);
+                        should_skip_position = true;
                         if (debug_print) {
                             sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
                                       << sync_endl
@@ -845,6 +851,7 @@ namespace Stockfish::Tools
                         num_capture_or_promo_skipped.fetch_add(1);
                         num_capture_or_promo_skipped_multipv_cap1.fetch_add(1);
                         num_processed.fetch_add(1);
+                        should_skip_position = true;
                         if (debug_print) {
                             sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
                                       << sync_endl
@@ -864,6 +871,7 @@ namespace Stockfish::Tools
                         }
                         num_one_good_move_skipped.fetch_add(1);
                         num_processed.fetch_add(1);
+                        should_skip_position = true;
                         continue;
                       } else if (abs(m1_score) > 300 && abs(m2_score) < 100) {
                         if (debug_print) {
@@ -873,6 +881,7 @@ namespace Stockfish::Tools
                         }
                         num_one_good_move_skipped.fetch_add(1);
                         num_processed.fetch_add(1);
+                        should_skip_position = true;
                         continue;
                       } else if (abs(m1_score) > 300 &&
                                  (abs(m2_score) > 300 && ((m1_score > 0) != (m2_score > 0)))) {
@@ -883,6 +892,7 @@ namespace Stockfish::Tools
                         }
                         num_one_good_move_skipped.fetch_add(1);
                         num_processed.fetch_add(1);
+                        should_skip_position = true;
                         continue;
                       }
                     }
@@ -894,12 +904,10 @@ namespace Stockfish::Tools
                     // - only one good move according to depth7 multipv2 search
                     pos.sfen_pack(ps.sfen, false);
 
-                    // TODO set score to VALUE_NONE 32002 if skipping
-                    // ps.score = search_value9;
+                    // nnue-pytorch training_data_loader skips positions with score VALUE_NONE
+                    if (should_skip_position)
+                        ps.score = 32002; // VALUE_NONE
 
-                    // if (!params.keep_moves)
-                    // Don't change the move
-                    // ps.move = search_pv9[0];
                     ps.padding = 0;
 
                     out.write(th.id(), ps);
