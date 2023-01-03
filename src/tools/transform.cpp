@@ -10,7 +10,6 @@
 #include "search.h"
 
 #include "nnue/evaluate_nnue.h"
-#include "../extra/nnue_data_binpack_format.h"
 
 #include <string>
 #include <map>
@@ -178,7 +177,7 @@ namespace Stockfish::Tools
                 out->write(buffer);
                 buffer.clear();
 
-                std::cout << "Processed " << num_processed << " positions. whoa\n";
+                std::cout << "Processed " << num_processed << " positions.\n";
             }
         }
 
@@ -189,7 +188,7 @@ namespace Stockfish::Tools
             out->write(buffer);
             buffer.clear();
 
-            std::cout << "Processed " << num_processed << " positions. nice\n";
+            std::cout << "Processed " << num_processed << " positions.\n";
         }
 
         std::cout << "Finished.\n";
