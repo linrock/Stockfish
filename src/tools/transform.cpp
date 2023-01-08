@@ -545,7 +545,7 @@ namespace Stockfish::Tools
                       // remove positions with only 1 good move
                       Value m1_score = th.rootMoves[0].score;
                       Value m2_score = th.rootMoves[1].score;
-                      if (abs(m1_score) < 110 && abs(m2_score) > 290) {
+                      if (abs(m1_score) < 110 && abs(m2_score) > 200) {
                         if (debug_print) {
                             sync_cout << "[debug] best move is about equal, 2nd best move is losing"
                                       << sync_endl
@@ -554,7 +554,7 @@ namespace Stockfish::Tools
                         num_one_good_move_skipped.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
-                      } else if (abs(m1_score) > 300 && abs(m2_score) < 100) {
+                      } else if (abs(m1_score) > 200 && abs(m2_score) < 110) {
                         if (debug_print) {
                             sync_cout << "[debug] best move gains advantage, 2nd best move equalizes"
                                       << sync_endl
@@ -563,8 +563,8 @@ namespace Stockfish::Tools
                         num_one_good_move_skipped.fetch_add(1);
                         num_processed.fetch_add(1);
                         continue;
-                      } else if (abs(m1_score) > 300 &&
-                                 (abs(m2_score) > 300 && ((m1_score > 0) != (m2_score > 0)))) {
+                      } else if (abs(m1_score) > 200 &&
+                                 (abs(m2_score) > 200 && ((m1_score > 0) != (m2_score > 0)))) {
                         if (debug_print) {
                             sync_cout << "[debug] best move gains an advantage, 2nd best move loses "
                                       << sync_endl
