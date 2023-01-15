@@ -436,7 +436,7 @@ namespace Stockfish::Tools
 
                 sync_cout << "Processed " << p << " positions. Skipped " << (s+st+ep+multipv_one_good_move) << " positions." << sync_endl
                           << "  Static filter: " << (a+c+st+ep)
-                          << " (capture: " << a << ", in check: " << c << ", start pos: " << st << ", " << "early ply: " << ep << ")"
+                          << " (capture: " << a << ", in check: " << c << ", start pos: " << st << ", " << "early ply <= 28: " << ep << ")"
                           << sync_endl
                           << "  MultiPV filter: " << (multipv_cap0+multipv_cap1+multipv_one_good_move)
                           << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ", eval diff: " << multipv_one_good_move << ")"
