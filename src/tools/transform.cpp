@@ -561,6 +561,7 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
+        std::atomic<std::uint64_t> num_standard_startpos = 0;
         std::atomic<std::uint64_t> num_position_in_check = 0;
         std::atomic<std::uint64_t> num_move_already_is_capture = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap0 = 0;
@@ -601,6 +602,9 @@ namespace Stockfish::Tools
                                       << "[debug]" << sync_endl;
                         }
                         num_move_already_is_capture.fetch_add(1);
+                        should_skip_position = true;
+		    } else if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
+                        num_standard_startpos.fetch_add(1);
                         should_skip_position = true;
                     } else {
                         auto [search_val, pvs] = Search::search(pos, 6, 2);
@@ -655,12 +659,13 @@ namespace Stockfish::Tools
                     if (p % 10000 == 0) {
                         auto c = num_position_in_check.load();
                         auto a = num_move_already_is_capture.load();
+                        auto s = num_standard_startpos.load();
                         auto multipv_cap0 = num_capture_or_promo_skipped_multipv_cap0.load();
                         auto multipv_cap1 = num_capture_or_promo_skipped_multipv_cap1.load();
-                        sync_cout << "Processed " << p << " positions. Skipped " << (c + a + multipv_cap0 + multipv_cap1) << " positions."
+                        sync_cout << "Processed " << p << " positions. Skipped " << (c + a + s + multipv_cap0 + multipv_cap1) << " positions."
                                   << sync_endl
-                                  << "  Static filter: " << (a + c)
-                                  << " (capture or promo: " << a << ", in check: " << c << ")"
+                                  << "  Static filter: " << (a + c + s)
+                                  << " (capture or promo: " << a << ", in check: " << c << ", startpos: " << s << ")"
                                   << sync_endl
                                   << "  MultiPV filter: " << (multipv_cap0 + multipv_cap1)
                                   << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ")"
