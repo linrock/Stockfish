@@ -725,7 +725,7 @@ namespace Stockfish::Tools
         const std::map<std::string, CommandFunc> subcommands = {
             { "nudged_static", &nudged_static },
             { "rescore", &rescore },
-            { "filter-335a9b2d8a80", &filter_335a9b2d8a80 }
+            { "filter_335a9b2d8a80", &filter_335a9b2d8a80 }
         };
 
         Eval::NNUE::init();
