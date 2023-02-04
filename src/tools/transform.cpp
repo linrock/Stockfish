@@ -515,7 +515,7 @@ namespace Stockfish::Tools
         do_rescore(params);
     }
 
-    void do_filter_data(FilterParams& params)
+    void do_filter_data_335a9b2d8a80(FilterParams& params)
     {
         // TODO: Use SfenReader once it works correctly in sequential mode. See issue #271
         auto in = Tools::open_sfen_input_file(params.input_filename);
@@ -680,11 +680,11 @@ namespace Stockfish::Tools
         std::cout << "Finished.\n";
     }
 
-    void do_filter(FilterParams& params)
+    void do_filter_335a9b2d8a80(FilterParams& params)
     {
         if (ends_with(params.input_filename, ".binpack"))
         {
-            do_filter_data(params);
+            do_filter_data_335a9b2d8a80(params);
         }
         else
         {
@@ -692,7 +692,7 @@ namespace Stockfish::Tools
         }
     }
 
-    void filter(std::istringstream& is)
+    void filter_335a9b2d8a80(std::istringstream& is)
     {
         FilterParams params{};
 
@@ -728,7 +728,7 @@ namespace Stockfish::Tools
         std::cout << "debug_print         : " << params.debug_print << '\n';
         std::cout << '\n';
 
-        do_filter(params);
+        do_filter_335a9b2d8a80(params);
     }
 
     void transform(std::istringstream& is)
@@ -736,7 +736,7 @@ namespace Stockfish::Tools
         const std::map<std::string, CommandFunc> subcommands = {
             { "nudged_static", &nudged_static },
             { "rescore", &rescore },
-            { "filter", &filter }
+            { "filter-335a9b2d8a80", &filter_335a9b2d8a80 }
         };
 
         Eval::NNUE::init();
