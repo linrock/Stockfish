@@ -67,13 +67,7 @@ namespace Stockfish::Tools
     {
         std::string input_filename = "in.binpack";
         std::string output_filename = "out.binpack";
-        int depth = 6;
         bool debug_print = false;
-
-        void enforce_constraints()
-        {
-            depth = std::max(1, depth);
-        }
     };
 
     [[nodiscard]] std::int16_t nudge(NudgedStaticParams& params, std::int16_t static_eval_i16, std::int16_t deep_eval_i16)
@@ -609,7 +603,7 @@ namespace Stockfish::Tools
                         num_move_already_is_capture.fetch_add(1);
                         should_skip_position = true;
                     } else {
-                        auto [search_val, pvs] = Search::search(pos, params.depth, 2);
+                        auto [search_val, pvs] = Search::search(pos, 6, 2);
                         if (!pvs.empty() && th.rootMoves.size() > 0) {
                             auto best_move = th.rootMoves[0].pv[0];
                             bool more_than_one_valid_move = th.rootMoves.size() > 1;
@@ -631,7 +625,7 @@ namespace Stockfish::Tools
                                 if (debug_print) {
                                     sync_cout << "[debug] Move is capture or promo: " << UCI::move(best_move, false)
                                               << sync_endl
-                                              << "[debug] 1st best move at depth " << params.depth << " multipv 2" << sync_endl
+                                              << "[debug] 1st best move at depth 6 multipv 2" << sync_endl
                                               << "[debug]" << sync_endl;
                                 }
                                 num_capture_or_promo_skipped_multipv_cap0.fetch_add(1);
@@ -641,7 +635,7 @@ namespace Stockfish::Tools
                                 if (debug_print) {
                                     sync_cout << "[debug] Move is capture or promo: " << UCI::move(best_move, false)
                                               << sync_endl
-                                              << "[debug] 2nd best move at depth " << params.depth << " multipv 2" << sync_endl
+                                              << "[debug] 2nd best move at depth 6 multipv 2" << sync_endl
                                               << "[debug]" << sync_endl;
                                 }
                                 num_capture_or_promo_skipped_multipv_cap1.fetch_add(1);
@@ -670,7 +664,7 @@ namespace Stockfish::Tools
                                   << sync_endl
                                   << "  MultiPV filter: " << (multipv_cap0 + multipv_cap1)
                                   << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ")"
-                                  << " depth " << params.depth << " multipv 2" << sync_endl;
+                                  << " depth 6 multipv 2" << sync_endl;
                     }
                 }
             }
@@ -704,8 +698,6 @@ namespace Stockfish::Tools
             if (token == "")
                 break;
 
-            else if (token == "depth")
-                is >> params.depth;
             else if (token == "input_file")
                 is >> params.input_filename;
             else if (token == "output_file")
@@ -719,10 +711,7 @@ namespace Stockfish::Tools
             }
         }
 
-        params.enforce_constraints();
-
-        std::cout << "Performing transform filter with parameters:\n";
-        std::cout << "depth               : " << params.depth << '\n';
+        std::cout << "Performing transform filter_335a9b2d8a80 with parameters:\n";
         std::cout << "input_file          : " << params.input_filename << '\n';
         std::cout << "output_file         : " << params.output_filename << '\n';
         std::cout << "debug_print         : " << params.debug_print << '\n';
