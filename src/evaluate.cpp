@@ -192,9 +192,14 @@ using namespace Trace;
 
 namespace {
 
+  constexpr int useClassicalPsqtThresh = 1783;
+  constexpr int nnueComplexityScale = 413;
+  constexpr int nnueComplexityOffset = 276;
+  constexpr int pDamp1 = 234;
+
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
+  constexpr Value LazyThreshold1    =  Value(2934);
+  constexpr Value LazyThreshold2    =  Value(2253);
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1056,7 +1061,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > useClassicalPsqtThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
@@ -1071,7 +1076,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
+      nnueComplexity = (  nnueComplexityScale * nnueComplexity
                         + (424 + optimism) * abs(psq - nnue)
                         ) / 1024;
 
@@ -1079,12 +1084,12 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
+      optimism = optimism * (nnueComplexityOffset + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
+  v = v * (pDamp1 - pos.rule50_count()) / 256;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
