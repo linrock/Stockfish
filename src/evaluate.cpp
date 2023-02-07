@@ -193,9 +193,26 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3631);
-  constexpr Value LazyThreshold2    =  Value(2084);
-  constexpr Value SpaceThreshold    =  Value(11551);
+  Value LazyThreshold1    =  Value(3631);
+  Value LazyThreshold2    =  Value(2084);
+  Value SpaceThreshold    =  Value(11551);
+  TUNE(SetRange(2000,4000), LazyThreshold1);
+  TUNE(SetRange(1500,2500), LazyThreshold2);
+  TUNE(SetRange(11000,12000), SpaceThreshold);
+
+  int useClassicalPsqtThresh = 1781;
+  TUNE(SetRange(1700, 1900), useClassicalPsqtThresh);
+  int nnueComplexityScale = 406;
+  TUNE(SetRange(300, 500), nnueComplexityScale);
+  int nnueComplexityOffset = 272;
+  TUNE(SetRange(250, 300), nnueComplexityOffset);
+  int optimismScaleOffset = 748;
+  TUNE(SetRange(650, 850), optimismScaleOffset);
+
+  int pDamp1 = 200;
+  TUNE(SetRange(100,300), pDamp1);
+  int pDamp2 = 214;
+  TUNE(SetRange(100,300), pDamp2);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 76, 46, 45, 14 };
@@ -1056,7 +1073,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > useClassicalPsqtThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
@@ -1071,7 +1088,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
+      nnueComplexity = (  nnueComplexityScale * nnueComplexity
                         + 424 * abs(psq - nnue)
                         + int(optimism) * int(psq - nnue)
                         ) / 1024;
@@ -1080,12 +1097,12 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      optimism = optimism * (nnueComplexityOffset + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - optimismScaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
+  v = v * (pDamp1 - pos.rule50_count()) / pDamp2;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
