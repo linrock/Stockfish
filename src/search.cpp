@@ -64,7 +64,7 @@ int FM1=158, RE1=1460, RE2=937,
 
 int OPT1=116, OPT2=170;
 
-int D3=2, FE1=71, FE2=656.7, TR1=192, TR2=95, TR3=140, TR4=215, TR5=9, CPXT1=261,INC1=53, IMP1=172;
+int D3=2, FE1=71, FE2=6567, TR1=192, TR2=95, TR3=140, TR4=215, TR5=9, CPXT1=261,INC1=53, IMP1=172;
 int FP1=8, FP2=28580, NMV1=18200, NMV2=20, NMV3=235, NMR1=165, NMR2=6, NMR3=3, NMR4=4;
 int PB1=4, PB2=180, PB3=54, STEN1=6, STEN2=9, PBC1=402, PBC2=2, LMR1=7, LMR2=185, LMR3=203, LMR4=-220, LMR5=5, LMR6=-4180;
 int LMR7=13, LMR8=103, LMR9=136, LMR10=-25, LMR11=16, EX1=4, EX2=2, EX3=25, EX4=10, EX5=9, EX6=78 ,EX7=5600;
@@ -479,7 +479,7 @@ void Thread::search() {
           && !mainThread->stopOnPonderhit)
       {
           double fallingEval = (FE1 + 12 * (mainThread->bestPreviousAverageScore - bestValue)
-                                    +  6 * (mainThread->iterValue[iterIdx] - bestValue)) / float(FE2);
+                                    +  6 * (mainThread->iterValue[iterIdx] - bestValue)) / float(FE2 / 10);
           fallingEval = std::clamp(fallingEval, 0.5, 1.5);
 
           // If the bestMove is stable over several iterations, reduce time accordingly
