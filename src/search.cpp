@@ -58,11 +58,10 @@ using namespace Search;
 
 namespace {
 
-int FM1=158, RE1=1460, RE2=937, FMC1=3, FMC2=3,
-    /* SB1=6, */ SB2=350, SB3=400, SB4=1650,
+int FM1=158, RE1=1460, RE2=937,
+    SB2=350, SB3=400, SB4=1650,
     RE3=2026, D1=10, CPXA1=153; /* CPXA2=1; */
 
-// not done
 int OPT1=116, OPT2=170;
 
 int D3=2, FE1=71, FE2=656.7, TR1=192, TR2=95, TR3=140, TR4=215, TR5=9, CPXT1=261,INC1=53, IMP1=172;
@@ -92,8 +91,8 @@ int DDS1=66, DDS2=11, DEDS1=582;
   }
 
   constexpr int futility_move_count(bool improving, Depth depth) {
-    return improving ? (FMC1 + depth * depth)
-                     : (FMC2 + depth * depth) / 2;
+    return improving ? (3 + depth * depth)
+                     : (3 + depth * depth) / 2;
   }
 
   // History and stats update bonus, based on depth
