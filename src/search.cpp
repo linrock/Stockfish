@@ -60,7 +60,7 @@ namespace {
 
 int FM1=158, RE1=1460, RE2=937,
     SB2=350, SB3=400, SB4=1650,
-    RE3=2026, 
+    RE3=2026,
     CPXA1=153,
     D1=10;
 
@@ -485,7 +485,7 @@ void Thread::search() {
           fallingEval = std::clamp(fallingEval, 0.5, 1.5);
 
           // If the bestMove is stable over several iterations, reduce time accordingly
-          timeReduction = lastBestMoveDepth + 9 < completedDepth ? TR1/100.0 : TR2/100;
+          timeReduction = lastBestMoveDepth + TR5 < completedDepth ? TR1/100.0 : TR2/100;
           double reduction = (TR3/100.0 + mainThread->previousTimeReduction) / (TR4/100.0 * timeReduction);
           double bestMoveInstability = 1 + 1.7 * totBestMoveChanges / Threads.size();
           int complexity = mainThread->complexityAverage.value();
