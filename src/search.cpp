@@ -1122,7 +1122,7 @@ moves_loop: // When in check, search starts here
 
           // Check extensions (~1 Elo)
           else if (   givesCheck
-                   && depth > EX5 9
+                   && depth > EX5
                    && abs(ss->staticEval) > EX6)
               extension = 1;
 
