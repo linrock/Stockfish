@@ -58,6 +58,12 @@ using namespace Search;
 
 namespace {
 
+  int tStatScore = 18200;
+  int tOffset = 235;
+  TUNE(SetRange(17200, 19200), tStatScore);
+  TUNE(SetRange(200, 270), tOffset);
+
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
@@ -797,10 +803,10 @@ namespace {
     // Step 9. Null move search with verification search (~35 Elo)
     if (   !PvNode
         && (ss-1)->currentMove != MOVE_NULL
-        && (ss-1)->statScore < 18200
+        && (ss-1)->statScore < tStatScore
         &&  eval >= beta
         &&  eval >= ss->staticEval
-        &&  ss->staticEval >= beta - 20 * depth - improvement / 14 + 235 + complexity / 24
+        &&  ss->staticEval >= beta - 20 * depth - improvement / 14 + tOffset + complexity / 24
         && !excludedMove
         &&  pos.non_pawn_material(us)
         && (ss->ply >= thisThread->nmpMinPly || us != thisThread->nmpColor))
