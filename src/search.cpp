@@ -794,6 +794,17 @@ namespace {
         &&  eval < 28580) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
         return eval;
 
+    int tSS = 18200;
+    int tDepthMult = 20;
+    int tImprovementDen = 14;
+    int tOffset = 235;
+    int tComplexityDen = 24;
+    TUNE(SetRange(16000, 20400), tSS);
+    TUNE(SetRange(10, 40), tDepthMult);
+    TUNE(SetRange(7, 28), tImprovementDen);
+    TUNE(SetRange(100, 370), tOffset);
+    TUNE(SetRange(12, 48), tComplexityDen);
+
     // Step 9. Null move search with verification search (~35 Elo)
     if (   !PvNode
         && (ss-1)->currentMove != MOVE_NULL
