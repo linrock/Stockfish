@@ -58,6 +58,13 @@ using namespace Search;
 
 namespace {
 
+  int tFutPruneOffset = 185;
+  int tLmrDepth = 13;
+  int tFutPruneParentOffset = 103;
+  TUNE(SetRange(135, 235), tFutPruneOffset);
+  TUNE(SetRange(3, 23), tLmrDepth);
+  TUNE(SetRange(50, 150), tFutPruneParentOffset);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
@@ -1006,7 +1013,7 @@ moves_loop: // When in check, search starts here
                   && !PvNode
                   && lmrDepth < 7
                   && !ss->inCheck
-                  && ss->staticEval + 185 + 203 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
+                  && ss->staticEval + tFutPruneOffset + 203 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
                    + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 6 < alpha)
                   continue;
 
@@ -1032,8 +1039,8 @@ moves_loop: // When in check, search starts here
 
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
-                  && lmrDepth < 13
-                  && ss->staticEval + 103 + 136 * lmrDepth <= alpha)
+                  && lmrDepth < tLmrDepth
+                  && ss->staticEval + tFutPruneParentOffset + 136 * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
