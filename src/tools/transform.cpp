@@ -428,45 +428,38 @@ namespace Stockfish::Tools
                 for(auto& ps : psv)
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
-
                     auto [search_val, pvs] = Search::search(pos, 6, 2);
 
+		    std::stringstream csv_string;
+		    csv_string <<
+		        pos.game_ply() << "," <<
+			pos.fen() << "," <<
+			UCI::move((Stockfish::Move)ps.move, false) << "," <<
+			ps.score << "," <<
+			(int)ps.game_result;
                     if (pvs.empty() || th.rootMoves.size() == 0) {
 		      // no valid moves
-			    sync_cout <<
-				pos.game_ply() << "," <<
-				pos.fen() << "," <<
-				ps.score << "," << (int)ps.game_result << "," <<
- 			        UCI::move((Stockfish::Move)ps.move, false) <<
-				sync_endl;
+			    sync_cout << csv_string.str() << sync_endl;
 		    } else {
 			auto best_move = th.rootMoves[0].pv[0];
 			Value m1_score = th.rootMoves[0].score;
                     	bool more_than_one_valid_move = th.rootMoves.size() > 1;
 		    	if (more_than_one_valid_move) {
-				// more than one valid move
-                      		Value m2_score = th.rootMoves[1].score;
-			    sync_cout <<
-				pos.game_ply() << "," <<
-				pos.fen() << "," <<
-				ps.score << "," << (int)ps.game_result << "," <<
- 			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
+			    // more than one valid move
+                      	    Value m2_score = th.rootMoves[1].score;
+			    csv_string << "," <<
 				"d6 pv2," <<
 				UCI::move((Stockfish::Move)best_move, false) << "," <<
 				m1_score << "," <<
 				UCI::move((Stockfish::Move)th.rootMoves[0].pv[1], false) << "," <<
-				m2_score <<
-				sync_endl;
+				m2_score;
+			    sync_cout << csv_string.str() << sync_endl;
 		    	} else {
-   	           		// only one valid move
-			    sync_cout <<
-				pos.game_ply() << "," <<
-				pos.fen() << "," <<
-				ps.score << "," << (int)ps.game_result << "," <<
- 			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
+         		    // only one valid move
+		  	    csv_string << "," <<
 				"d6 pv2," <<
-				UCI::move((Stockfish::Move)best_move, false) << "," << m1_score <<
-				sync_endl;
+				UCI::move((Stockfish::Move)best_move, false) << "," << m1_score;
+			    sync_cout << csv_string.str() << sync_endl;
 		    	}
 		    }
                     // pos.sfen_pack(ps.sfen, false);
