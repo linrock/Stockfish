@@ -436,7 +436,7 @@ namespace Stockfish::Tools
 			    sync_cout <<
 				pos.game_ply() << "," <<
 				pos.fen() << "," <<
-				ps.score << "," << ps.game_result << "," <<
+				ps.score << "," << (int)ps.game_result << "," <<
  			        UCI::move((Stockfish::Move)ps.move, false) <<
 				sync_endl;
 		    } else {
@@ -449,7 +449,7 @@ namespace Stockfish::Tools
 			    sync_cout <<
 				pos.game_ply() << "," <<
 				pos.fen() << "," <<
-				ps.score << "," << ps.game_result << "," <<
+				ps.score << "," << (int)ps.game_result << "," <<
  			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
 				"d6 pv2," <<
 				UCI::move((Stockfish::Move)best_move, false) << "," <<
@@ -462,7 +462,7 @@ namespace Stockfish::Tools
 			    sync_cout <<
 				pos.game_ply() << "," <<
 				pos.fen() << "," <<
-				ps.score << "," << ps.game_result << "," <<
+				ps.score << "," << (int)ps.game_result << "," <<
  			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
 				"d6 pv2," <<
 				UCI::move((Stockfish::Move)best_move, false) << "," << m1_score <<
