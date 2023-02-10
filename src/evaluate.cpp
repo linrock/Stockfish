@@ -59,6 +59,14 @@ using namespace std;
 namespace Stockfish {
 
 namespace Eval {
+  int TUNE_nnueScaleOffset = 1076;
+  int TUNE_nnueScaleMultNonPawn = 96;
+  int TUNE_nnueOptComplexityOffset = 272;
+  int TUNE_nnueScaleOptMultOffset = 748;
+  TUNE(SetRange(700, 1400), TUNE_nnueScaleOffset);
+  TUNE(SetRange(50, 200), TUNE_nnueScaleMultNonPawn);
+  TUNE(SetRange(150, 400), TUNE_nnueOptComplexityOffset);
+  TUNE(SetRange(500, 1000), TUNE_nnueScaleOptMultOffset);
 
   bool useNNUE;
   string currentEvalFileName = "None";
@@ -1063,7 +1071,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   else
   {
       int nnueComplexity;
-      int scale = 1076 + 96 * pos.non_pawn_material() / 5120;
+      int scale = TUNE_nnueScaleOffset + TUNE_nnueScaleMultNonPawn * pos.non_pawn_material() / 5120;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1080,8 +1088,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      optimism = optimism * (TUNE_nnueOptComplexityOffset + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - TUNE_nnueScaleOptMultOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
