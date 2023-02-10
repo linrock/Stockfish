@@ -360,6 +360,7 @@ namespace Stockfish::Tools
         std::cout << "Finished.\n";
     }
 
+    // modified to output position data
     void do_rescore_data(RescoreParams& params)
     {
         // TODO: Use SfenReader once it works correctly in sequential mode. See issue #271
@@ -421,29 +422,6 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_start_positions = 0;
         std::atomic<std::uint64_t> num_early_plies = 0;
 
-        auto print_stats = [&]() {
-            auto p = num_processed.load();
-            if (p % 10000 == 0) {
-                auto s = num_capture_or_promo_skipped.load();
-                auto a = num_move_already_is_capture.load();
-                auto c = num_position_in_check.load();
-                auto st = num_start_positions.load();
-                auto ep = num_early_plies.load();
-
-                auto multipv_cap0 = num_capture_or_promo_skipped_d7_multipv0.load();
-                auto multipv_cap1 = num_capture_or_promo_skipped_d7_multipv1.load();
-                auto multipv_one_good_move = num_one_good_move_skipped.load();
-
-                sync_cout << "Processed " << p << " positions. Skipped " << (s+st+ep+multipv_one_good_move) << " positions." << sync_endl
-                          << "  Static filter: " << (a+c+st+ep)
-                          << " (capture: " << a << ", in check: " << c << ", start pos: " << st << ", " << "early ply <= 28: " << ep << ")"
-                          << sync_endl
-                          << "  MultiPV filter: " << (multipv_cap0+multipv_cap1+multipv_one_good_move)
-                          << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ", eval diff: " << multipv_one_good_move << ")"
-                          << " depth " << params.filter_depth << sync_endl;
-            }
-        };
-
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
             StateInfo si;
@@ -459,129 +437,37 @@ namespace Stockfish::Tools
                 for(auto& ps : psv)
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
-                    // sync_cout << pos.fen() << sync_endl;
 
-                    print_stats();
-                    if (pos.checkers()) {
-                        // Skip if in check
-                        if (debug_print) {
-                            sync_cout << "[debug] " << pos.fen() << sync_endl
-                                      << "[debug] Position is in check" << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_position_in_check.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                      } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
-                        // Skip if the written move is already a capture or promotion
-                        if (debug_print) {
-                            sync_cout << "[debug] " << pos.fen() << sync_endl
-                                      << "[debug] Provided move is capture: "
-                                      << UCI::move((Stockfish::Move)ps.move, false)
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_move_already_is_capture.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                    } else if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
-                        num_start_positions.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                    } else if (pos.game_ply() <= 28) {
-                        num_early_plies.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                    }
+                    auto [search_val, pvs] = Search::search(pos, 6, 2);
 
-                    // use multipv search to get a sense of whether the position is tactical or quiet
-                    auto [search_val, pvs] = Search::search(pos, params.filter_depth, params.filter_multipv);
-                    if (pvs.empty())
-                        continue;
-                    if (th.rootMoves.size() == 0)
-                        continue;
-                    if (debug_print) {
-                        sync_cout << "[debug] " << pos.fen() << sync_endl;
-                        sync_cout << "[debug] Main PV move:    "
-                                  << UCI::move(th.rootMoves[0].pv[0], false) << " "
-                                  << th.rootMoves[0].score << " " << sync_endl;
-                        if (th.rootMoves.size() > 1) {
-                            sync_cout << "[debug] 2nd PV move:     "
-                                      << UCI::move(th.rootMoves[1].pv[0], false) << " "
-                                      << th.rootMoves[1].score << " " << sync_endl;
-                        } else {
-                            sync_cout << "[debug] The only valid move" << sync_endl;
-                        }
-                    }
-                    auto best_move = th.rootMoves[0].pv[0];
-                    bool more_than_one_valid_move = th.rootMoves.size() > 1;
-                    if (pos.capture_or_promotion(best_move)) {
-                        // skip if multipv 1st line bestmove is a capture or promo
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_d7_multipv0.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        if (debug_print) {
-                            sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
-                                      << sync_endl
-                                      << "[debug] 1st best move at depth 7 multipv 2" << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        continue;
-                    } else if (more_than_one_valid_move && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
-                        // skip if multipv 2nd line bestmove is a capture or promo
-                        num_capture_or_promo_skipped.fetch_add(1);
-                        num_capture_or_promo_skipped_d7_multipv1.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        if (debug_print) {
-                            sync_cout << "[debug] Move is capture: " << UCI::move(best_move, false)
-                                      << sync_endl
-                                      << "[debug] 2nd best move at depth 7 multipv 2" << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        continue;
-                    } else if (more_than_one_valid_move) {
-                      // remove positions with only 1 good move
-                      Value m1_score = th.rootMoves[0].score;
-                      Value m2_score = th.rootMoves[1].score;
-                      if (abs(m1_score) < 110 && abs(m2_score) > 200) {
-                        if (debug_print) {
-                            sync_cout << "[debug] best move is about equal, 2nd best move is losing"
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_one_good_move_skipped.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                      } else if (abs(m1_score) > 200 && abs(m2_score) < 110) {
-                        if (debug_print) {
-                            sync_cout << "[debug] best move gains advantage, 2nd best move equalizes"
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_one_good_move_skipped.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                      } else if (abs(m1_score) > 200 &&
-                                 (abs(m2_score) > 200 && ((m1_score > 0) != (m2_score > 0)))) {
-                        if (debug_print) {
-                            sync_cout << "[debug] best move gains an advantage, 2nd best move loses "
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_one_good_move_skipped.fetch_add(1);
-                        num_processed.fetch_add(1);
-                        continue;
-                      }
-                    }
-
-                    // only write the position if:
-                    // - position is not in check
-                    // - the provided move was not a capture
-                    // - neither bestmove at depth7 multipv2 search is a capture
-                    // - only one good move according to depth7 multipv2 search
-                    pos.sfen_pack(ps.sfen, false);
+                    if (pvs.empty() || th.rootMoves.size() == 0) {
+		      // no valid moves
+			    sync_cout <<
+				pos.fen() << "," << pos.game_ply() << "," <<
+				ps.score << "," << ps.game_result << "," << ps.move <<
+				sync_endl;
+		    } else {
+			auto best_move = th.rootMoves[0].pv[0];
+			Value m1_score = th.rootMoves[0].score;
+                    	bool more_than_one_valid_move = th.rootMoves.size() > 1;
+		    	if (more_than_one_valid_move) {
+                      		Value m2_score = th.rootMoves[1].score;
+			    sync_cout <<
+				pos.fen() << "," << pos.game_ply() << "," <<
+				ps.score << "," << ps.game_result << "," << ps.move << "," <<
+				best_move << "," << m1_score <<
+				th.rootMoves[0].pv[1] << "," << m2_score <<
+				sync_endl;
+		    	} else {
+   	           		// only one valid move
+			    sync_cout <<
+				pos.fen() << "," << pos.game_ply() << "," <<
+				ps.score << "," << ps.game_result << "," << ps.move << "," <<
+				best_move << "," << m1_score <<
+				sync_endl;
+		    	}
+		    }
+                    // pos.sfen_pack(ps.sfen, false);
 
                     // Don't change the score
                     // ps.score = search_value9;
@@ -589,11 +475,11 @@ namespace Stockfish::Tools
                     // if (!params.keep_moves)
                     // Don't change the move
                     // ps.move = search_pv9[0];
-                    ps.padding = 0;
+                    // ps.padding = 0;
 
-                    out.write(th.id(), ps);
+                    // out.write(th.id(), ps);
 
-                    num_processed.fetch_add(1);
+                    // num_processed.fetch_add(1);
                 }
             }
         });
