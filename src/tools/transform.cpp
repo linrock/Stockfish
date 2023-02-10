@@ -434,7 +434,8 @@ namespace Stockfish::Tools
                     if (pvs.empty() || th.rootMoves.size() == 0) {
 		      // no valid moves
 			    sync_cout <<
-				pos.fen() << "," << pos.game_ply() << "," <<
+				pos.game_ply() << "," <<
+				pos.fen() << "," <<
 				ps.score << "," << ps.game_result << "," <<
  			        UCI::move((Stockfish::Move)ps.move, false) <<
 				sync_endl;
@@ -446,7 +447,8 @@ namespace Stockfish::Tools
 				// more than one valid move
                       		Value m2_score = th.rootMoves[1].score;
 			    sync_cout <<
-				pos.fen() << "," << pos.game_ply() << "," <<
+				pos.game_ply() << "," <<
+				pos.fen() << "," <<
 				ps.score << "," << ps.game_result << "," <<
  			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
 				best_move << "," << m1_score << "," <<
@@ -455,7 +457,8 @@ namespace Stockfish::Tools
 		    	} else {
    	           		// only one valid move
 			    sync_cout <<
-				pos.fen() << "," << pos.game_ply() << "," <<
+				pos.game_ply() << "," <<
+				pos.fen() << "," <<
 				ps.score << "," << ps.game_result << "," <<
  			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
 				UCI::move((Stockfish::Move)best_move, false) << "," << m1_score <<
