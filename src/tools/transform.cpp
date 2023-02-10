@@ -435,26 +435,30 @@ namespace Stockfish::Tools
 		      // no valid moves
 			    sync_cout <<
 				pos.fen() << "," << pos.game_ply() << "," <<
-				ps.score << "," << ps.game_result << "," << ps.move <<
+				ps.score << "," << ps.game_result << "," <<
+ 			        UCI::move((Stockfish::Move)ps.move, false) <<
 				sync_endl;
 		    } else {
 			auto best_move = th.rootMoves[0].pv[0];
 			Value m1_score = th.rootMoves[0].score;
                     	bool more_than_one_valid_move = th.rootMoves.size() > 1;
 		    	if (more_than_one_valid_move) {
+				// more than one valid move
                       		Value m2_score = th.rootMoves[1].score;
 			    sync_cout <<
 				pos.fen() << "," << pos.game_ply() << "," <<
-				ps.score << "," << ps.game_result << "," << ps.move << "," <<
-				best_move << "," << m1_score <<
-				th.rootMoves[0].pv[1] << "," << m2_score <<
+				ps.score << "," << ps.game_result << "," <<
+ 			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
+				best_move << "," << m1_score << "," <<
+				UCI::move((Stockfish::Move)th.rootMoves[0].pv[1], false) << "," << m2_score <<
 				sync_endl;
 		    	} else {
    	           		// only one valid move
 			    sync_cout <<
 				pos.fen() << "," << pos.game_ply() << "," <<
-				ps.score << "," << ps.game_result << "," << ps.move << "," <<
-				best_move << "," << m1_score <<
+				ps.score << "," << ps.game_result << "," <<
+ 			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
+				UCI::move((Stockfish::Move)best_move, false) << "," << m1_score <<
 				sync_endl;
 		    	}
 		    }
