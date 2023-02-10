@@ -451,8 +451,11 @@ namespace Stockfish::Tools
 				pos.fen() << "," <<
 				ps.score << "," << ps.game_result << "," <<
  			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
-				best_move << "," << m1_score << "," <<
-				UCI::move((Stockfish::Move)th.rootMoves[0].pv[1], false) << "," << m2_score <<
+				"d6 pv2," <<
+				UCI::move((Stockfish::Move)best_move, false) << "," <<
+				m1_score << "," <<
+				UCI::move((Stockfish::Move)th.rootMoves[0].pv[1], false) << "," <<
+				m2_score <<
 				sync_endl;
 		    	} else {
    	           		// only one valid move
@@ -461,6 +464,7 @@ namespace Stockfish::Tools
 				pos.fen() << "," <<
 				ps.score << "," << ps.game_result << "," <<
  			        UCI::move((Stockfish::Move)ps.move, false) << "," <<
+				"d6 pv2," <<
 				UCI::move((Stockfish::Move)best_move, false) << "," << m1_score <<
 				sync_endl;
 		    	}
