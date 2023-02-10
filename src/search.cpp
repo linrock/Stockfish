@@ -58,12 +58,17 @@ using namespace Search;
 
 namespace {
 
+  int TUNE_futilityMarginMult = 158;
+  int TUNE_futilityEvalThresh = 28580;
+  TUNE(SetRange(50, 250), TUNE_futilityMarginMult);
+  TUNE(SetRange(20000, 36000), TUNE_futilityEvalThresh);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
   // Futility margin
   Value futility_margin(Depth d, bool improving) {
-    return Value(158 * (d - improving));
+    return Value(TUNE_futilityMarginMult * (d - improving));
   }
 
   // Reductions lookup table, initialized at startup
@@ -789,7 +794,7 @@ namespace {
         &&  depth < 8
         &&  eval - futility_margin(depth, improving) - (ss-1)->statScore / 304 >= beta
         &&  eval >= beta
-        &&  eval < 28580) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
+        &&  eval < TUNE_futilityEvalThresh) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
         return eval;
 
     // Step 9. Null move search with verification search (~35 Elo)
