@@ -59,14 +59,10 @@ using namespace std;
 namespace Stockfish {
 
 namespace Eval {
-  int TUNE_nnueScaleOffset = 1076;
-  int TUNE_nnueScaleMultNonPawn = 96;
-  int TUNE_nnueOptComplexityOffset = 272;
-  int TUNE_nnueScaleOptMultOffset = 748;
-  TUNE(SetRange(700, 1400), TUNE_nnueScaleOffset);
-  TUNE(SetRange(50, 200), TUNE_nnueScaleMultNonPawn);
-  TUNE(SetRange(150, 400), TUNE_nnueOptComplexityOffset);
-  TUNE(SetRange(500, 1000), TUNE_nnueScaleOptMultOffset);
+  int TUNE_nnueScaleOffset = 980;
+  int TUNE_nnueScaleMultNonPawn = 94;
+  int TUNE_nnueOptComplexityOffset = 209;
+  int TUNE_nnueScaleOptMultOffset = 649;
 
   bool useNNUE;
   string currentEvalFileName = "None";
