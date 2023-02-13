@@ -57,8 +57,10 @@ using Eval::evaluate;
 using namespace Search;
 
 namespace {
+  int TUNE_denomConst = 12800;
   int TUNE_lowhighDepthDenom = 4410;
   int TUNE_midDepthDenom = 4410;
+  TUNE(SetRange(10000, 15600), TUNE_denomConst);
   TUNE(SetRange(0, 8800), TUNE_lowhighDepthDenom);
   TUNE(SetRange(0, 8800), TUNE_midDepthDenom);
 
@@ -1186,7 +1188,7 @@ moves_loop: // When in check, search starts here
                      - 4467;
 
       // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-      r -= ss->statScore / (12800 +
+      r -= ss->statScore / (TUNE_denomConst +
                             TUNE_lowhighDepthDenom * (depth > 7  && depth <= 11) +
                             TUNE_midDepthDenom     * (depth > 11 && depth <= 14) +
                             TUNE_lowhighDepthDenom * (depth > 14 && depth <  19));
