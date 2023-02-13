@@ -192,27 +192,22 @@ using namespace Trace;
 
 namespace {
 
-  // Threshold for lazy and space evaluation
   Value LazyThreshold1    =  Value(3631);
   Value LazyThreshold2    =  Value(2084);
-  Value SpaceThreshold    =  Value(11551);
-  TUNE(SetRange(2000,4000), LazyThreshold1);
-  TUNE(SetRange(1500,2500), LazyThreshold2);
-  TUNE(SetRange(11000,12000), SpaceThreshold);
-
   int useClassicalPsqtThresh = 1781;
-  TUNE(SetRange(1700, 1900), useClassicalPsqtThresh);
   int nnueComplexityScale = 406;
-  TUNE(SetRange(300, 500), nnueComplexityScale);
   int nnueComplexityOffset = 272;
-  TUNE(SetRange(250, 300), nnueComplexityOffset);
-  int optimismScaleOffset = 748;
-  TUNE(SetRange(650, 850), optimismScaleOffset);
+  int pDamp1 = 239;
 
-  int pDamp1 = 200;
-  TUNE(SetRange(100,300), pDamp1);
-  int pDamp2 = 214;
-  TUNE(SetRange(100,300), pDamp2);
+  TUNE(SetRange(2000, 4000), LazyThreshold1);
+  TUNE(SetRange(1500, 2500), LazyThreshold2);
+  TUNE(SetRange(1700, 1900), useClassicalPsqtThresh);
+  TUNE(SetRange(300,  500),  nnueComplexityScale);
+  TUNE(SetRange(220,  330),  nnueComplexityOffset);
+  TUNE(SetRange(180,  300),  pDamp1);
+
+  // Threshold for lazy and space evaluation
+  constexpr Value SpaceThreshold   =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 76, 46, 45, 14 };
@@ -1098,11 +1093,11 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           *complexity = nnueComplexity;
 
       optimism = optimism * (nnueComplexityOffset + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - optimismScaleOffset)) / 1024;
+      v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (pDamp1 - pos.rule50_count()) / pDamp2;
+  v = v * (pDamp1 - pos.rule50_count()) / 256;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
