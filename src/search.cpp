@@ -57,6 +57,12 @@ using Eval::evaluate;
 using namespace Search;
 
 namespace {
+  int TUNE_lowerDepthDenom = 4410;
+  int TUNE_midDepthDenom = 4410;
+  int TUNE_higherDepthDenom = 4410;
+  TUNE(SetRange(0, 8800), TUNE_lowerDepthDenom);
+  TUNE(SetRange(0, 8800), TUNE_midDepthDenom);
+  TUNE(SetRange(0, 8800), TUNE_higherDepthDenom);
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
@@ -1182,7 +1188,10 @@ moves_loop: // When in check, search starts here
                      - 4467;
 
       // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-      r -= ss->statScore / (12800 + 4410 * (depth > 7 && depth < 19));
+      r -= ss->statScore / (12800 +
+                            TUNE_lowerDepthDenom  * (depth > 7  && depth <= 11) +
+                            TUNE_midDepthDenom    * (depth > 11 && depth <= 14) +
+                            TUNE_higherDepthDenom * (depth > 14 && depth <  19));
 
       // Step 17. Late moves reduction / extension (LMR, ~117 Elo)
       // We use various heuristics for the sons of a node after the first son has
