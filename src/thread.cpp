@@ -28,6 +28,9 @@
 
 namespace Stockfish {
 
+int TUNE_histFill = -71;
+TUNE(SetRange(-150, 0), TUNE_histFill);
+
 ThreadPool Threads; // Global object
 
 
@@ -56,7 +59,6 @@ Thread::~Thread() {
 /// Thread::clear() reset histories, usually before a new game
 
 void Thread::clear() {
-
   counterMoves.fill(MOVE_NONE);
   mainHistory.fill(0);
   captureHistory.fill(0);
@@ -65,7 +67,7 @@ void Thread::clear() {
       for (StatsType c : { NoCaptures, Captures })
           for (auto& to : continuationHistory[inCheck][c])
               for (auto& h : to)
-                  h->fill(-71);
+                  h->fill(TUNE_histFill);
 }
 
 
