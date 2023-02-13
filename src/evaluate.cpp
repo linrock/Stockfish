@@ -62,9 +62,13 @@ namespace Eval {
   int TUNE_scale = 1076;
   int TUNE_numPawnsMult = 0;
   int TUNE_nonPawnMaterialMult = 76;
+  int TUNE_vDampOffset = 200;
+  int TUNE_vDampDenom = 214;
   TUNE(SetRange(600, 1400), TUNE_scale);
-  TUNE(SetRange(-24, 24), TUNE_numPawnsMult);
-  TUNE(SetRange(50, 100), TUNE_nonPawnMaterialMult);
+  TUNE(SetRange(-30, 30), TUNE_numPawnsMult);
+  TUNE(SetRange(40, 110), TUNE_nonPawnMaterialMult);
+  TUNE(SetRange(125, 275), TUNE_vDampOffset);
+  TUNE(SetRange(150, 300), TUNE_vDampDenom);
 
   bool useNNUE;
   string currentEvalFileName = "None";
@@ -1093,7 +1097,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
+  v = v * (TUNE_vDampOffset - pos.rule50_count()) / TUNE_vDampDenom;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
