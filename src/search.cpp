@@ -58,6 +58,17 @@ using namespace Search;
 
 namespace {
 
+  int TUNE_statScoreDenom = 12800;
+  int TUNE_dampDepthLow = 4410;
+  int TUNE_depthLow = 7;
+  int TUNE_dampDepthMid = 4410;
+  int TUNE_depthHigh = 19;
+  TUNE(SetRange(10000, 15600), TUNE_statScoreDenom);
+  TUNE(SetRange(0, 8000), TUNE_dampDepthLow);
+  TUNE(SetRange(0, 7), TUNE_depthLow);
+  TUNE(SetRange(0, 8000), TUNE_dampDepthMid);
+  TUNE(SetRange(14, 22), TUNE_depthHigh);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
@@ -1182,7 +1193,9 @@ moves_loop: // When in check, search starts here
                      - 4467;
 
       // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-      r -= ss->statScore / (12800 + 4410 * (depth > 7 && depth < 19));
+      r -= ss->statScore / (12800 +
+                            TUNE_dampDepthLow * (depth > TUNE_depthLow && depth <= 7) +
+                            TUNE_dampDepthMid * (depth > 7 && depth < TUNE_depthHigh));
 
       // Step 17. Late moves reduction / extension (LMR, ~117 Elo)
       // We use various heuristics for the sons of a node after the first son has
