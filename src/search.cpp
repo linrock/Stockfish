@@ -58,6 +58,14 @@ using namespace Search;
 
 namespace {
   int TUNE_denomConst = 12800;
+  int TUNE_depth0  = 0;
+  int TUNE_depth1  = 0;
+  int TUNE_depth2  = 0;
+  int TUNE_depth3  = 0;
+  int TUNE_depth4  = 0;
+  int TUNE_depth5  = 0;
+  int TUNE_depth6  = 0;
+  int TUNE_depth7  = 0;
   int TUNE_depth8  = 4410;
   int TUNE_depth9  = 4410;
   int TUNE_depth10 = 4410;
@@ -69,8 +77,22 @@ namespace {
   int TUNE_depth16 = 4410;
   int TUNE_depth17 = 4410;
   int TUNE_depth18 = 4410;
+  int TUNE_depth19 = 0;
+  int TUNE_depth20 = 0;
+  int TUNE_depth21 = 0;
+  int TUNE_depth22 = 0;
+  int TUNE_depth23 = 0;
+  int TUNE_depth24 = 0;
 
   TUNE(SetRange(10000, 15600), TUNE_denomConst);
+  TUNE(SetRange(-4410, 4410), TUNE_depth0);
+  TUNE(SetRange(-4410, 4410), TUNE_depth1);
+  TUNE(SetRange(-4410, 4410), TUNE_depth2);
+  TUNE(SetRange(-4410, 4410), TUNE_depth3);
+  TUNE(SetRange(-4410, 4410), TUNE_depth4);
+  TUNE(SetRange(-4410, 4410), TUNE_depth5);
+  TUNE(SetRange(-4410, 4410), TUNE_depth6);
+  TUNE(SetRange(-4410, 4410), TUNE_depth7);
   TUNE(SetRange(0, 8820), TUNE_depth8);
   TUNE(SetRange(0, 8820), TUNE_depth9);
   TUNE(SetRange(0, 8820), TUNE_depth10);
@@ -82,6 +104,12 @@ namespace {
   TUNE(SetRange(0, 8820), TUNE_depth16);
   TUNE(SetRange(0, 8820), TUNE_depth17);
   TUNE(SetRange(0, 8820), TUNE_depth18);
+  TUNE(SetRange(-4410, 4410), TUNE_depth19);
+  TUNE(SetRange(-4410, 4410), TUNE_depth20);
+  TUNE(SetRange(-4410, 4410), TUNE_depth21);
+  TUNE(SetRange(-4410, 4410), TUNE_depth22);
+  TUNE(SetRange(-4410, 4410), TUNE_depth23);
+  TUNE(SetRange(-4410, 4410), TUNE_depth24);
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
@@ -1208,6 +1236,14 @@ moves_loop: // When in check, search starts here
 
       // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
       r -= ss->statScore /  (TUNE_denomConst +
+                            (depth == 0 ) * TUNE_depth0  +
+                            (depth == 1 ) * TUNE_depth1  +
+                            (depth == 2 ) * TUNE_depth2  +
+                            (depth == 3 ) * TUNE_depth3  +
+                            (depth == 4 ) * TUNE_depth4  +
+                            (depth == 5 ) * TUNE_depth5  +
+                            (depth == 6 ) * TUNE_depth6  +
+                            (depth == 7 ) * TUNE_depth7  +
                             (depth == 8 ) * TUNE_depth8  +
                             (depth == 9 ) * TUNE_depth9  +
                             (depth == 10) * TUNE_depth10 +
@@ -1218,7 +1254,13 @@ moves_loop: // When in check, search starts here
                             (depth == 15) * TUNE_depth15 +
                             (depth == 16) * TUNE_depth16 +
                             (depth == 17) * TUNE_depth17 +
-                            (depth == 18) * TUNE_depth18 );
+                            (depth == 18) * TUNE_depth18 +
+                            (depth == 19) * TUNE_depth19 +
+                            (depth == 20) * TUNE_depth20 +
+                            (depth == 21) * TUNE_depth21 +
+                            (depth == 22) * TUNE_depth22 +
+                            (depth == 23) * TUNE_depth23 +
+                            (depth == 24) * TUNE_depth24);
 
       // Step 17. Late moves reduction / extension (LMR, ~117 Elo)
       // We use various heuristics for the sons of a node after the first son has
