@@ -71,17 +71,17 @@ namespace {
   int TUNE_depth18 = 4410;
 
   TUNE(SetRange(10000, 15600), TUNE_denomConst);
-  TUNE(SetRange(0, 8800), TUNE_depth8);
-  TUNE(SetRange(0, 8800), TUNE_depth9);
-  TUNE(SetRange(0, 8800), TUNE_depth10);
-  TUNE(SetRange(0, 8800), TUNE_depth11);
-  TUNE(SetRange(0, 8800), TUNE_depth12);
-  TUNE(SetRange(0, 8800), TUNE_depth13);
-  TUNE(SetRange(0, 8800), TUNE_depth14);
-  TUNE(SetRange(0, 8800), TUNE_depth15);
-  TUNE(SetRange(0, 8800), TUNE_depth16);
-  TUNE(SetRange(0, 8800), TUNE_depth17);
-  TUNE(SetRange(0, 8800), TUNE_depth18);
+  TUNE(SetRange(0, 8820), TUNE_depth8);
+  TUNE(SetRange(0, 8820), TUNE_depth9);
+  TUNE(SetRange(0, 8820), TUNE_depth10);
+  TUNE(SetRange(0, 8820), TUNE_depth11);
+  TUNE(SetRange(0, 8820), TUNE_depth12);
+  TUNE(SetRange(0, 8820), TUNE_depth13);
+  TUNE(SetRange(0, 8820), TUNE_depth14);
+  TUNE(SetRange(0, 8820), TUNE_depth15);
+  TUNE(SetRange(0, 8820), TUNE_depth16);
+  TUNE(SetRange(0, 8820), TUNE_depth17);
+  TUNE(SetRange(0, 8820), TUNE_depth18);
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
@@ -1211,6 +1211,8 @@ moves_loop: // When in check, search starts here
                             (depth == 8 ) * TUNE_depth8  +
                             (depth == 9 ) * TUNE_depth9  +
                             (depth == 10) * TUNE_depth10 +
+                            (depth == 11) * TUNE_depth11 +
+                            (depth == 12) * TUNE_depth12 +
                             (depth == 13) * TUNE_depth13 +
                             (depth == 14) * TUNE_depth14 +
                             (depth == 15) * TUNE_depth15 +
