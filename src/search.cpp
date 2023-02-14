@@ -58,11 +58,30 @@ using namespace Search;
 
 namespace {
   int TUNE_denomConst = 12800;
-  int TUNE_lowhighDepthDenom = 4410;
-  int TUNE_midDepthDenom = 4410;
+  int TUNE_depth8  = 4410;
+  int TUNE_depth9  = 4410;
+  int TUNE_depth10 = 4410;
+  int TUNE_depth11 = 4410;
+  int TUNE_depth12 = 4410;
+  int TUNE_depth13 = 4410;
+  int TUNE_depth14 = 4410;
+  int TUNE_depth15 = 4410;
+  int TUNE_depth16 = 4410;
+  int TUNE_depth17 = 4410;
+  int TUNE_depth18 = 4410;
+
   TUNE(SetRange(10000, 15600), TUNE_denomConst);
-  TUNE(SetRange(0, 8800), TUNE_lowhighDepthDenom);
-  TUNE(SetRange(0, 8800), TUNE_midDepthDenom);
+  TUNE(SetRange(0, 8800), TUNE_depth8);
+  TUNE(SetRange(0, 8800), TUNE_depth9);
+  TUNE(SetRange(0, 8800), TUNE_depth10);
+  TUNE(SetRange(0, 8800), TUNE_depth11);
+  TUNE(SetRange(0, 8800), TUNE_depth12);
+  TUNE(SetRange(0, 8800), TUNE_depth13);
+  TUNE(SetRange(0, 8800), TUNE_depth14);
+  TUNE(SetRange(0, 8800), TUNE_depth15);
+  TUNE(SetRange(0, 8800), TUNE_depth16);
+  TUNE(SetRange(0, 8800), TUNE_depth17);
+  TUNE(SetRange(0, 8800), TUNE_depth18);
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
@@ -1188,10 +1207,16 @@ moves_loop: // When in check, search starts here
                      - 4467;
 
       // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-      r -= ss->statScore / (TUNE_denomConst +
-                            TUNE_lowhighDepthDenom * (depth > 7  && depth <= 11) +
-                            TUNE_midDepthDenom     * (depth > 11 && depth <= 14) +
-                            TUNE_lowhighDepthDenom * (depth > 14 && depth <  19));
+      r -= ss->statScore /  (TUNE_denomConst +
+                            (depth == 8 ) * TUNE_depth8  +
+                            (depth == 9 ) * TUNE_depth9  +
+                            (depth == 10) * TUNE_depth10 +
+                            (depth == 13) * TUNE_depth13 +
+                            (depth == 14) * TUNE_depth14 +
+                            (depth == 15) * TUNE_depth15 +
+                            (depth == 16) * TUNE_depth16 +
+                            (depth == 17) * TUNE_depth17 +
+                            (depth == 18) * TUNE_depth18 );
 
       // Step 17. Late moves reduction / extension (LMR, ~117 Elo)
       // We use various heuristics for the sons of a node after the first son has
