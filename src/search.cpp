@@ -57,18 +57,18 @@ using Eval::evaluate;
 using namespace Search;
 
 namespace {
-  int TUNE_denomConst = 13260;
-  int TUNE_depth8  = 2832;
-  int TUNE_depth9  = 4975;
-  int TUNE_depth10 = 2975;
-  int TUNE_depth11 = 5327;
-  int TUNE_depth12 = 4944;
-  int TUNE_depth13 = 6123;
-  int TUNE_depth14 = 3777;
-  int TUNE_depth15 = 4950;
-  int TUNE_depth16 = 4376;
-  int TUNE_depth17 = 5895;
-  int TUNE_depth18 = 3962;
+  int TUNE_denomConst = 13184;
+  int TUNE_depth8  = 2706;
+  int TUNE_depth9  = 4928;
+  int TUNE_depth10 = 4132;
+  int TUNE_depth11 = 5435;
+  int TUNE_depth12 = 5077;
+  int TUNE_depth13 = 6138;
+  int TUNE_depth14 = 3706;
+  int TUNE_depth15 = 5101;
+  int TUNE_depth16 = 4379;
+  int TUNE_depth17 = 6046;
+  int TUNE_depth18 = 4076;
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
