@@ -57,12 +57,9 @@ using Eval::evaluate;
 using namespace Search;
 
 namespace {
-  int TUNE_denomConst = 12800;
-  int TUNE_lowhighDepthDenom = 4410;
-  int TUNE_midDepthDenom = 4410;
-  TUNE(SetRange(10000, 15600), TUNE_denomConst);
-  TUNE(SetRange(0, 8800), TUNE_lowhighDepthDenom);
-  TUNE(SetRange(0, 8800), TUNE_midDepthDenom);
+  int TUNE_denomConst = 12572;
+  int TUNE_lowhighDepthDenom = 6620;
+  int TUNE_midDepthDenom = 6939;
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
