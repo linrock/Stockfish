@@ -7,7 +7,7 @@ fi
 function filter_piece() {
   output_filename=$(basename $1).csv
   echo "Filtering... $1 -> test80-oct2022-16tb7p-position-csv/$output_filename"
-  ./filter_piece.sh $1 > test80-oct2022-16tb7p-position-csv/$output_filename
+  ./filter_piece.sh $1 | grep "d6 pv2" > test80-oct2022-16tb7p-position-csv/$output_filename
 }
 export -f filter_piece
 
