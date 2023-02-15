@@ -11,7 +11,6 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -57,6 +56,17 @@ using Eval::evaluate;
 using namespace Search;
 
 namespace {
+
+  int TUNE_futPruneChildDenom = 304;
+  int TUNE_futPruneChildThresh = 28580;
+  int TUNE_futPruneOffset = 185;
+  int TUNE_histMult = -4180;
+  int TUNE_futPruneParOffset = 103;
+  TUNE(SetRange(152, 608), TUNE_futPruneChildDenom);
+  TUNE(SetRange(27000, 30000), TUNE_futPruneChildThresh);
+  TUNE(SetRange(20, 350), TUNE_futPruneOffset);
+  TUNE(SetRange(-5000, -3360), TUNE_histMult);
+  TUNE(SetRange(50, 150), TUNE_futPruneParOffset);
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
@@ -787,9 +797,9 @@ namespace {
     // The depth condition is important for mate finding.
     if (   !ss->ttPv
         &&  depth < 8
-        &&  eval - futility_margin(depth, improving) - (ss-1)->statScore / 304 >= beta
+        &&  eval - futility_margin(depth, improving) - (ss-1)->statScore / TUNE_futPruneChildDenom >= beta
         &&  eval >= beta
-        &&  eval < 28580) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
+        &&  eval < TUNE_futPruneChildThresh) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
         return eval;
 
     // Step 9. Null move search with verification search (~35 Elo)
@@ -1006,7 +1016,7 @@ moves_loop: // When in check, search starts here
                   && !PvNode
                   && lmrDepth < 7
                   && !ss->inCheck
-                  && ss->staticEval + 185 + 203 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
+                  && ss->staticEval + TUNE_futPruneOffset + 203 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
                    + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 6 < alpha)
                   continue;
 
@@ -1022,7 +1032,7 @@ moves_loop: // When in check, search starts here
 
               // Continuation history based pruning (~2 Elo)
               if (   lmrDepth < 5
-                  && history < -4180 * (depth - 1))
+                  && history < TUNE_histMult * (depth - 1))
                   continue;
 
               history += 2 * thisThread->mainHistory[us][from_to(move)];
@@ -1033,7 +1043,7 @@ moves_loop: // When in check, search starts here
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
                   && lmrDepth < 13
-                  && ss->staticEval + 103 + 136 * lmrDepth <= alpha)
+                  && ss->staticEval + TUNE_futPruneParOffset + 136 * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
