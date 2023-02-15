@@ -12,5 +12,5 @@ function filter_piece() {
 export -f filter_piece
 
 # Filters positions out of .plain files concurrently
-ls -1v $1/*.binpack | \
-  xargs -P95 -I{} bash -c 'filter_piece "$@"' _ {}
+concurrency=$(( $(nproc) - 1 ))
+ls -1v $1/*.binpack | xargs -P $concurrency -I{} bash -c 'filter_piece "$@"' _ {}
