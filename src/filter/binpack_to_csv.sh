@@ -1,4 +1,8 @@
 #!/bin/bash
+if [ "$#" -ne 1 ]; then
+  echo "Usage: ./binpack_to_csv.sh <input_binpack>"
+  exit 0
+fi
 
 input_binpack=$1
 
