@@ -6,8 +6,9 @@ fi
 
 function binpack_to_csv() {
   output_filename=$(basename $1).csv
-  echo "Filtering... $1 -> test80-oct2022-16tb7p-position-csv/$output_filename"
-  ./binpack_to_csv.sh $1 | grep "d6 pv2" > test80-oct2022-16tb7p-position-csv/$output_filename
+  output_dir=./data/nnue-tools/training-data/dfrc-positions-csv/
+  echo "Filtering... $1 -> $output_dir/$output_filename"
+  ./binpack_to_csv.sh $1 | grep "d6 pv2" > $output_dir/$output_filename
 }
 export -f binpack_to_csv
 
