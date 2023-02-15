@@ -57,31 +57,18 @@ using Eval::evaluate;
 using namespace Search;
 
 namespace {
-  int TUNE_denomConst = 12800;
-  int TUNE_depth8  = 4410;
-  int TUNE_depth9  = 4410;
-  int TUNE_depth10 = 4410;
-  int TUNE_depth11 = 4410;
-  int TUNE_depth12 = 4410;
-  int TUNE_depth13 = 4410;
-  int TUNE_depth14 = 4410;
-  int TUNE_depth15 = 4410;
-  int TUNE_depth16 = 4410;
-  int TUNE_depth17 = 4410;
-  int TUNE_depth18 = 4410;
-
-  TUNE(SetRange(10000, 15600), TUNE_denomConst);
-  TUNE(SetRange(0, 8820), TUNE_depth8);
-  TUNE(SetRange(0, 8820), TUNE_depth9);
-  TUNE(SetRange(0, 8820), TUNE_depth10);
-  TUNE(SetRange(0, 8820), TUNE_depth11);
-  TUNE(SetRange(0, 8820), TUNE_depth12);
-  TUNE(SetRange(0, 8820), TUNE_depth13);
-  TUNE(SetRange(0, 8820), TUNE_depth14);
-  TUNE(SetRange(0, 8820), TUNE_depth15);
-  TUNE(SetRange(0, 8820), TUNE_depth16);
-  TUNE(SetRange(0, 8820), TUNE_depth17);
-  TUNE(SetRange(0, 8820), TUNE_depth18);
+  constexpr int TUNE_denomConst = 12906;
+  constexpr int TUNE_depth8  = 3508;
+  constexpr int TUNE_depth9  = 1628;
+  constexpr int TUNE_depth10 = 5166;
+  constexpr int TUNE_depth11 = 4299;
+  constexpr int TUNE_depth12 = 6651;
+  constexpr int TUNE_depth13 = 6297;
+  constexpr int TUNE_depth14 = 4868;
+  constexpr int TUNE_depth15 = 3973;
+  constexpr int TUNE_depth16 = 4320;
+  constexpr int TUNE_depth17 = 5506;
+  constexpr int TUNE_depth18 = 4840;
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
