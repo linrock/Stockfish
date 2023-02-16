@@ -193,26 +193,17 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  Value LazyThreshold1    =  Value(3631);
-  Value LazyThreshold2    =  Value(2084);
-  Value SpaceThreshold    =  Value(11551);
-  TUNE(SetRange(2000,4000), LazyThreshold1);
-  TUNE(SetRange(1500,2500), LazyThreshold2);
-  TUNE(SetRange(11000,12000), SpaceThreshold);
+  constexpr Value LazyThreshold1    =  Value(3300);
+  constexpr Value LazyThreshold2    =  Value(2051);
+  constexpr Value SpaceThreshold    =  Value(11642);
 
-  int useClassicalPsqtThresh = 1781;
-  TUNE(SetRange(1700, 1900), useClassicalPsqtThresh);
-  int nnueComplexityScale = 406;
-  TUNE(SetRange(300, 500), nnueComplexityScale);
-  int nnueComplexityOffset = 272;
-  TUNE(SetRange(250, 300), nnueComplexityOffset);
-  int optimismScaleOffset = 748;
-  TUNE(SetRange(650, 850), optimismScaleOffset);
+  constexpr int useClassicalPsqtThresh = 1781;
+  constexpr int nnueComplexityScale = 377;
+  constexpr int nnueComplexityOffset = 267;
+  constexpr int optimismScaleOffset = 756;
 
-  int pDamp1 = 200;
-  TUNE(SetRange(100,300), pDamp1);
-  int pDamp2 = 214;
-  TUNE(SetRange(100,300), pDamp2);
+  constexpr int pDamp1 = 198;
+  constexpr int pDamp2 = 242;
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 76, 46, 45, 14 };
