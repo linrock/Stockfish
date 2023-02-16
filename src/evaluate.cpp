@@ -60,6 +60,12 @@ namespace Stockfish {
 
 namespace Eval {
 
+  int TUNE_dampOffset = 2575;
+  int TUNE_dampR50Mult = 12;
+  int TUNE_dampDenom = 3959;
+  int TUNE_nnueMultScale = 11;
+  int TUNE_nnueScaleOffset = 748;
+
   bool useNNUE;
   string currentEvalFileName = "None";
 
@@ -1080,11 +1086,11 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           *complexity = nnueComplexity;
 
       optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      v = TUNE_nnueMultScale * nnue * scale / 8192 + optimism * (scale - TUNE_nnueScaleOffset) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
+  v = v * (TUNE_dampOffset - TUNE_dampR50Mult * pos.rule50_count()) / TUNE_dampDenom;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
