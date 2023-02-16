@@ -62,9 +62,14 @@ namespace Eval {
   int TUNE_nnuePsqThresh = 1781;
   int TUNE_nnueComplexityScale = 406;
   int TUNE_optimismOffset = 272;
+  int TUNE_psqMinusNnueScale = 424;
+  int TUNE_scaleOffset = 748;
   TUNE(SetRange(1700, 1900), TUNE_nnuePsqThresh);
   TUNE(SetRange(250, 550), TUNE_nnueComplexityScale);
   TUNE(SetRange(200, 350), TUNE_optimismOffset);
+  TUNE(SetRange(350, 500), TUNE_psqMinusNnueScale);
+  TUNE(SetRange(600, 900), TUNE_scaleOffset);
+
 
   bool useNNUE;
   string currentEvalFileName = "None";
@@ -1078,7 +1083,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
 
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  TUNE_nnueComplexityScale * nnueComplexity
-                        + 424 * abs(psq - nnue)
+                        + TUNE_psqMinusNnueScale * abs(psq - nnue)
                         + int(optimism) * int(psq - nnue)
                         ) / 1024;
 
@@ -1087,7 +1092,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           *complexity = nnueComplexity;
 
       optimism = optimism * (TUNE_optimismOffset + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      v = (nnue * scale + optimism * (scale - TUNE_scaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
