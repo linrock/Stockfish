@@ -59,12 +59,12 @@ using namespace std;
 namespace Stockfish {
 
 namespace Eval {
-  int TUNE_scale = 1076;
-  int TUNE_numPawnsMult = 0;
-  int TUNE_nonPawnMaterialMult = 76;
-  TUNE(SetRange(600, 1400), TUNE_scale);
-  TUNE(SetRange(-24, 24), TUNE_numPawnsMult);
-  TUNE(SetRange(50, 100), TUNE_nonPawnMaterialMult);
+  int TUNE_nnuePsqThresh = 1781;
+  int TUNE_nnueComplexityScale = 406;
+  int TUNE_optimismOffset = 272;
+  TUNE(SetRange(1700, 1900), TUNE_nnuePsqThresh);
+  TUNE(SetRange(250, 550), TUNE_nnueComplexityScale);
+  TUNE(SetRange(200, 350), TUNE_optimismOffset);
 
   bool useNNUE;
   string currentEvalFileName = "None";
@@ -1062,16 +1062,14 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > TUNE_nnuePsqThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
       int nnueComplexity;
-      int scale = TUNE_scale
-        + TUNE_numPawnsMult * pos.count<PAWN>()
-        + TUNE_nonPawnMaterialMult * pos.non_pawn_material() / 4096;
+      int scale = 1035 + 8 * pos.count<PAWN>() + 55 * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1079,7 +1077,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
+      nnueComplexity = (  TUNE_nnueComplexityScale * nnueComplexity
                         + 424 * abs(psq - nnue)
                         + int(optimism) * int(psq - nnue)
                         ) / 1024;
@@ -1088,7 +1086,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
+      optimism = optimism * (TUNE_optimismOffset + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
