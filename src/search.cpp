@@ -57,16 +57,11 @@ using namespace Search;
 
 namespace {
 
-  int TUNE_futPruneChildDenom = 304;
-  int TUNE_futPruneChildThresh = 28580;
-  int TUNE_futPruneOffset = 185;
-  int TUNE_histMult = -4180;
-  int TUNE_futPruneParOffset = 103;
-  TUNE(SetRange(152, 608), TUNE_futPruneChildDenom);
-  TUNE(SetRange(27000, 30000), TUNE_futPruneChildThresh);
-  TUNE(SetRange(20, 350), TUNE_futPruneOffset);
-  TUNE(SetRange(-5000, -3360), TUNE_histMult);
-  TUNE(SetRange(50, 150), TUNE_futPruneParOffset);
+  constexpr int TUNE_futPruneChildDenom = 196;
+  constexpr int TUNE_futPruneChildThresh = 28851;
+  constexpr int TUNE_futPruneOffset = 199;
+  constexpr int TUNE_histMult = -4296;
+  constexpr int TUNE_futPruneParOffset = 97;
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
