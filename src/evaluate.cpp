@@ -63,9 +63,13 @@ namespace Eval {
   int TUNE_dampOffset = 2000;
   int TUNE_dampR50Mult = 10;
   int TUNE_dampDenom = 2140;
+  int TUNE_nnueMultScale = 8;
+  int TUNE_nnueScaleOffset = 748;
   TUNE(SetRange(1000, 3000), TUNE_dampOffset);
   TUNE(SetRange(0, 50), TUNE_dampR50Mult);
   TUNE(SetRange(1070, 4180), TUNE_dampDenom);
+  TUNE(SetRange(0, 32), TUNE_nnueMultScale);
+  TUNE(SetRange(500, 1000), TUNE_nnueScaleOffset);
 
   bool useNNUE;
   string currentEvalFileName = "None";
@@ -1088,7 +1092,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           *complexity = nnueComplexity;
 
       optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      v = TUNE_nnueMultScale * nnue * scale / 8192 + optimism * (scale - TUNE_nnueScaleOffset) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
