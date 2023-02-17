@@ -58,6 +58,9 @@ using namespace Search;
 
 namespace {
 
+  int TUNE_ssePruningThresh = -108;
+  TUNE(SetRange(-300, 0), TUNE_ssePruningThresh);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
@@ -1576,7 +1579,7 @@ moves_loop: // When in check, search starts here
           continue;
 
       // Do not search moves with bad enough SEE values (~5 Elo)
-      if (!pos.see_ge(move, Value(-108)))
+      if (!pos.see_ge(move, Value(TUNE_ssePruningThresh)))
           continue;
 
     }
