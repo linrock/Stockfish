@@ -62,9 +62,11 @@ namespace Eval {
   int TUNE_scale = 1076;
   int TUNE_numPawnsMult = 0;
   int TUNE_nonPawnMaterialMult = 76;
-  TUNE(SetRange(600, 1400), TUNE_scale);
+  int TUNE_classicalPsqThresh = 1781;
+  TUNE(SetRange(900, 1250), TUNE_scale);
   TUNE(SetRange(-24, 24), TUNE_numPawnsMult);
-  TUNE(SetRange(50, 100), TUNE_nonPawnMaterialMult);
+  TUNE(SetRange(45, 95), TUNE_nonPawnMaterialMult);
+  TUNE(SetRange(1700, 1860), TUNE_classicalPsqThresh);
 
   bool useNNUE;
   string currentEvalFileName = "None";
@@ -199,8 +201,11 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3631);
-  constexpr Value LazyThreshold2    =  Value(2084);
+  Value LazyThreshold1    =  Value(3631);
+  Value LazyThreshold2    =  Value(2084);
+  TUNE(SetRange(3000, 4000), LazyThreshold1);
+  TUNE(SetRange(1500, 2300), LazyThreshold2);
+
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1062,7 +1067,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > TUNE_classicalPsqThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
