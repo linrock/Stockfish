@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu -o pipefail
 
 binpack_file=$1
 
