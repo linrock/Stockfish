@@ -5,15 +5,15 @@ if [ "$#" -ne 2 ]; then
 fi
 
 function binpack_to_csv() {
-  intput_filename=$1
+  input_filename=$1
   output_filename=$(basename $1).csv
   output_dir=$2
-  output_filepath=$output_dir/$output_filename
-  if [ -f $output_filepath ]; then
-    echo "Doing nothing, csv exists: $output_filepath"
+  output_csv_filepath=$output_dir/$output_filename
+  if [ -f $output_csv_filepath ]; then
+    echo "Doing nothing, csv exists: $output_csv_filepath"
   else
-    echo "Filtering... $input_filename -> $output_filepath"
-    ./binpack_to_csv.sh $input_filename | grep "d6 pv2" > $output_filepath
+    echo "Filtering... $input_filename -> $output_csv_filepath"
+    ./binpack_to_csv.sh $input_filename | grep "d6 pv2" > $output_csv_filepath
   fi
 }
 export -f binpack_to_csv
