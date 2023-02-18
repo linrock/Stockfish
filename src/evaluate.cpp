@@ -59,12 +59,9 @@ using namespace std;
 namespace Stockfish {
 
 namespace Eval {
-  int TUNE_scale = 1076;
-  int TUNE_numPawnsMult = 0;
-  int TUNE_nonPawnMaterialMult = 76;
-  TUNE(SetRange(600, 1400), TUNE_scale);
-  TUNE(SetRange(-24, 24), TUNE_numPawnsMult);
-  TUNE(SetRange(50, 100), TUNE_nonPawnMaterialMult);
+  int TUNE_scale = 1033;
+  int TUNE_numPawnsMult = 4;
+  int TUNE_nonPawnMaterialMult = 78;
 
   bool useNNUE;
   string currentEvalFileName = "None";
