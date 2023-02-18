@@ -62,9 +62,9 @@ namespace Eval {
   int TUNE_scale = 1076;
   int TUNE_numPawnsMult = 0;
   int TUNE_nonPawnMaterialMult = 76;
-  TUNE(SetRange(600, 1400), TUNE_scale);
+  TUNE(SetRange(900, 1250), TUNE_scale);
   TUNE(SetRange(-24, 24), TUNE_numPawnsMult);
-  TUNE(SetRange(50, 100), TUNE_nonPawnMaterialMult);
+  TUNE(SetRange(45, 95), TUNE_nonPawnMaterialMult);
 
   bool useNNUE;
   string currentEvalFileName = "None";
@@ -199,8 +199,11 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3631);
-  constexpr Value LazyThreshold2    =  Value(2084);
+  Value LazyThreshold1    =  Value(3631);
+  Value LazyThreshold2    =  Value(2084);
+  TUNE(SetRange(3000, 4000), LazyThreshold1);
+  TUNE(SetRange(1500, 2300), LazyThreshold2);
+
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
