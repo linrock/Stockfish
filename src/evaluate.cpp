@@ -60,8 +60,8 @@ namespace Stockfish {
 
 namespace Eval {
 
-  constexpr int TUNE_nnueDampConst = 172;
-  constexpr int TUNE_nnueDampDenom = 200;
+  constexpr int TUNE_nnueDampConst = 207;
+  constexpr int TUNE_nnueDampDenom = 218;
 
   bool useNNUE;
   string currentEvalFileName = "None";
