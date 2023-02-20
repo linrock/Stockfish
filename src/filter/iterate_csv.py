@@ -1,6 +1,8 @@
 import os.path
 import sys
 
+import chess
+
 ''' Iterate over positions .csv files and output .plain files
 '''
 if len(sys.argv) != 2:
@@ -17,6 +19,8 @@ if os.path.isfile(output_filename):
 position = None
 num_games = 0
 num_positions = 0
+num_bestmove_captures = 0
+num_bestmove_promos = 0
 
 is_standard_game = False
 num_standard_games = 0
@@ -34,6 +38,11 @@ with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as out
                 num_standard_games += 1
             else:
                 num_non_standard_games += 1
+        b = chess.Board(fen)
+        move = chess.Move.from_uci(bestmove)
+        bestmove_is_capture = b.is_capture(move)
+        if bestmove_is_capture:
+            num_bestmove_captures += 1
         num_positions += 1
 
 print(f'Filtered {input_filename} to {output_filename}')
@@ -41,3 +50,5 @@ print(f'  # games:                 {num_games}')
 print(f'    # standard games:      {num_standard_games}')
 print(f'    # non-standard games:  {num_non_standard_games}')
 print(f'  # positions:             {num_positions}')
+print(f'    # bestmove captures:   {num_bestmove_captures}')
+# print(f'    # promos:   {num_promos}')
