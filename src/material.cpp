@@ -117,6 +117,10 @@ namespace {
 
 namespace Material {
 
+Value TUNE_MidgameLimit = Value(15258);
+Value TUNE_EndgameLimit = Value(3915);
+TUNE(SetRange(15000, 15500), TUNE_MidgameLimit);
+TUNE(SetRange(3700, 4100), TUNE_EndgameLimit);
 
 /// Material::probe() looks up the current position's material configuration in
 /// the material hash table. It returns a pointer to the Entry if the position
@@ -137,10 +141,10 @@ Entry* probe(const Position& pos) {
 
   Value npm_w = pos.non_pawn_material(WHITE);
   Value npm_b = pos.non_pawn_material(BLACK);
-  Value npm   = std::clamp(npm_w + npm_b, EndgameLimit, MidgameLimit);
+  Value npm   = std::clamp(npm_w + npm_b, TUNE_EndgameLimit, TUNE_MidgameLimit);
 
   // Map total non-pawn material into [PHASE_ENDGAME, PHASE_MIDGAME]
-  e->gamePhase = Phase(((npm - EndgameLimit) * PHASE_MIDGAME) / (MidgameLimit - EndgameLimit));
+  e->gamePhase = Phase(((npm - TUNE_EndgameLimit) * PHASE_MIDGAME) / (TUNE_MidgameLimit - TUNE_EndgameLimit));
 
   // Let's look if we have a specialized evaluation function for this particular
   // material configuration. Firstly we look for a fixed configuration one, then
