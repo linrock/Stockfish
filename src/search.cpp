@@ -58,6 +58,15 @@ using namespace Search;
 
 namespace {
 
+  int TUNE_histDenom = 7208;
+  int TUNE_lmrDepth = 13;
+  int TUNE_staticEvalOffset = 103;
+  int TUNE_lmrDepthMult = 136;
+  TUNE(SetRange(6800, 7600), TUNE_histDenom);
+  TUNE(SetRange(10, 16), TUNE_lmrDepth);
+  TUNE(SetRange(70, 130), TUNE_staticEvalOffset);
+  TUNE(SetRange(100, 172), TUNE_lmrDepthMult);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
@@ -1029,13 +1038,13 @@ moves_loop: // When in check, search starts here
 
               history += 2 * thisThread->mainHistory[us][from_to(move)];
 
-              lmrDepth += history / 7208;
+              lmrDepth += history / TUNE_histDenom;
               lmrDepth = std::max(lmrDepth, -2);
 
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
-                  && lmrDepth < 13
-                  && ss->staticEval + 103 + 136 * lmrDepth <= alpha)
+                  && lmrDepth < TUNE_lmrDepth
+                  && ss->staticEval + TUNE_staticEvalOffset + TUNE_lmrDepthMult * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
