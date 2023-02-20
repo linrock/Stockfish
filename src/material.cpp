@@ -117,10 +117,8 @@ namespace {
 
 namespace Material {
 
-Value TUNE_MidgameLimit = Value(15258);
-Value TUNE_EndgameLimit = Value(3915);
-TUNE(SetRange(15000, 15500), TUNE_MidgameLimit);
-TUNE(SetRange(3700, 4100), TUNE_EndgameLimit);
+constexpr Value TUNE_MidgameLimit = Value(15270);
+constexpr Value TUNE_EndgameLimit = Value(3950);
 
 /// Material::probe() looks up the current position's material configuration in
 /// the material hash table. It returns a pointer to the Entry if the position
