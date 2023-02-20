@@ -1,7 +1,9 @@
+import io
 import os.path
 import sys
 
 import chess
+import zstandard
 
 ''' Iterate over positions .csv files and output .plain files
 '''
@@ -10,7 +12,10 @@ if len(sys.argv) != 2:
     sys.exit(0)
 
 input_filename = sys.argv[1]
-output_filename = input_filename.replace('.csv', '.csv.plain')
+if input_filename.endswith(".csv"):
+    output_filename = input_filename.replace('.csv', '.csv.plain')
+elif input_filename.endswith(".csv.zst"):
+    output_filename = input_filename.replace('.csv.zst', '.csv.zst.plain')
 
 if os.path.isfile(output_filename):
     print(f'Found .csv.plain file. Doing nothing: {output_filename}')
@@ -32,8 +37,10 @@ num_non_standard_games = 0
 def move_is_promo(uci_move):
     return len(uci_move) == 5 and uci_move[-1] in ['n','b','r','q']
 
-print(f'Processing {input_filename} ...')
-with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as outfile:
+def process_csv_rows(infile):
+    global num_games, num_positions, num_positions_filtered_out, \
+           num_bestmove_captures, num_bestmove_promos, num_sf_bestmove1_captures, num_sf_bestmove2_captures, \
+           num_standard_games, num_non_standard_games
     for row in infile:
         ply, fen, bestmove_uci, bestmove_score, game_result, \
         sf_search_method, sf_bestmove1_uci, sf_bestmove1_score, sf_bestmove2_uci, sf_bestmove2_score = \
@@ -71,6 +78,17 @@ with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as out
         num_positions += 1
         if should_filter_out:
             num_positions_filtered_out += 1
+
+print(f'Processing {input_filename} ...')
+if input_filename.endswith(".csv.zst"):
+    with open(input_filename, 'rb') as compressed_infile:
+        dctx = zstandard.ZstdDecompressor()
+        stream_reader = dctx.stream_reader(compressed_infile)
+        text_stream = io.TextIOWrapper(stream_reader, encoding='utf-8')
+        process_csv_rows(text_stream)
+else:
+    with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as outfile:
+        process_csv_rows(infile)
 
 print(f'Filtered {input_filename} to {output_filename}')
 print(f'  # games:                       {num_games}')
