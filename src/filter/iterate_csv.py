@@ -57,6 +57,7 @@ with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as out
         sf_bestmove1 = chess.Move.from_uci(sf_bestmove1_uci)
         if b.is_capture(sf_bestmove1):
             num_sf_bestmove1_captures += 1
+        b.push(sf_bestmove1)
         sf_bestmove2 = chess.Move.from_uci(sf_bestmove2_uci)
         print(f'{fen}, bm: {bestmove} ({bestmove_score}), sf_bm1: {sf_bestmove1} ({sf_bestmove1_score}), sf_bm2: {sf_bestmove2} ({sf_bestmove2_score})')
         if b.is_capture(sf_bestmove2):
@@ -64,11 +65,11 @@ with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as out
         num_positions += 1
 
 print(f'Filtered {input_filename} to {output_filename}')
-print(f'  # games:                   {num_games}')
-print(f'    # standard games:        {num_standard_games}')
-print(f'    # non-standard games:    {num_non_standard_games}')
-print(f'  # positions:               {num_positions}')
-print(f'    # bestmove captures:     {num_bestmove_captures}')
-print(f'    # bestmove promos:       {num_bestmove_promos}')
-print(f'    # sf bestmove1 captures: {num_sf_bestmove1_captures}')
-print(f'    # sf bestmove2 captures: {num_sf_bestmove2_captures}')
+print(f'  # games:                       {num_games}')
+print(f'    # standard games:            {num_standard_games}')
+print(f'    # non-standard games:        {num_non_standard_games}')
+print(f'  # positions:                   {num_positions}')
+print(f'    # bestmove captures:         {num_bestmove_captures}')
+print(f'    # bestmove promos:           {num_bestmove_promos}')
+print(f'    # sf bestmove1 captures:     {num_sf_bestmove1_captures}')
+print(f'    # sf re-captures after bm1:  {num_sf_bestmove2_captures}')
