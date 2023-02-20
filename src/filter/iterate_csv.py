@@ -43,6 +43,9 @@ with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as out
         bestmove_is_capture = b.is_capture(move)
         if bestmove_is_capture:
             num_bestmove_captures += 1
+        bestmove_is_promo = len(bestmove) == 5 and bestmove[-1] in ['n','b','r','q']
+        if bestmove_is_promo:
+            num_bestmove_promos += 1
         num_positions += 1
 
 print(f'Filtered {input_filename} to {output_filename}')
@@ -51,4 +54,4 @@ print(f'    # standard games:      {num_standard_games}')
 print(f'    # non-standard games:  {num_non_standard_games}')
 print(f'  # positions:             {num_positions}')
 print(f'    # bestmove captures:   {num_bestmove_captures}')
-# print(f'    # promos:   {num_promos}')
+print(f'    # bestmove promos:     {num_bestmove_promos}')
