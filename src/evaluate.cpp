@@ -59,17 +59,11 @@ using namespace std;
 namespace Stockfish {
 
 namespace Eval {
-  int TUNE_nnuePsqThresh = 1781;
-  int TUNE_nnueComplexityScale = 406;
-  int TUNE_optimismOffset = 272;
-  int TUNE_psqMinusNnueScale = 424;
-  int TUNE_scaleOffset = 748;
-  TUNE(SetRange(1700, 1900), TUNE_nnuePsqThresh);
-  TUNE(SetRange(250, 550), TUNE_nnueComplexityScale);
-  TUNE(SetRange(200, 350), TUNE_optimismOffset);
-  TUNE(SetRange(350, 500), TUNE_psqMinusNnueScale);
-  TUNE(SetRange(600, 900), TUNE_scaleOffset);
-
+  int TUNE_nnuePsqThresh = 1799;
+  int TUNE_nnueComplexityScale = 368;
+  int TUNE_optimismOffset = 296;
+  int TUNE_psqMinusNnueScale = 498;
+  int TUNE_scaleOffset = 817;
 
   bool useNNUE;
   string currentEvalFileName = "None";
