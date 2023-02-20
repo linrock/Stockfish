@@ -19,6 +19,7 @@ if os.path.isfile(output_filename):
 position = None
 num_games = 0
 num_positions = 0
+num_positions_filtered_out = 0
 num_bestmove_captures = 0
 num_bestmove_promos = 0
 num_sf_bestmove1_captures = 0
@@ -48,21 +49,28 @@ with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as out
         bestmove = chess.Move.from_uci(bestmove_uci)
         # check if provided move is a capture or promo
         bestmove_is_capture = b.is_capture(bestmove)
+        should_filter_out = False
         if bestmove_is_capture:
             num_bestmove_captures += 1
+            should_filter_out = True
         bestmove_is_promo = move_is_promo(bestmove_uci)
         if bestmove_is_promo:
             num_bestmove_promos += 1
+            should_filter_out = True
         # check if moves from SF search are captures or promos
         sf_bestmove1 = chess.Move.from_uci(sf_bestmove1_uci)
         if b.is_capture(sf_bestmove1):
             num_sf_bestmove1_captures += 1
+            should_filter_out = True
         b.push(sf_bestmove1)
         sf_bestmove2 = chess.Move.from_uci(sf_bestmove2_uci)
         print(f'{fen}, bm: {bestmove} ({bestmove_score}), sf_bm1: {sf_bestmove1} ({sf_bestmove1_score}), sf_bm2: {sf_bestmove2} ({sf_bestmove2_score})')
         if b.is_capture(sf_bestmove2):
             num_sf_bestmove2_captures += 1
+            should_filter_out = True
         num_positions += 1
+        if should_filter_out:
+            num_positions_filtered_out += 1
 
 print(f'Filtered {input_filename} to {output_filename}')
 print(f'  # games:                       {num_games}')
@@ -73,3 +81,4 @@ print(f'    # bestmove captures:         {num_bestmove_captures}')
 print(f'    # bestmove promos:           {num_bestmove_promos}')
 print(f'    # sf bestmove1 captures:     {num_sf_bestmove1_captures}')
 print(f'    # sf re-captures after bm1:  {num_sf_bestmove2_captures}')
+print(f'  # positions after filtering:   {num_positions - num_positions_filtered_out}')
