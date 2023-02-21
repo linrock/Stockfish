@@ -58,9 +58,9 @@ using namespace Search;
 
 namespace {
 
-  constexpr int TUNE_histDenom = 7133;
+  constexpr int TUNE_histDenom = 7163;
   constexpr int TUNE_lmrDepth = 13;
-  constexpr int TUNE_staticEvalOffset = 103;
+  constexpr int TUNE_staticEvalOffset = 101;
   constexpr int TUNE_lmrDepthMult = 150;
 
   // Different node types, used as a template parameter
