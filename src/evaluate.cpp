@@ -192,9 +192,9 @@ using namespace Trace;
 
 namespace {
 
-  constexpr int TUNE_complexityDenomOffset = -2;
-  constexpr int TUNE_optimismDenomOffset = 24;
-  constexpr int TUNE_vDenomOffset = 6;
+  constexpr int TUNE_complexityDenomOffset = 23;
+  constexpr int TUNE_optimismDenomOffset = 10;
+  constexpr int TUNE_vDenomOffset = 13;
 
   // Threshold for lazy and space evaluation
   constexpr Value LazyThreshold1    =  Value(3631);
