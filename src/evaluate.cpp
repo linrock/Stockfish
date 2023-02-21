@@ -192,10 +192,10 @@ using namespace Trace;
 
 namespace {
 
-  constexpr Value LazyThreshold1    =  Value(2934);
-  constexpr Value LazyThreshold2    =  Value(2253);
-  constexpr int useClassicalPsqtThresh = 1783;
-  constexpr int nnueComplexityScale = 413;
+  constexpr Value LazyThreshold1    =  Value(2896);
+  constexpr Value LazyThreshold2    =  Value(2224);
+  constexpr int useClassicalPsqtThresh = 1775;
+  constexpr int nnueComplexityScale = 409;
   constexpr int nnueComplexityOffset = 276;
   constexpr int pDamp1 = 234;
 
