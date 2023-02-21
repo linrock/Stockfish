@@ -58,6 +58,11 @@ using namespace Search;
 
 namespace {
 
+  int TUNE_optMult = 116;
+  int TUNE_optDenomOffset = 170;
+  TUNE(SetRange(100, 130), TUNE_optMult);
+  TUNE(SetRange(100, 240), TUNE_optDenomOffset);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
@@ -359,7 +364,7 @@ void Thread::search() {
               beta  = std::min(prev + delta, VALUE_INFINITE);
 
               // Adjust optimism based on root move's previousScore
-              int opt = 116 * prev / (std::abs(prev) + 170);
+              int opt = TUNE_optMult * prev / (std::abs(prev) + TUNE_optDenomOffset);
               optimism[ us] = Value(opt);
               optimism[~us] = -optimism[us];
           }
