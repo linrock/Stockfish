@@ -58,9 +58,9 @@ using namespace Search;
 
 namespace {
 
-  constexpr int TUNE_statScoreOffset = 4479;
-  constexpr int TUNE_reducDenomConst = 12510;
-  constexpr int TUNE_reducDenomMidMult = 4381;
+  constexpr int TUNE_statScoreOffset = 4383;
+  constexpr int TUNE_reducDenomConst = 12180;
+  constexpr int TUNE_reducDenomMidMult = 4461;
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
