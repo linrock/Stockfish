@@ -60,6 +60,17 @@ namespace Stockfish {
 
 namespace Eval {
 
+  int TUNE_scaleConst = 1001;
+  int TUNE_nonPawnMatMult = 61;
+  int TUNE_numPawnsScale = 5;
+  int TUNE_numQueensScale = 0;
+  int TUNE_numRooksScale = 0;
+  TUNE(SetRange(676, 1476), TUNE_scaleConst);
+  TUNE(SetRange(25, 125), TUNE_nonPawnMatMult);
+  TUNE(SetRange(-30, 30), TUNE_numPawnsScale);
+  TUNE(SetRange(-30, 30), TUNE_numQueensScale);
+  TUNE(SetRange(-30, 30), TUNE_numRooksScale);
+
   bool useNNUE;
   string currentEvalFileName = "None";
 
@@ -193,8 +204,8 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3631);
-  constexpr Value LazyThreshold2    =  Value(2084);
+  constexpr Value LazyThreshold1    =  Value(3622);
+  constexpr Value LazyThreshold2    =  Value(1962);
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1063,7 +1074,10 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   else
   {
       int nnueComplexity;
-      int scale = 1076 + 96 * pos.non_pawn_material() / 5120;
+      int scale = TUNE_scaleConst + TUNE_nonPawnMatMult * pos.non_pawn_material() / 4096
+                                  + TUNE_numPawnsScale * pos.count<PAWN>()
+                                  + TUNE_numQueensScale * pos.count<QUEEN>()
+                                  + TUNE_numRooksScale * pos.count<ROOK>();
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
