@@ -60,6 +60,17 @@ namespace Stockfish {
 
 namespace Eval {
 
+  int TUNE_scaleConst = 1001;
+  int TUNE_nonPawnMatMult = 61;
+  int TUNE_numPawnsScale = 5;
+  int TUNE_numQueensScale = 0;
+  int TUNE_numRooksScale = 0;
+  TUNE(SetRange(676, 1476), TUNE_scaleConst);
+  TUNE(SetRange(25, 125), TUNE_nonPawnMatMult);
+  TUNE(SetRange(-30, 30), TUNE_numPawnsScale);
+  TUNE(SetRange(-30, 30), TUNE_numQueensScale);
+  TUNE(SetRange(-30, 30), TUNE_numRooksScale);
+
   bool useNNUE;
   string currentEvalFileName = "None";
 
@@ -1063,7 +1074,10 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   else
   {
       int nnueComplexity;
-      int scale = 1001 + 5 * pos.count<PAWN>() + 61 * pos.non_pawn_material() / 4096;
+      int scale = 937 + 61 * pos.non_pawn_material() / 4096
+                      + 10 * pos.count<PAWN>()
+                      -  3 * pos.count<QUEEN>()
+                      +  5 * pos.count<ROOK>();
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
