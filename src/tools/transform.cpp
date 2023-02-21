@@ -460,7 +460,7 @@ namespace Stockfish::Tools
 				"d6 pv2," <<
 				UCI::move((Stockfish::Move)best_move, false) << "," <<
 				m1_score << "," <<
-				UCI::move((Stockfish::Move)th.rootMoves[0].pv[1], false) << "," <<
+				UCI::move((Stockfish::Move)th.rootMoves[1].pv[0], false) << "," <<
 				m2_score;
 			    sync_cout << csv_string.str() << sync_endl;
 		    	} else {
