@@ -199,10 +199,10 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  Value LazyThreshold1    =  Value(3631);
-  Value LazyThreshold2    =  Value(2084);
-  TUNE(SetRange(3000, 4000), LazyThreshold1);
-  TUNE(SetRange(1500, 2300), LazyThreshold2);
+  Value LazyThreshold1    =  Value(3631 * 115 / 100);
+  Value LazyThreshold2    =  Value(2084 * 115 / 100);
+  TUNE(SetRange(3000, 4500), LazyThreshold1);
+  TUNE(SetRange(1500, 2500), LazyThreshold2);
 
   constexpr Value SpaceThreshold    =  Value(11551);
 
