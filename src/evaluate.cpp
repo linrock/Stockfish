@@ -192,6 +192,13 @@ using namespace Trace;
 
 namespace {
 
+  int TUNE_complexityDenomOffset = 0;
+  int TUNE_optimismDenomOffset = 0;
+  int TUNE_vDenomOffset = 0;
+  TUNE(SetRange(-100, 100), TUNE_complexityDenomOffset);
+  TUNE(SetRange(-100, 100), TUNE_optimismDenomOffset);
+  TUNE(SetRange(-100, 100), TUNE_vDenomOffset);
+
   // Threshold for lazy and space evaluation
   constexpr Value LazyThreshold1    =  Value(3631);
   constexpr Value LazyThreshold2    =  Value(2084);
@@ -1073,14 +1080,15 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  406 * nnueComplexity
                         + (424 + optimism) * abs(psq - nnue)
+                        + TUNE_complexityDenomOffset
                         ) / 1024;
 
       // Return hybrid NNUE complexity to caller
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      optimism = (optimism * (272 + nnueComplexity) + TUNE_optimismDenomOffset) / 256;
+      v = (nnue * scale + optimism * (scale - 748) + TUNE_vDenomOffset) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
