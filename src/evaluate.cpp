@@ -64,10 +64,12 @@ namespace Eval {
   int TUNE_nonPawnMatMult = 77;
   int TUNE_numPawnsScale = 0;
   int TUNE_numQueensScale = 0;
-  TUNE(SetRange(976, 1176), TUNE_scaleConst);
-  TUNE(SetRange(50, 100), TUNE_nonPawnMatMult);
+  int TUNE_numRooksScale = 0;
+  TUNE(SetRange(776, 1376), TUNE_scaleConst);
+  TUNE(SetRange(25, 125), TUNE_nonPawnMatMult);
   TUNE(SetRange(-30, 30), TUNE_numPawnsScale);
   TUNE(SetRange(-500, 500), TUNE_numQueensScale);
+  TUNE(SetRange(-500, 500), TUNE_numRooksScale);
 
   bool useNNUE;
   string currentEvalFileName = "None";
@@ -1074,7 +1076,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       int nnueComplexity;
       int scale = TUNE_scaleConst + TUNE_nonPawnMatMult * pos.non_pawn_material() / 4096
                                   + TUNE_numPawnsScale * pos.count<PAWN>()
-                                  + TUNE_numQueensScale * pos.count<QUEEN>();
+                                  + TUNE_numQueensScale * pos.count<QUEEN>()
+                                  + TUNE_numRooksScale * pos.count<ROOK>();
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
