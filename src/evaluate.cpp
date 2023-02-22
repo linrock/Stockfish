@@ -58,6 +58,19 @@ using namespace std;
 
 namespace Stockfish {
 
+constexpr Value LazyThreshold1 = Value(3622);
+Value LazyThreshold2 = Value(1962);
+TUNE(SetRange(1862, 2062), LazyThreshold2);
+
+int TUNE_psqlThresh = 1781;
+int TUNE_nnueScale = 1001;
+int TUNE_nnueComplexityMult = 406;
+int TUNE_nnueNumOffset = 272;
+TUNE(SetRange(1740, 1820), TUNE_psqlThresh);
+TUNE(SetRange(900, 1100), TUNE_nnueScale);
+TUNE(SetRange(350, 450), TUNE_nnueComplexityMult);
+TUNE(SetRange(200, 350), TUNE_nnueNumOffset);
+
 namespace Eval {
 
   bool useNNUE;
@@ -193,8 +206,6 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1056,14 +1067,14 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > TUNE_psqlThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
       int nnueComplexity;
-      int scale = 1001 + 5 * pos.count<PAWN>() + 61 * pos.non_pawn_material() / 4096;
+      int scale = TUNE_nnueScale + 5 * pos.count<PAWN>() + 61 * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1071,7 +1082,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
+      nnueComplexity = (  TUNE_nnueComplexityMult * nnueComplexity
                         + (424 + optimism) * abs(psq - nnue)
                         ) / 1024;
 
@@ -1079,7 +1090,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
+      optimism = optimism * (TUNE_nnueNumOffset + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
