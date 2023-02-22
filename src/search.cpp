@@ -58,6 +58,11 @@ using namespace Search;
 
 namespace {
 
+  int TUNE_complexityNullMoveDenom = 24;
+  int TUNE_complexityNullMoveThresh = 800;
+  TUNE(SetRange(12, 48), TUNE_complexityNullMoveDenom);
+  TUNE(SetRange(600, 1000), TUNE_complexityNullMoveThresh);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
