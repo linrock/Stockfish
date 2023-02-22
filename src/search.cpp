@@ -58,6 +58,13 @@ using namespace Search;
 
 namespace {
 
+  int TUNE_statBonusMultD = 350;
+  int TUNE_statBonusOffset = 400;
+  int TUNE_statBonusMin = 1650;
+  TUNE(SetRange(300, 400), TUNE_statBonusMultD);
+  TUNE(SetRange(300, 500), TUNE_statBonusOffset);
+  TUNE(SetRange(1550, 1750), TUNE_statBonusMin);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
@@ -81,7 +88,7 @@ namespace {
 
   // History and stats update bonus, based on depth
   int stat_bonus(Depth d) {
-    return std::min(350 * d - 400, 1650);
+    return std::min(TUNE_statBonusMultD * d - TUNE_statBonusOffset, TUNE_statBonusMin);
   }
 
   // Add a small random component to draw evaluations to avoid 3-fold blindness
