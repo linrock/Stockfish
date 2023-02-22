@@ -58,6 +58,11 @@ using namespace Search;
 
 namespace {
 
+  int TUNE_complexityNullMoveDenom = 24;
+  int TUNE_complexityNullMoveThresh = 800;
+  TUNE(SetRange(12, 48), TUNE_complexityNullMoveDenom);
+  TUNE(SetRange(600, 1000), TUNE_complexityNullMoveThresh);
+
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
 
@@ -798,7 +803,7 @@ namespace {
         && (ss-1)->statScore < 18200
         &&  eval >= beta
         &&  eval >= ss->staticEval
-        &&  ss->staticEval >= beta - 20 * depth - improvement / 14 + 235 + complexity / 24
+        &&  ss->staticEval >= beta - 20 * depth - improvement / 14 + 235 + complexity / TUNE_complexityNullMoveDenom
         && !excludedMove
         &&  pos.non_pawn_material(us)
         && (ss->ply >= thisThread->nmpMinPly || us != thisThread->nmpColor))
@@ -806,7 +811,7 @@ namespace {
         assert(eval - beta >= 0);
 
         // Null move dynamic reduction based on depth, eval and complexity of position
-        Depth R = std::min(int(eval - beta) / 165, 6) + depth / 3 + 4 - (complexity > 800);
+        Depth R = std::min(int(eval - beta) / 165, 6) + depth / 3 + 4 - (complexity > TUNE_complexityNullMoveThresh);
 
         ss->currentMove = MOVE_NULL;
         ss->continuationHistory = &thisThread->continuationHistory[0][0][NO_PIECE][0];
