@@ -58,19 +58,13 @@ using namespace Search;
 
 namespace {
 
-  int TUNE_histDenom = 7208;
-  int TUNE_staticEvalOffset = 103;
+  int TUNE_histDenom = 7126;
+  int TUNE_staticEvalOffset = 104;
   int TUNE_lmrDepthMult = 136;
-  TUNE(SetRange(6800, 7600), TUNE_histDenom);
-  TUNE(SetRange(70, 130), TUNE_staticEvalOffset);
-  TUNE(SetRange(100, 172), TUNE_lmrDepthMult);
 
-  int TUNE_statScoreOffset = 4467;
-  int TUNE_reducDenomConst = 12800;
-  int TUNE_reducDenomMidMult = 4410;
-  TUNE(SetRange(4000, 4900), TUNE_statScoreOffset);
-  TUNE(SetRange(10000, 15600), TUNE_reducDenomConst);
-  TUNE(SetRange(4000, 4820), TUNE_reducDenomMidMult);
+  int TUNE_statScoreOffset = 4484;
+  int TUNE_reducDenomConst = 12407;
+  int TUNE_reducDenomMidMult = 4503;
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
