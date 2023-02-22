@@ -34,6 +34,13 @@
 
 namespace Stockfish::Eval::NNUE {
 
+  int TUNE_deltaConst = 24;
+  int TUNE_deltaNonPawnDenom = 9560;
+  int TUNE_numPawnsDelta = 0;
+  TUNE(SetRange(0, 48), TUNE_deltaConst);
+  TUNE(SetRange(9260, 9860), TUNE_deltaNonPawnDenom);
+  TUNE(SetRange(-30, 30), TUNE_numPawnsDelta);
+
   // Input feature converter
   LargePagePtr<FeatureTransformer> featureTransformer;
 
@@ -143,7 +150,7 @@ namespace Stockfish::Eval::NNUE {
     // overaligning stack variables with alignas() doesn't work correctly.
 
     constexpr uint64_t alignment = CacheLineSize;
-    int delta = 24 - pos.non_pawn_material() / 9560;
+    int delta = TUNE_deltaConst - pos.non_pawn_material() / TUNE_deltaNonPawnDenom - TUNE_numPawnsDelta * pos.count<PAWN>();
 
 #if defined(ALIGNAS_ON_STACK_VARIABLES_BROKEN)
     TransformedFeatureType transformedFeaturesUnaligned[
