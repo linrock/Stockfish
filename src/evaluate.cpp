@@ -60,16 +60,11 @@ namespace Stockfish {
 
 namespace Eval {
 
-  int TUNE_scaleConst = 1001;
-  int TUNE_nonPawnMatMult = 61;
-  int TUNE_numPawnsScale = 5;
-  int TUNE_numQueensScale = 0;
-  int TUNE_numRooksScale = 0;
-  TUNE(SetRange(676, 1476), TUNE_scaleConst);
-  TUNE(SetRange(25, 125), TUNE_nonPawnMatMult);
-  TUNE(SetRange(-30, 30), TUNE_numPawnsScale);
-  TUNE(SetRange(-30, 30), TUNE_numQueensScale);
-  TUNE(SetRange(-30, 30), TUNE_numRooksScale);
+  int TUNE_nonPawnMatMult = 87;
+  int TUNE_numPawnsScale = 1;
+  int TUNE_numQueensScale = 4;
+  int TUNE_numRooksScale = -13;
+  int TUNE_scaleConst = 1037;
 
   bool useNNUE;
   string currentEvalFileName = "None";
