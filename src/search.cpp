@@ -58,12 +58,9 @@ using namespace Search;
 
 namespace {
 
-  int TUNE_statBonusMultD = 350;
-  int TUNE_statBonusOffset = 400;
-  int TUNE_statBonusMin = 1650;
-  TUNE(SetRange(300, 400), TUNE_statBonusMultD);
-  TUNE(SetRange(300, 500), TUNE_statBonusOffset);
-  TUNE(SetRange(1550, 1750), TUNE_statBonusMin);
+  constexpr int TUNE_statBonusMultD = 308;
+  constexpr int TUNE_statBonusOffset = 364;
+  constexpr int TUNE_statBonusMin = 1678;
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
