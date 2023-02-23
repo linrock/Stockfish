@@ -60,9 +60,9 @@ namespace Stockfish {
 
 namespace Eval {
 
-  constexpr int TUNE_nnueComplexityMult = 395;
-  constexpr int TUNE_nnueOptimismOffset = 418;
-  constexpr int TUNE_nnueNumOffset = 281;
+  constexpr int TUNE_nnueComplexityMult = 402;
+  constexpr int TUNE_nnueOptimismOffset = 422;
+  constexpr int TUNE_nnueNumOffset = 274;
 
   bool useNNUE;
   string currentEvalFileName = "None";

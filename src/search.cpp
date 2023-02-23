@@ -58,8 +58,8 @@ using namespace Search;
 
 namespace {
 
-  constexpr int TUNE_complexityNullMoveDenom = 22;
-  constexpr int TUNE_complexityNullMoveThresh = 854;
+  constexpr int TUNE_complexityNullMoveDenom = 23;
+  constexpr int TUNE_complexityNullMoveThresh = 841;
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
