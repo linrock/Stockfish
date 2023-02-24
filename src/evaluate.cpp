@@ -60,10 +60,10 @@ namespace Stockfish {
 
 namespace Eval {
 
-  constexpr int TUNE_dampDenom = 2651;
-  constexpr int TUNE_dampOffset = 2264;
+  constexpr int TUNE_dampDenom = 2831;
+  constexpr int TUNE_dampOffset = 2347;
   constexpr int TUNE_dampR50Mult = 14;
-  constexpr int TUNE_nnueMultScale = 8;
+  constexpr int TUNE_nnueMultScale = 9;
 
   bool useNNUE;
   string currentEvalFileName = "None";
