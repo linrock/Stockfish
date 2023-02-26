@@ -193,6 +193,19 @@ namespace {
   // Threshold for lazy and space evaluation
   constexpr Value LazyThreshold1    =  Value(3622);
   constexpr Value LazyThreshold2    =  Value(1962);
+
+  int TUNE_psqThresh = 2048;
+  int TUNE_nnueComplexityMult = 406;
+  int TUNE_nnueOptCompOffset = 272;
+  TUNE(SetRange(1748, 2348), TUNE_psqThresh);
+  TUNE(SetRange(356, 456), TUNE_nnueComplexityMult);
+  TUNE(SetRange(232, 312), TUNE_nnueOptCompOffset);
+
+  int TUNE_scaleBase = 1001;
+  int TUNE_scaleNonPawnMat = 64;
+  TUNE(SetRange(900, 1100), TUNE_scaleBase);
+  TUNE(SetRange(0, 128), TUNE_scaleNonPawnMat);
+
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1056,14 +1069,14 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > 2048;
+  bool useClassical = !useNNUE || abs(psq) > TUNE_psqThresh;
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
       int nnueComplexity;
-      int scale = 1001 + pos.non_pawn_material() / 64;
+      int scale = TUNE_scaleBase + TUNE_scaleNonPawnMat * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1071,11 +1084,11 @@ Value Eval::evaluate(const Position& pos) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
+      nnueComplexity = (  TUNE_nnueComplexityMult * nnueComplexity
                         + (424 + optimism) * abs(psq - nnue)
                         ) / 1024;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
+      optimism = optimism * (TUNE_nnueOptCompOffset + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
