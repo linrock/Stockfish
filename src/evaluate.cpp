@@ -58,17 +58,12 @@ using namespace std;
 
 namespace Stockfish {
 
-Value LazyThreshold1 = Value(3622);
-Value LazyThreshold2 = Value(1962);
-TUNE(SetRange(3400, 3700), LazyThreshold1);
-TUNE(SetRange(1800, 2050), LazyThreshold2);
+constexpr Value LazyThreshold1 = Value(3608);
+constexpr Value LazyThreshold2 = Value(1898);
 
-int TUNE_psqlThresh = 1781;
-int TUNE_nnueComplexityMult = 406;
-int TUNE_nnueNumOffset = 272;
-TUNE(SetRange(1740, 1820), TUNE_psqlThresh);
-TUNE(SetRange(350, 450), TUNE_nnueComplexityMult);
-TUNE(SetRange(200, 350), TUNE_nnueNumOffset);
+constexpr int TUNE_psqlThresh = 1796;
+constexpr int TUNE_nnueComplexityMult = 403;
+constexpr int TUNE_nnueNumOffset = 262;
 
 namespace Eval {
 
