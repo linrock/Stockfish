@@ -191,8 +191,15 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
+  constexpr Value LazyThreshold1 = Value(3622);
+  constexpr Value LazyThreshold2 = Value(1962);
+
+constexpr   int TUNE_nnueComplexityMult = 400;
+constexpr   int TUNE_nnueOptCompOffset = 261;
+constexpr   int TUNE_scaleBase = 954;
+constexpr   int TUNE_scalePcMult = 89;
+constexpr   int TUNE_scaleNonPawnMat = 51;
+
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1061,7 +1068,9 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   else
   {
       int nnueComplexity;
-      int scale = 1001 + 5 * pos.count<PAWN>() + 61 * pos.non_pawn_material() / 4096;
+      int scale = TUNE_scaleBase
+                + TUNE_scalePcMult * pos.count<PAWN>() / 32
+                + TUNE_scaleNonPawnMat * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1069,7 +1078,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
+      nnueComplexity = (  TUNE_nnueComplexityMult * nnueComplexity
                         + (424 + optimism) * abs(psq - nnue)
                         ) / 1024;
 
@@ -1077,7 +1086,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
+      optimism = optimism * (TUNE_nnueOptCompOffset + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
