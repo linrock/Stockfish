@@ -193,8 +193,12 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
+constexpr Value LazyThreshold1 = Value(3372);
+constexpr Value LazyThreshold2 = Value(2013);
+constexpr int TUNE_psqThresh = 1781;
+constexpr int TUNE_nnueComplexityMult = 412;
+constexpr int TUNE_nnueOptCompOffset = 281;
+
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1056,7 +1060,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > TUNE_psqThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
@@ -1071,7 +1075,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
+      nnueComplexity = (  TUNE_nnueComplexityMult * nnueComplexity
                         + (424 + optimism) * abs(psq - nnue)
                         ) / 1024;
 
@@ -1079,7 +1083,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
+      optimism = optimism * (TUNE_nnueOptCompOffset + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
