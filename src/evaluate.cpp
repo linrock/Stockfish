@@ -191,8 +191,28 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
+  Value LazyThreshold1 = Value(3622);
+  Value LazyThreshold2 = Value(1962);
+  TUNE(SetRange(3000, 4000), LazyThreshold1);
+  TUNE(SetRange(1400, 2400), LazyThreshold2);
+
+  int TUNE_psqThresh = 1781;
+  int TUNE_scaleBase = 1001;
+  int TUNE_scalePawnMult = 5;
+  int TUNE_scaleNonPawnMult = 61;
+  int TUNE_nnueComplexityMult = 406;
+  int TUNE_complexityOptOffset = 424;
+  int TUNE_nnueOptCompOffset = 272;
+  int TUNE_vScaleOffset = 748;
+  TUNE(SetRange(1730, 1830), TUNE_psqThresh);
+  TUNE(SetRange(800, 1200), TUNE_scaleBase);
+  TUNE(SetRange(0, 15), TUNE_scalePawnMult);
+  TUNE(SetRange(40, 80), TUNE_scaleNonPawnMult);
+  TUNE(SetRange(380, 430), TUNE_nnueComplexityMult);
+  TUNE(SetRange(394, 454), TUNE_complexityOptOffset);
+  TUNE(SetRange(240, 310), TUNE_nnueOptCompOffset);
+  TUNE(SetRange(700, 800), TUNE_vScaleOffset);
+
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1054,14 +1074,16 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > TUNE_psqThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
       int nnueComplexity;
-      int scale = 1001 + 5 * pos.count<PAWN>() + 61 * pos.non_pawn_material() / 4096;
+      int scale =   TUNE_scaleBase
+                  + TUNE_scalePawnMult * pos.count<PAWN>()
+                  + TUNE_scaleNonPawnMult * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1069,16 +1091,16 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
-                        + (424 + optimism) * abs(psq - nnue)
+      nnueComplexity = (  TUNE_nnueComplexityMult * nnueComplexity
+                        + (TUNE_complexityOptOffset + optimism) * abs(psq - nnue)
                         ) / 1024;
 
       // Return hybrid NNUE complexity to caller
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      optimism = optimism * (TUNE_nnueOptCompOffset + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - TUNE_vScaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
