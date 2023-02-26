@@ -193,6 +193,22 @@ namespace {
   // Threshold for lazy and space evaluation
   constexpr Value LazyThreshold1    =  Value(3622);
   constexpr Value LazyThreshold2    =  Value(1962);
+
+  int TUNE_nnueComplexityMult = 406;
+  int TUNE_nnueOptCompOffset = 272;
+  int TUNE_optOffset = 424;
+  int TUNE_scaleOffset = 748;
+  TUNE(SetRange(306, 506), TUNE_nnueComplexityMult);
+  TUNE(SetRange(122, 372), TUNE_nnueOptCompOffset);
+  TUNE(SetRange(324, 524), TUNE_optOffset);
+  TUNE(SetRange(648, 848), TUNE_scaleOffset);
+
+  int TUNE_scaleBase = 1001;
+  int TUNE_scaleNonPawnMat = 64;
+  TUNE(SetRange(701, 1301), TUNE_scaleBase);
+  TUNE(SetRange(-32, 160), TUNE_scaleNonPawnMat);
+
+
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1063,7 +1079,7 @@ Value Eval::evaluate(const Position& pos) {
   else
   {
       int nnueComplexity;
-      int scale = 1001 + pos.non_pawn_material() / 64;
+      int scale = TUNE_scaleBase + TUNE_scaleNonPawnMat * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1071,12 +1087,12 @@ Value Eval::evaluate(const Position& pos) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
-                        + (424 + optimism) * abs(psq - nnue)
+      nnueComplexity = (  TUNE_nnueComplexityMult * nnueComplexity
+                        + (TUNE_optOffset + optimism) * abs(psq - nnue)
                         ) / 1024;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      optimism = optimism * (TUNE_nnueOptCompOffset + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - TUNE_scaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
