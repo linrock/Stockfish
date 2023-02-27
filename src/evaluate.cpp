@@ -58,6 +58,27 @@ using namespace std;
 
 namespace Stockfish {
 
+      int TUNE_scaleBase = 1001;
+      int TUNE_scalePawnMult = 5;
+      int TUNE_scaleNonPawnMult = 61;
+      TUNE(SetRange(800, 1200), TUNE_scaleBase);
+      TUNE(SetRange(0, 15), TUNE_scalePawnMult);
+      TUNE(SetRange(40, 80), TUNE_scaleNonPawnMult);
+
+      int TUNE_optComplexOffset = 272;
+      int TUNE_vScaleOffset = 748;
+      TUNE(SetRange(200, 350), TUNE_optComplexOffset);
+      TUNE(SetRange(700, 800), TUNE_vScaleOffset);
+
+      int TUNE_psqThresh = 1781;
+      int TUNE_nnueComplexMult = 406;
+      int TUNE_nnueComplexOptOffset = 424;
+      int TUNE_nnueDampNum = 239;
+      TUNE(SetRange(1680, 1880), TUNE_psqThresh);
+      TUNE(SetRange(320, 480), TUNE_nnueComplexMult);
+      TUNE(SetRange(380, 470), TUNE_nnueComplexOptOffset);
+      TUNE(SetRange(200, 280), TUNE_nnueDampNum);
+
 namespace Eval {
 
   bool useNNUE;
@@ -1056,14 +1077,15 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > TUNE_psqThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
       int nnueComplexity;
-      int scale = 1001 + 5 * pos.count<PAWN>() + 61 * pos.non_pawn_material() / 4096;
+      int scale = TUNE_scaleBase + TUNE_scalePawnMult * pos.count<PAWN>()
+                                 + TUNE_scaleNonPawnMult * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1071,20 +1093,20 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
-                        + (424 + optimism) * abs(psq - nnue)
+      nnueComplexity = (  TUNE_nnueComplexMult * nnueComplexity
+                        + (TUNE_nnueComplexOptOffset + optimism) * abs(psq - nnue)
                         ) / 1024;
 
       // Return hybrid NNUE complexity to caller
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      optimism = optimism * (TUNE_optComplexOffset + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - TUNE_vScaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
+  v = v * (TUNE_nnueDampNum - pos.rule50_count()) / 256;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
