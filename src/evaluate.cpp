@@ -58,6 +58,18 @@ using namespace std;
 
 namespace Stockfish {
 
+      int TUNE_scaleBase = 1001;
+      int TUNE_scalePawnMult = 5;
+      int TUNE_scaleNonPawnMult = 61;
+      TUNE(SetRange(800, 1200), TUNE_scaleBase);
+      TUNE(SetRange(0, 15), TUNE_scalePawnMult);
+      TUNE(SetRange(40, 80), TUNE_scaleNonPawnMult);
+
+      int TUNE_optComplexOffset = 272;
+      int TUNE_vScaleOffset = 748;
+      TUNE(SetRange(200, 350), TUNE_optComplexOffset);
+      TUNE(SetRange(700, 800), TUNE_vScaleOffset);
+
 namespace Eval {
 
   bool useNNUE;
@@ -1063,7 +1075,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   else
   {
       int nnueComplexity;
-      int scale = 1001 + 5 * pos.count<PAWN>() + 61 * pos.non_pawn_material() / 4096;
+      int scale = TUNE_scaleBase + TUNE_scalePawnMult * pos.count<PAWN>()
+                                 + TUNE_scaleNonPawnMult * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1079,8 +1092,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      optimism = optimism * (TUNE_optComplexOffset + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - TUNE_vScaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
