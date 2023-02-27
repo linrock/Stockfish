@@ -34,6 +34,15 @@
 
 namespace Stockfish::Eval::NNUE {
 
+    int TUNE_psqtConst = 1000;
+    int TUNE_psqtDenom = 9560;
+    int TUNE_posConst = 1048;
+    int TUNE_posDenom = 9560;
+    TUNE(SetRange(800, 1200), TUNE_psqtConst);
+    TUNE(SetRange(7000, 12000), TUNE_psqtDenom);
+    TUNE(SetRange(850, 1250), TUNE_posConst);
+    TUNE(SetRange(7000, 12000), TUNE_posDenom);
+
   // Input feature converter
   LargePagePtr<FeatureTransformer> featureTransformer;
 
@@ -148,7 +157,6 @@ namespace Stockfish::Eval::NNUE {
     // overaligning stack variables with alignas() doesn't work correctly.
 
     constexpr uint64_t alignment = CacheLineSize;
-    int delta = 24 - pos.non_pawn_material() / 9560;
 
 #if defined(ALIGNAS_ON_STACK_VARIABLES_BROKEN)
     TransformedFeatureType transformedFeaturesUnaligned[
@@ -171,7 +179,10 @@ namespace Stockfish::Eval::NNUE {
 
     // Give more value to positional evaluation when adjusted flag is set
     if (adjusted)
-        return static_cast<Value>(((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale));
+        return static_cast<Value>((
+            (TUNE_psqtConst + pos.non_pawn_material() / TUNE_psqtDenom) * psqt
+          + (TUNE_posConst  + pos.non_pawn_material() / TUNE_posDenom ) * positional
+        ) / (1024 * OutputScale));
     else
         return static_cast<Value>((psqt + positional) / OutputScale);
   }
