@@ -34,14 +34,10 @@
 
 namespace Stockfish::Eval::NNUE {
 
-  int TUNE_deltaConst = 24;
-  int TUNE_deltaDenom = 9560;
-  int TUNE_psqtMinusDelta = 1024;
-  int TUNE_posPlusDelta = 1024;
-  TUNE(SetRange(12, 36), TUNE_deltaConst);
-  TUNE(SetRange(8000, 11000), TUNE_deltaDenom);
-  TUNE(SetRange(900, 1148), TUNE_psqtMinusDelta);
-  TUNE(SetRange(900, 1148), TUNE_posPlusDelta);
+constexpr  int TUNE_deltaConst = 22;
+constexpr  int TUNE_deltaDenom = 9419;
+constexpr  int TUNE_psqtMinusDelta = 1024;
+constexpr  int TUNE_posPlusDelta = 1014;
 
   // Input feature converter
   LargePagePtr<FeatureTransformer> featureTransformer;
