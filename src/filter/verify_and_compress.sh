@@ -28,10 +28,8 @@ echo Num binpack positions: $num_binpack_positions
 echo Num csv positions: $num_csv_positions
 
 if [ $num_binpack_positions -eq $num_csv_positions ]; then
-  echo Same number of positions in both!
+  echo Same number of positions in both! Compressing CSV file...
+  zstd --ultra -22 --rsyncable --rm $csv_filepath
 else
-  echo Not continuing.. different number of positions in each
+  echo Not continuing, Different number of positions: $num_binpack_positions != $num_csv_positions
 fi
-
-echo Compressing CSV file...
-zstd --ultra -22 --rsyncable --rm $csv_filepath
