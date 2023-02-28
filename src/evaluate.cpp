@@ -58,26 +58,15 @@ using namespace std;
 
 namespace Stockfish {
 
-      int TUNE_scaleBase = 1001;
-      int TUNE_scalePawnMult = 5;
-      int TUNE_scaleNonPawnMult = 61;
-      TUNE(SetRange(800, 1200), TUNE_scaleBase);
-      TUNE(SetRange(0, 15), TUNE_scalePawnMult);
-      TUNE(SetRange(40, 80), TUNE_scaleNonPawnMult);
-
-      int TUNE_optComplexOffset = 272;
-      int TUNE_vScaleOffset = 748;
-      TUNE(SetRange(200, 350), TUNE_optComplexOffset);
-      TUNE(SetRange(700, 800), TUNE_vScaleOffset);
-
-      int TUNE_psqThresh = 1781;
-      int TUNE_nnueComplexMult = 406;
-      int TUNE_nnueComplexOptOffset = 424;
-      int TUNE_nnueDampNum = 239;
-      TUNE(SetRange(1680, 1880), TUNE_psqThresh);
-      TUNE(SetRange(320, 480), TUNE_nnueComplexMult);
-      TUNE(SetRange(380, 470), TUNE_nnueComplexOptOffset);
-      TUNE(SetRange(200, 280), TUNE_nnueDampNum);
+constexpr      int TUNE_scaleBase = 1006;
+constexpr      int TUNE_scalePawnMult = 5;
+constexpr      int TUNE_scaleNonPawnMult = 59;
+constexpr      int TUNE_optComplexOffset = 254;
+constexpr      int TUNE_vScaleOffset = 749;
+constexpr      int TUNE_psqThresh = 1824;
+constexpr      int TUNE_nnueComplexMult = 405;
+constexpr      int TUNE_nnueComplexOptOffset = 415;
+constexpr      int TUNE_nnueDampNum = 237;
 
 namespace Eval {
 
