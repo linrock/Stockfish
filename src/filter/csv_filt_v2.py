@@ -81,8 +81,10 @@ def process_csv_rows(infile):
             num_sf_bestmove1_captures += 1
             should_filter_out = True
         b.push(sf_bestmove1)
-        if sf_bestmove2 and sf_bestmove2_score:
+        if sf_bestmove2_uci and sf_bestmove2_score:
             sf_bestmove2 = chess.Move.from_uci(sf_bestmove2_uci)
+            sf_bestmove1_score = int(sf_bestmove1_score)
+            sf_bestmove2_score = int(sf_bestmove2_score)
             # print(f'{fen}, bm: {bestmove} ({bestmove_score}), sf_bm1: {sf_bestmove1} ({sf_bestmove1_score}), sf_bm2: {sf_bestmove2} ({sf_bestmove2_score})')
             if b.is_capture(sf_bestmove2) or move_is_promo(sf_bestmove2_uci):
                 num_sf_bestmove2_captures += 1
@@ -102,6 +104,20 @@ def process_csv_rows(infile):
         if should_filter_out:
             num_positions_filtered_out += 1
         num_positions += 1
+        if num_positions % 10000 == 0:
+            num_positions_after_filter = num_positions - num_positions_filtered_out
+            print(f'Processed {num_positions} positions')
+            print(f'  # games:                       {num_games}')
+            print(f'    # standard games:            {num_standard_games}')
+            print(f'    # non-standard games:        {num_non_standard_games}')
+            print(f'  # positions:                   {num_positions}')
+            print(f'    # bestmove captures:         {num_bestmove_captures}')
+            print(f'    # bestmove promos:           {num_bestmove_promos}')
+            print(f'    # sf bestmove1 cap promo:    {num_sf_bestmove1_captures}')
+            print(f'    # sf bestmove2 cap promo:    {num_sf_bestmove2_captures}')
+            print(f'    # one good move:             {num_one_good_move}')
+            print(f'  # positions after filtering:   {num_positions_after_filter}')
+            print(f'    % positions kept:            {num_positions_after_filter/num_positions:.2f}')
 
 
 print(f'Processing {input_filename} ...')
