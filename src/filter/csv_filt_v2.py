@@ -47,6 +47,7 @@ def process_csv_rows(infile):
            num_bestmove_captures, num_bestmove_promos, \
            num_sf_bestmove1_captures, num_sf_bestmove2_captures, \
            num_standard_games, num_non_standard_games, \
+           num_start_positions, num_early_plies, num_in_check, \
            num_one_good_move
     for row in infile:
         split_row = row.strip().split(",")
