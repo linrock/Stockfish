@@ -2,6 +2,7 @@ import io
 import os.path
 from pprint import pprint
 import sys
+import textwrap
 
 import chess
 import zstandard
@@ -16,7 +17,7 @@ input_filename = sys.argv[1]
 if input_filename.endswith(".csv"):
     output_filename = input_filename.replace('.csv', '.csv.plain')
 elif input_filename.endswith(".csv.zst"):
-    output_filename = input_filename.replace('.csv.zst', '.csv.zst.filt-v3.plain')
+    output_filename = input_filename.replace('.csv.zst', '.csv.zst.filter-v3.plain')
 
 if os.path.isfile(output_filename):
     print(f'Found .csv.plain file. Doing nothing: {output_filename}')
@@ -43,7 +44,7 @@ num_non_standard_games = 0
 def move_is_promo(uci_move):
     return len(uci_move) == 5 and uci_move[-1] in ['n','b','r','q']
 
-def process_csv_rows(infile):
+def process_csv_rows(infile, outfile):
     global num_games, num_positions, num_positions_filtered_out, \
            num_bestmove_captures, num_bestmove_promos, \
            num_sf_bestmove1_captures, num_sf_bestmove2_captures, \
@@ -90,6 +91,17 @@ def process_csv_rows(infile):
                         else:
                             b.pop()
                 pprint(positions)
+                game_plain = ''
+                for position in positions:
+                    game_plain += textwrap.dedent(f'''
+                        fen {position['fen']}
+                        score {position['score']}
+                        move {str(position['move'])}
+                        ply {position['ply']}
+                        result {position['result']}
+                        e''')
+                print(game_plain)
+                outfile.write(game_plain)
                 sys.exit(0)
         elif ply <= 28:
             # skip if an early ply position
@@ -163,14 +175,16 @@ def process_csv_rows(infile):
 
 print(f'Processing {input_filename} ...')
 if input_filename.endswith(".csv.zst"):
-    with open(input_filename, 'rb') as compressed_infile:
+    with open(input_filename, 'rb') as compressed_infile, \
+         open(output_filename, 'w+') as outfile:
         dctx = zstandard.ZstdDecompressor()
         stream_reader = dctx.stream_reader(compressed_infile)
         text_stream = io.TextIOWrapper(stream_reader, encoding='utf-8')
-        process_csv_rows(text_stream)
+        process_csv_rows(text_stream, outfile)
 else:
-    with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as outfile:
-        process_csv_rows(infile)
+    with open(input_filename, 'r') as infile, \
+         open(output_filename, 'w+') as outfile:
+        process_csv_rows(infile, outfile)
 num_positions_after_filter = num_positions - num_positions_filtered_out
 
 print(f'Filtered {input_filename} to {output_filename}')
