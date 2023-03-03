@@ -46,7 +46,6 @@ class PositionCsvIterator:
         self.num_bestmove_captures = 0
         self.num_bestmove_promos = 0
         self.num_sf_bestmove1_captures = 0
-        self.num_sf_bestmove2_captures = 0
         self.num_one_good_move = 0
         self.num_positions_filtered_out = 0
 
@@ -177,10 +176,12 @@ class PositionCsvIterator:
         print(f'    # standard games:            {self.num_standard_games:8d}')
         print(f'    # non-standard games:        {self.num_non_standard_games:8d}')
         print(f'  # positions:                   {self.num_positions:8d}')
+        print(f'    # startpos:                  {self.num_start_positions:8d}')
+        print(f'    # early plies <= 28:         {self.num_early_plies:8d}')
+        print(f'    # in check:                  {self.num_in_check:8d}')
         print(f'    # bestmove captures:         {self.num_bestmove_captures:8d}')
         print(f'    # bestmove promos:           {self.num_bestmove_promos:8d}')
         print(f'    # sf bestmove1 cap promo:    {self.num_sf_bestmove1_captures:8d}')
-        print(f'    # sf bestmove2 cap promo:    {self.num_sf_bestmove2_captures:8d}')
         print(f'    # one good move:             {self.num_one_good_move:8d}')
         print(f'  # positions after filtering:   {num_positions_after_filter:8d}')
         print(f'    % positions kept:            {num_positions_after_filter/self.num_positions*100:8.1f}')
