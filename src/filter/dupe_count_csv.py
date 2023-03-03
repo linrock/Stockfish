@@ -35,7 +35,7 @@ def move_is_promo(uci_move):
 def process_csv_rows(infile):
     global num_games, num_positions, num_positions_filtered_out, \
            num_bestmove_captures, num_bestmove_promos, num_sf_bestmove1_captures, num_sf_bestmove2_captures, \
-           num_standard_games, num_non_standard_games, num_overlap_sf_bestmove_captures
+           num_standard_games, num_non_standard_games, num_overlap_sf_bestmove_captures, num_unique_piece_orientations
     for row in infile:
         split_row = row.strip().split(",")
         if len(split_row) == 10:
@@ -57,13 +57,15 @@ def process_csv_rows(infile):
         if piece_orientation not in piece_orientations_seen:
             num_unique_piece_orientations += 1
         piece_orientations_seen.add(piece_orientation)
-        if num_positions % 10000 == 0:
+        num_positions += 1
+        if (num_positions % 1000000 == 0) and num_positions > 0:
             print(f"Processed {num_positions} positions")
             print(f'  # standard games:           {num_standard_games}')
             print(f'  # non-standard games:       {num_non_standard_games}')
             print(f'  # positions:                {num_positions}')
             print(f'    # unique:                 {num_unique_piece_orientations}')
             print(f'    % unique:                 {num_unique_piece_orientations / num_positions:.2f}')
+
 
 print(f'Processing {input_filename} ...')
 if input_filename.endswith(".csv.zst"):
