@@ -59,10 +59,10 @@ using namespace std;
 namespace Stockfish {
 
 namespace Eval {
-  int TUNE_scale = 965;
-  int TUNE_numPawnsMult = 6;
-  int TUNE_nonPawnMaterialMult = 50;
-  int TUNE_classicalPsqThresh = 1774;
+  int TUNE_scale = 971;
+  int TUNE_numPawnsMult = 7;
+  int TUNE_nonPawnMaterialMult = 58;
+  int TUNE_classicalPsqThresh = 1812;
 
   bool useNNUE;
   string currentEvalFileName = "None";
@@ -197,8 +197,8 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  Value LazyThreshold1    =  Value(3783);
-  Value LazyThreshold2    =  Value(1900);
+  Value LazyThreshold1    =  Value(3485);
+  Value LazyThreshold2    =  Value(1781);
 
   constexpr Value SpaceThreshold    =  Value(11551);
 
