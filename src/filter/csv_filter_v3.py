@@ -23,7 +23,7 @@ if os.path.isfile(output_filename):
     print(f'Found .csv.zst.filter-v3.plain file, doing nothing:')
     print(output_filename)
     sys.exit(0)
-elif os.path.isfile(output_filename.replace('.csv.zst.filter-v3.plain', '.csv.zst.filter-v3.binpack'):
+elif os.path.isfile(output_filename.replace('.csv.zst.filter-v3.plain', '.csv.zst.filter-v3.binpack')):
     print(f'Found .csv.zst.filter-v3.binpack file, doing nothing:')
     print(output_filename.replace('.csv.zst.filter-v3.plain', '.csv.zst.filter-v3.binpack'))
     sys.exit(0)
