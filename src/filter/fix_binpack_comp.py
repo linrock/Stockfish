@@ -68,35 +68,9 @@ class PositionCsvIterator:
                 self.num_start_positions += 1
                 should_filter_out = True
                 if len(positions):
-                    # finished a game. time to compact it
-                    pprint(positions)
-                    for i in range(len(positions) - 1):
-                        b = chess.Board(positions[i]['fen'])
-                        # TODO check given moves first
-                        # print(f'{b.legal_moves.count()} legal moves')
-                        for move in b.legal_moves:
-                            b.push(move)
-                            if b.fen() == positions[i + 1]['fen']:
-                                # print(f'move {move} fixes binpack!')
-                                positions[i]['move'] = move
-                                if positions[i]['should_filter_out']:
-                                    positions[i]['score'] = 32002
-                                break
-                            else:
-                                b.pop()
-                    pprint(positions)
-                    game_plain = ''
-                    for position in positions:
-                        game_plain += textwrap.dedent(f'''
-                            fen {position['fen']}
-                            score {position['score']}
-                            move {str(position['move'])}
-                            ply {position['ply']}
-                            result {position['result']}
-                            e''')
-                    print(game_plain)
-                    self.outfile.write(game_plain)
-                    sys.exit(0)
+                    # finished processing a game. time to save it to a file
+                    self.write_positions_to_file(positions)
+                    positions = []
             elif ply <= 28:
                 # skip if an early ply position
                 self.num_early_plies += 1
@@ -152,6 +126,36 @@ class PositionCsvIterator:
                 'should_filter_out': should_filter_out,
             })
             self.print_stats()
+
+    def write_positions_to_file(self, positions):
+        # pprint(positions)
+        for i in range(len(positions) - 1):
+            b = chess.Board(positions[i]['fen'])
+            # TODO check given moves first
+            # print(f'{b.legal_moves.count()} legal moves')
+            for move in b.legal_moves:
+                b.push(move)
+                if b.fen() == positions[i + 1]['fen']:
+                    # print(f'move {move} fixes binpack!')
+                    positions[i]['move'] = move
+                    if positions[i]['should_filter_out']:
+                        positions[i]['score'] = 32002
+                    break
+                else:
+                    b.pop()
+        # pprint(positions)
+        game_plain = ''
+        for position in positions:
+            game_plain += textwrap.dedent(f'''
+                fen {position['fen']}
+                score {position['score']}
+                move {str(position['move'])}
+                ply {position['ply']}
+                result {position['result']}
+                e''')
+        print(game_plain)
+        self.outfile.write(game_plain)
+        sys.exit(0)
 
     def print_stats(self):
         if self.num_positions % 10000 != 0:
