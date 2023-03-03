@@ -15,12 +15,17 @@ if len(sys.argv) != 2:
 
 input_filename = sys.argv[1]
 if input_filename.endswith(".csv"):
-    output_filename = input_filename.replace('.csv', '.csv.plain')
+    output_filename = input_filename.replace('.csv', '.csv.filter-v3.plain')
 elif input_filename.endswith(".csv.zst"):
-    output_filename = input_filename.replace('.csv.zst', '.csv.zst.filter-v3.plain')
+    output_filename = input_filename.replace('.csv.zst', '.csv.filter-v3.plain')
 
 if os.path.isfile(output_filename):
-    print(f'Found .csv.plain file. Doing nothing: {output_filename}')
+    print(f'Found .csv.filter-v3.plain file, doing nothing:')
+    print(output_filename)
+    sys.exit(0)
+elif os.path.isfile(output_filename.replace('.csv.filter-v3.plain', '.csv.filter-v3.binpack'):
+    print(f'Found .csv.filter-v3.binpack file, doing nothing:')
+    print(output_filename.replace('.csv.filter-v3.plain', '.csv.filter-v3.binpack'))
     sys.exit(0)
 
 
