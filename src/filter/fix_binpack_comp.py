@@ -140,7 +140,7 @@ class PositionCsvIterator:
         for i in range(len(positions) - 1):
             b = chess.Board(positions[i]['fen'])
             # find the move that leads to the next fen and fixes binpack compression
-            b.push(position['move'])
+            b.push(positions[i]['move'])
             if b.fen() == positions[i + 1]['fen']:
                 if positions[i]['should_filter_out']:
                     positions[i]['score'] = 32002
