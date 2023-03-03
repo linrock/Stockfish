@@ -178,7 +178,7 @@ class PositionCsvIterator:
         print(f'    # sf bestmove2 cap promo:    {self.num_sf_bestmove2_captures:8d}')
         print(f'    # one good move:             {self.num_one_good_move:8d}')
         print(f'  # positions after filtering:   {num_positions_after_filter:8d}')
-        print(f'    % positions kept:            {num_positions_after_filter/num_positions*100:8.1f}')
+        print(f'    % positions kept:            {num_positions_after_filter/self.num_positions*100:8.1f}')
 
 
 print(f'Processing {input_filename} ...')
