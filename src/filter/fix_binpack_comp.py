@@ -24,6 +24,8 @@ if os.path.isfile(output_filename):
     sys.exit(0)
 
 
+EARLY_PLY_SKIP = 28
+
 def move_is_promo(uci_move):
     return len(uci_move) == 5 and uci_move[-1] in ['n','b','r','q']
 
@@ -76,7 +78,7 @@ class PositionCsvIterator:
                     # finished processing a game. time to save it to a file
                     self.write_positions_to_file(positions)
                     positions = []
-            elif ply <= 28:
+            elif ply <= EARLY_PLY_SKIP:
                 # skip if an early ply position
                 self.num_early_plies += 1
                 should_filter_out = True
@@ -134,8 +136,7 @@ class PositionCsvIterator:
         self.print_stats()
 
     def write_positions_to_file(self, positions):
-        # pprint(positions)
-        for i in range(len(positions) - 1):
+        for i in range(EARLY_PLY_SKIP, len(positions) - 1):
             b = chess.Board(positions[i]['fen'])
             # TODO check given moves first
             # print(f'{b.legal_moves.count()} legal moves')
@@ -149,7 +150,6 @@ class PositionCsvIterator:
                     break
                 else:
                     b.pop()
-        # pprint(positions)
         game_plain = ''
         for position in positions:
             game_plain += textwrap.dedent(f'''
@@ -158,10 +158,10 @@ class PositionCsvIterator:
                 move {str(position['move'])}
                 ply {position['ply']}
                 result {position['result']}
-                e''')
-        # print(game_plain)
+                e
+            ''')
         self.outfile.write(game_plain.strip() + "\n")
-        sys.exit(0)
+        # sys.exit(0)
 
     def print_stats(self):
         if self.num_positions % 10000 != 0:
