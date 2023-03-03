@@ -130,7 +130,7 @@ def process_csv_rows(infile):
             print(f'    # sf bestmove2 cap promo:    {num_sf_bestmove2_captures:8d}')
             print(f'    # one good move:             {num_one_good_move:8d}')
             print(f'  # positions after filtering:   {num_positions_after_filter:8d}')
-            print(f'    % positions kept:            {num_positions_after_filter/num_positions*100:8d}')
+            print(f'    % positions kept:            {num_positions_after_filter/num_positions*100:8.1f}')
 
 
 print(f'Processing {input_filename} ...')
@@ -156,4 +156,4 @@ print(f'    # sf bestmove1 cap promo:    {num_sf_bestmove1_captures:8d}')
 print(f'    # sf bestmove2 cap promo:    {num_sf_bestmove2_captures:8d}')
 print(f'    # one good move:             {num_one_good_move:8d}')
 print(f'  # positions after filtering:   {num_positions_after_filter:8d}')
-print(f'    % positions kept:            {num_positions_after_filter/num_positions*100:8d}')
+print(f'    % positions kept:            {num_positions_after_filter/num_positions*100:8.1f}')
