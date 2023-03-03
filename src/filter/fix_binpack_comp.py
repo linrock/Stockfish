@@ -136,20 +136,26 @@ class PositionCsvIterator:
         self.print_stats()
 
     def write_positions_to_file(self, positions):
-        for i in range(EARLY_PLY_SKIP, len(positions) - 1):
+        positions = positions[EARLY_PLY_SKIP:]
+        for i in range(len(positions) - 1):
             b = chess.Board(positions[i]['fen'])
-            # TODO check given moves first
-            # print(f'{b.legal_moves.count()} legal moves')
-            for move in b.legal_moves:
-                b.push(move)
-                if b.fen() == positions[i + 1]['fen']:
-                    # the move that leads to the next fen and fixes binpack compression
-                    positions[i]['move'] = move
-                    if positions[i]['should_filter_out']:
-                        positions[i]['score'] = 32002
-                    break
-                else:
-                    b.pop()
+            # find the move that leads to the next fen and fixes binpack compression
+            b.push(position['move'])
+            if b.fen() == positions[i + 1]['fen']:
+                if positions[i]['should_filter_out']:
+                    positions[i]['score'] = 32002
+            else:
+                b.pop()
+                # print(f'{b.legal_moves.count()} legal moves')
+                for move in b.legal_moves:
+                    b.push(move)
+                    if b.fen() == positions[i + 1]['fen']:
+                        positions[i]['move'] = move
+                        if positions[i]['should_filter_out']:
+                            positions[i]['score'] = 32002
+                        break
+                    else:
+                        b.pop()
         game_plain = ''
         for position in positions:
             game_plain += textwrap.dedent(f'''
@@ -158,8 +164,7 @@ class PositionCsvIterator:
                 move {str(position['move'])}
                 ply {position['ply']}
                 result {position['result']}
-                e
-            ''')
+                e''')
         self.outfile.write(game_plain.strip() + "\n")
         # sys.exit(0)
 
