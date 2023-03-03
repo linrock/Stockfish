@@ -25,6 +25,10 @@ position = None
 num_games = 0
 num_positions = 0
 num_positions_filtered_out = 0
+
+num_start_positions = 0
+num_early_plies = 0
+num_in_check = 0
 num_bestmove_captures = 0
 num_bestmove_promos = 0
 num_sf_bestmove1_captures = 0
@@ -57,50 +61,59 @@ def process_csv_rows(infile):
                 split_row
             sf_bestmove2_uci, sf_bestmove2_score = None, None
         ply = int(ply)
+        should_filter_out = False
         if ply == 0:
-            num_games += 1
             if 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq' in fen:
                 num_standard_games += 1
             else:
                 num_non_standard_games += 1
-        b = chess.Board(fen)
-        bestmove = chess.Move.from_uci(bestmove_uci)
-        # filter out if provided move is a capture or promo
-        bestmove_is_capture = b.is_capture(bestmove)
-        should_filter_out = False
-        if bestmove_is_capture:
-            num_bestmove_captures += 1
+            num_games += 1
+            num_start_positions += 1
             should_filter_out = True
-        bestmove_is_promo = move_is_promo(bestmove_uci)
-        if bestmove_is_promo:
-            num_bestmove_promos += 1
+        elif ply <= 28:
+            # skip if an early ply position
+            num_early_plies += 1
             should_filter_out = True
-        # check if moves from SF search are captures or promos
-        sf_bestmove1 = chess.Move.from_uci(sf_bestmove1_uci)
-        if b.is_capture(sf_bestmove1) or move_is_promo(sf_bestmove1_uci):
-            num_sf_bestmove1_captures += 1
+        elif b.is_check():
+            # skip if in check
+            num_in_check += 1
             should_filter_out = True
-        b.push(sf_bestmove1)
-        if sf_bestmove2_uci and sf_bestmove2_score:
-            sf_bestmove2 = chess.Move.from_uci(sf_bestmove2_uci)
-            sf_bestmove1_score = int(sf_bestmove1_score)
-            sf_bestmove2_score = int(sf_bestmove2_score)
-            # print(f'{fen}, bm: {bestmove} ({bestmove_score}), sf_bm1: {sf_bestmove1} ({sf_bestmove1_score}), sf_bm2: {sf_bestmove2} ({sf_bestmove2_score})')
-            if b.is_capture(sf_bestmove2) or move_is_promo(sf_bestmove2_uci):
-                num_sf_bestmove2_captures += 1
+        else:
+            b = chess.Board(fen)
+            bestmove = chess.Move.from_uci(bestmove_uci)
+            # filter out if provided move is a capture or promo
+            bestmove_is_capture = b.is_capture(bestmove)
+            bestmove_is_promo = move_is_promo(bestmove_uci)
+            if bestmove_is_capture:
+                num_bestmove_captures += 1
                 should_filter_out = True
-            if abs(sf_bestmove1_score) < 110 and abs(sf_bestmove2_score) > 200:
-                # best move about equal, 2nd best move loses
-                num_one_good_move += 1
+            elif move_is_promo(bestmove_uci):
+                num_bestmove_promos += 1
                 should_filter_out = True
-            elif abs(sf_bestmove1_score) > 200 and abs(sf_bestmove2_score) < 110:
-                # best move gains advantage, 2nd best move equalizes
-                num_one_good_move += 1
-                should_filter_out = True
-            elif abs(sf_bestmove1_score) > 200 and (abs(sf_bestmove2_score) > 200 and (sf_bestmove1_score > 0) != (sf_bestmove2_score > 0)):
-                # best move gains an advantage, 2nd best move loses
-                num_one_good_move += 1
-                should_filter_out = True
+            else:
+                # check if moves from SF search are captures or promos
+                sf_bestmove1 = chess.Move.from_uci(sf_bestmove1_uci)
+                if b.is_capture(sf_bestmove1) or move_is_promo(sf_bestmove1_uci):
+                    # skip if SF search best move is a capture
+                    num_sf_bestmove1_captures += 1
+                    should_filter_out = True
+                elif sf_bestmove2_score:
+                    # otherwise skip if the score difference is high enough
+                    sf_bestmove1_score = int(sf_bestmove1_score)
+                    sf_bestmove2_score = int(sf_bestmove2_score)
+                    if abs(sf_bestmove1_score) < 110 and abs(sf_bestmove2_score) > 200:
+                        # best move about equal, 2nd best move loses
+                        num_one_good_move += 1
+                        should_filter_out = True
+                    elif abs(sf_bestmove1_score) > 200 and abs(sf_bestmove2_score) < 110:
+                        # best move gains advantage, 2nd best move equalizes
+                        num_one_good_move += 1
+                        should_filter_out = True
+                    elif abs(sf_bestmove1_score) > 200 and (abs(sf_bestmove2_score) > 200 and \
+                         (sf_bestmove1_score > 0) != (sf_bestmove2_score > 0)):
+                        # best move gains an advantage, 2nd best move loses
+                        num_one_good_move += 1
+                        should_filter_out = True
         if should_filter_out:
             num_positions_filtered_out += 1
         num_positions += 1
