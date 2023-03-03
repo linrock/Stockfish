@@ -136,7 +136,7 @@ class PositionCsvIterator:
         self.print_stats()
 
     def write_positions_to_file(self, positions):
-        positions = positions[EARLY_PLY_SKIP:]
+        positions = positions[EARLY_PLY_SKIP + 1:]
         for i in range(len(positions) - 1):
             b = chess.Board(positions[i]['fen'])
             # find the move that leads to the next fen and fixes binpack compression
