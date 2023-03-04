@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ "$#" -ne 2 ]; then
-  echo "Usage: ./many_binpacks_to_csv.sh <input_binpack_dir> <output_csv_dir>"
+if [ "$#" -ne 1 ]; then
+  echo "Usage: ./many_binpacks_to_csv.sh <input_binpack_output_csv_dir>"
   exit 0
 fi
 
@@ -22,4 +22,4 @@ export -f binpack_to_csv
 
 # Converts binpacks to csv with search eval data for each position
 concurrency=$(( $(nproc) - 1 ))
-ls -1v $1/*.binpack | xargs -P $concurrency -I{} bash -c 'binpack_to_csv "$@"' _ {} $2
+ls -1v $1/*.binpack | xargs -P $concurrency -I{} bash -c 'binpack_to_csv "$@"' _ {} $1
