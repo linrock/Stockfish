@@ -34,10 +34,10 @@
 
 namespace Stockfish::Eval::NNUE {
 
-constexpr    int TUNE_psqtConst = 975;
-constexpr    int TUNE_psqtDenom = 9364;
-constexpr    int TUNE_posConst = 1016;
-constexpr    int TUNE_posDenom = 9721;
+constexpr    int TUNE_psqtConst = 995;
+constexpr    int TUNE_psqtDenom = 8972;
+constexpr    int TUNE_posConst = 1045;
+constexpr    int TUNE_posDenom = 9294;
 
   // Input feature converter
   LargePagePtr<FeatureTransformer> featureTransformer;
