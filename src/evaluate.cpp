@@ -193,27 +193,17 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  Value LazyThreshold1 = Value(3622);
-  Value LazyThreshold2 = Value(1962);
-  TUNE(SetRange(3000, 4000), LazyThreshold1);
-  TUNE(SetRange(1400, 2400), LazyThreshold2);
+  Value LazyThreshold1 = Value(3546);
+  Value LazyThreshold2 = Value(1829);
 
-  int TUNE_psqThresh = 1781;
-  int TUNE_scaleBase = 1001;
-  int TUNE_scalePawnMult = 5;
-  int TUNE_scaleNonPawnMult = 61;
-  int TUNE_nnueComplexityMult = 406;
-  int TUNE_complexityOptOffset = 424;
-  int TUNE_nnueOptCompOffset = 272;
-  int TUNE_vScaleOffset = 748;
-  TUNE(SetRange(1730, 1830), TUNE_psqThresh);
-  TUNE(SetRange(800, 1200), TUNE_scaleBase);
-  TUNE(SetRange(0, 15), TUNE_scalePawnMult);
-  TUNE(SetRange(40, 80), TUNE_scaleNonPawnMult);
-  TUNE(SetRange(380, 430), TUNE_nnueComplexityMult);
-  TUNE(SetRange(394, 454), TUNE_complexityOptOffset);
-  TUNE(SetRange(240, 310), TUNE_nnueOptCompOffset);
-  TUNE(SetRange(700, 800), TUNE_vScaleOffset);
+  int TUNE_psqThresh = 1767;
+  int TUNE_scaleBase = 935;
+  int TUNE_scalePawnMult = 7;
+  int TUNE_scaleNonPawnMult = 64;
+  int TUNE_nnueComplexityMult = 405;
+  int TUNE_complexityOptOffset = 416;
+  int TUNE_nnueOptCompOffset = 279;
+  int TUNE_vScaleOffset = 741;
 
   constexpr Value SpaceThreshold    =  Value(11551);
 
