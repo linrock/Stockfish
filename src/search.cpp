@@ -37,6 +37,11 @@
 
 namespace Stockfish {
 
+    int TUNE_nullMoveOffset = 253;
+    int TUNE_futPrunOffset = 103;
+    TUNE(SetRange(200, 300), TUNE_nullMoveOffset);
+    TUNE(SetRange(50, 150), TUNE_futPrunOffset);
+
 namespace Search {
 
   LimitsType Limits;
@@ -805,7 +810,7 @@ namespace {
         && (ss-1)->statScore < 18755
         &&  eval >= beta
         &&  eval >= ss->staticEval
-        &&  ss->staticEval >= beta - 19 * depth - improvement / 13 + 253 + complexity / 25
+        &&  ss->staticEval >= beta - 19 * depth - improvement / 13 + TUNE_nullMoveOffset + complexity / 25
         && !excludedMove
         &&  pos.non_pawn_material(us)
         && (ss->ply >= thisThread->nmpMinPly || us != thisThread->nmpColor))
@@ -1042,7 +1047,7 @@ moves_loop: // When in check, search starts here
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
                   && lmrDepth < 13
-                  && ss->staticEval + 103 + 138 * lmrDepth <= alpha)
+                  && ss->staticEval + TUNE_futPrunOffset + 138 * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
