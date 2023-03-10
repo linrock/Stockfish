@@ -193,19 +193,19 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  Value LazyThreshold1 = Value(3622);
-  Value LazyThreshold2 = Value(1962);
+  Value LazyThreshold1 = Value(3640);
+  Value LazyThreshold2 = Value(1880);
   TUNE(SetRange(3000, 4000), LazyThreshold1);
   TUNE(SetRange(1400, 2400), LazyThreshold2);
 
-  int TUNE_psqThresh = 1781;
-  int TUNE_scaleBase = 1001;
-  int TUNE_scalePawnMult = 5;
-  int TUNE_scaleNonPawnMult = 61;
-  int TUNE_nnueComplexityMult = 406;
-  int TUNE_complexityOptOffset = 424;
-  int TUNE_nnueOptCompOffset = 272;
-  int TUNE_vScaleOffset = 748;
+  int TUNE_psqThresh = 1777;
+  int TUNE_scaleBase = 983;
+  int TUNE_scalePawnMult = 8;
+  int TUNE_scaleNonPawnMult = 58;
+  int TUNE_nnueComplexityMult = 416;
+  int TUNE_complexityOptOffset = 428;
+  int TUNE_nnueOptCompOffset = 277;
+  int TUNE_vScaleOffset = 756;
   TUNE(SetRange(1730, 1830), TUNE_psqThresh);
   TUNE(SetRange(800, 1200), TUNE_scaleBase);
   TUNE(SetRange(0, 15), TUNE_scalePawnMult);
