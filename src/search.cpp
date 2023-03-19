@@ -37,10 +37,8 @@
 
 namespace Stockfish {
 
-    int TUNE_nullMoveOffset = 253;
-    int TUNE_futPrunOffset = 103;
-    TUNE(SetRange(200, 300), TUNE_nullMoveOffset);
-    TUNE(SetRange(50, 150), TUNE_futPrunOffset);
+    constexpr int TUNE_nullMoveOffset = 258;
+    constexpr int TUNE_futPrunOffset = 105;
 
 namespace Search {
 
