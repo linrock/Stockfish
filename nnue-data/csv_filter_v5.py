@@ -71,10 +71,11 @@ class PositionCsvIterator:
                 sf_bestmove2_uci, sf_bestmove2_score = \
                     split_row
             elif len(split_row) == 8:
-                ply, fen, bestmove_uci, bestmove_score, game_result, \
-                sf_search_method, sf_bestmove1_uci, sf_bestmove1_score = \
-                    split_row
-                sf_bestmove2_uci, sf_bestmove2_score = None, None
+                # only one possible move in the position
+                self.num_only_one_move += 1
+                self.num_positions += 1
+                self.num_positions_filtered_out += 1
+                continue
             ply = int(ply)
             bestmove_score = int(bestmove_score)
             sf_bestmove1_score = int(sf_bestmove1_score)
@@ -103,12 +104,8 @@ class PositionCsvIterator:
                 # skip if the best two moves are an obvious draw
                 self.num_obvious_draw += 1
                 should_filter_out = True
-            elif not sf_bestmove2_uci:
-                # only one possible move in the position
-                self.num_only_one_move += 1
-                should_filter_out = True
             else:
-                # skip if the score difference is high enough
+                # skip if there's only one good move in the position (best two moves score diff is high enough)
                 if abs(sf_bestmove1_score) < 100 and abs(sf_bestmove2_score) > 150:
                     # best move about equal, 2nd best move loses
                     self.num_one_good_move += 1
