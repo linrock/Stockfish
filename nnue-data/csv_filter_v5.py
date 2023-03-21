@@ -10,22 +10,22 @@ import zstandard
 ''' Iterate over positions .csv files and output .plain files
 '''
 if len(sys.argv) != 2:
-    print('Usage: ./iterate_csv.py <input_csv_file>')
+    print('Usage: ./csv_filter_v5.py <input_csv_file>')
     sys.exit(0)
 
 input_filename = sys.argv[1]
 if input_filename.endswith(".csv"):
-    output_filename = input_filename.replace('.csv', '.csv.filter-v4.plain')
+    output_filename = input_filename.replace('.csv', '.csv.filter-v5.plain')
 elif input_filename.endswith(".csv.zst"):
-    output_filename = input_filename.replace('.csv.zst', '.csv.zst.filter-v4.plain')
+    output_filename = input_filename.replace('.csv.zst', '.csv.zst.filter-v5.plain')
 
 if os.path.isfile(output_filename):
-    print(f'Found .csv.zst.filter-v4.plain file, doing nothing:')
+    print(f'Found .csv.zst.filter-v5.plain file, doing nothing:')
     print(output_filename)
     sys.exit(0)
-elif os.path.isfile(output_filename.replace('.csv.zst.filter-v4.plain', '.csv.zst.filter-v4.binpack')):
-    print(f'Found .csv.zst.filter-v4.binpack file, doing nothing:')
-    print(output_filename.replace('.csv.zst.filter-v4.plain', '.csv.zst.filter-v4.binpack'))
+elif os.path.isfile(output_filename.replace('.csv.zst.filter-v5.plain', '.csv.zst.filter-v5.binpack')):
+    print(f'Found .csv.zst.filter-v5.binpack file, doing nothing:')
+    print(output_filename.replace('.csv.zst.filter-v5.plain', '.csv.zst.filter-v5.binpack'))
     sys.exit(0)
 
 
@@ -189,6 +189,11 @@ class PositionCsvIterator:
         print(f'    # bestmove promos:           {self.num_bestmove_promos:8d}')
         print(f'    # sf bestmove1 cap promo:    {self.num_sf_bestmove1_captures:8d}')
         print(f'    # one good move:             {self.num_one_good_move:8d}')
+        print(f'    # obvious draw:              {self.num_obvious_draw:8d}')
+        print(f'    # score diff too high:       {self.num_score_too_high:8d}')
+        print(f'    # leela / sf score mismatch: {self.num_score_mismatch:8d}')
+        print(f'    # bm 1,2 large score gap:    {self.num_large_sf_score_gap:8d}')
+        print(f'    # only one move:             {self.num_only_one_move:8d}')
         print(f'  # positions after filtering:   {num_positions_after_filter:8d}')
         print(f'    % positions kept:            {num_positions_after_filter/self.num_positions*100:8.1f}')
 
