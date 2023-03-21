@@ -127,7 +127,7 @@ class PositionCsvIterator:
                                     # best move gains advantage, 2nd best move equalizes
                                     self.num_one_good_move += 1
                                     should_filter_out = True
-                                elif abs(sf_bestmove1_score) > 200 and (abs(sf_bestmove2_score) > 200 and \
+                                elif abs(sf_bestmove1_score) > 125 and (abs(sf_bestmove2_score) > 125 and \
                                      (sf_bestmove1_score > 0) != (sf_bestmove2_score > 0)):
                                     # best move gains an advantage, 2nd best move loses
                                     self.num_one_good_move += 1
