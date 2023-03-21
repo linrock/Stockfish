@@ -120,7 +120,7 @@ class PositionCsvIterator:
                     self.num_one_good_move += 1
                     should_filter_out = True
                 # skip if the score gap between bestmoves 1 and 2 is large
-                elif abs(sf_bestmove1_score - sf_bestmove2_score) > 500:
+                elif abs(sf_bestmove1_score - sf_bestmove2_score) > 225:
                     self.num_large_sf_score_gap += 1
                     should_filter_out = True
                 # skip if the leela score is a lot different from SF search score
@@ -171,7 +171,7 @@ class PositionCsvIterator:
         self.outfile.write(game_plain.strip() + "\n")
 
     def print_stats(self):
-        if self.num_positions % 10000 != 0:
+        if self.num_positions % 1000000 != 0:
             return
         num_positions_after_filter = self.num_positions - self.num_positions_filtered_out
         print(f'Processed {self.num_positions} positions')
@@ -187,7 +187,7 @@ class PositionCsvIterator:
         print(f'    # sf bestmove1 cap promo:    {self.num_sf_bestmove1_captures:8d}')
         print(f'    # one good move:             {self.num_one_good_move:8d}')
         print(f'    # obvious draw:              {self.num_obvious_draw:8d}')
-        print(f'    # score diff too high:       {self.num_score_too_high:8d}')
+        print(f'    # score too high/low:        {self.num_score_too_high:8d}')
         print(f'    # leela / sf score mismatch: {self.num_score_mismatch:8d}')
         print(f'    # bm 1,2 large score gap:    {self.num_large_sf_score_gap:8d}')
         print(f'    # only one move:             {self.num_only_one_move:8d}')
