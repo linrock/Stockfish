@@ -176,7 +176,7 @@ class PositionCsvIterator:
         self.outfile.write(game_plain.strip() + "\n")
 
     def print_stats(self):
-        if self.num_positions % 1000000 != 0:
+        if self.num_positions % 100000 != 0:
             return
         num_positions_after_filter = self.num_positions - self.num_positions_filtered_out
         print(f'Processed {self.num_positions} positions')
