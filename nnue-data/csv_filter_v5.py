@@ -146,41 +146,22 @@ class PositionCsvIterator:
                     # elif move_is_promo(bestmove_uci):
                     #     self.num_bestmove_promos += 1
                     #     should_filter_out = True
+            self.num_positions += 1
             if should_filter_out:
                 self.num_positions_filtered_out += 1
-            self.num_positions += 1
-            positions.append({
-                'fen': fen,
-                'move': bestmove_uci,
-                'score': bestmove_score,
-                'ply': ply,
-                'result': game_result,
-                'should_filter_out': should_filter_out,
-            })
+            else:
+                positions.append({
+                    'fen': fen,
+                    'move': bestmove_uci,
+                    'score': bestmove_score,
+                    'ply': ply,
+                    'result': game_result,
+                    'should_filter_out': should_filter_out,
+                })
             self.print_stats()
         self.print_stats()
 
     def write_positions_to_file(self, positions):
-        positions = positions[EARLY_PLY_SKIP + 1:]
-        for i in range(len(positions) - 1):
-            b = chess.Board(positions[i]['fen'])
-            # find the move that leads to the next fen and fixes binpack compression
-            b.push(chess.Move.from_uci(positions[i]['move']))
-            if b.fen() == positions[i + 1]['fen']:
-                if positions[i]['should_filter_out']:
-                    positions[i]['score'] = 32002
-            else:
-                b.pop()
-                # print(f'{b.legal_moves.count()} legal moves')
-                for move in b.legal_moves:
-                    b.push(move)
-                    if b.fen() == positions[i + 1]['fen']:
-                        positions[i]['move'] = move
-                        if positions[i]['should_filter_out']:
-                            positions[i]['score'] = 32002
-                        break
-                    else:
-                        b.pop()
         game_plain = ''
         for position in positions:
             game_plain += textwrap.dedent(f'''
@@ -191,7 +172,6 @@ class PositionCsvIterator:
                 result {position['result']}
                 e''')
         self.outfile.write(game_plain.strip() + "\n")
-        # sys.exit(0)
 
     def print_stats(self):
         if self.num_positions % 10000 != 0:
