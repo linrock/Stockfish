@@ -97,12 +97,20 @@ class PositionCsvIterator:
                 # skip if an early ply position
                 self.num_early_plies += 1
                 should_filter_out = True
-            elif abs(bestmove_score) > 9000:
-                self.num_score_too_high += 1
-                should_filter_out = True
+            # elif abs(bestmove_score) > 9000:
+            #     self.num_score_too_high += 1
+            #     should_filter_out = True
             elif bestmove_score == 0 and abs(sf_bestmove1_score) <= 1 and abs(sf_bestmove2_score) <= 1:
                 # skip if the best two moves are an obvious draw
                 self.num_obvious_draw += 1
+                should_filter_out = True
+            elif abs(sf_bestmove1_score - sf_bestmove2_score) > 225:
+                # skip if the score gap between bestmoves 1 and 2 is large
+                self.num_large_sf_score_gap += 1
+                should_filter_out = True
+            elif abs(bestmove_score - sf_bestmove1_score) > 500:
+                # skip if the leela score is a lot different from SF search score
+                self.num_score_mismatch += 1
                 should_filter_out = True
             else:
                 # skip if there's only one good move in the position (best two moves score diff is high enough)
@@ -114,20 +122,17 @@ class PositionCsvIterator:
                     # best move gains advantage, 2nd best move equalizes
                     self.num_one_good_move += 1
                     should_filter_out = True
-                elif (abs(sf_bestmove1_score) > 150 and abs(sf_bestmove2_score) > 150) and \
-                     (sf_bestmove1_score > 0) != (sf_bestmove2_score > 0):
-                    # best move gains an advantage, 2nd best move loses
-                    self.num_one_good_move += 1
-                    should_filter_out = True
-                # skip if the score gap between bestmoves 1 and 2 is large
-                elif abs(sf_bestmove1_score - sf_bestmove2_score) > 225:
-                    self.num_large_sf_score_gap += 1
-                    should_filter_out = True
-                # skip if the leela score is a lot different from SF search score
-                elif abs(bestmove_score - sf_bestmove1_score) > 500:
-                    # best move gains an advantage, 2nd best move loses
-                    self.num_score_mismatch += 1
-                    should_filter_out = True
+                elif (sf_bestmove1_score > 0) != (sf_bestmove2_score > 0):
+                    # if the 2 best move scores favor different sides
+                    if abs(sf_bestmove1_score) > 150 and abs(sf_bestmove2_score) > 150:
+                        # best move gains an advantage, 2nd best move loses
+                        self.num_one_good_move += 1
+                        should_filter_out = True
+                    elif abs(sf_bestmove1_score - sf_bestmove2_score) > 150:
+                        # lower score diff threshold if the best moves are on different sides
+                        self.num_one_good_move += 1
+                        should_filter_out = True
+
             # else:
                 # b = chess.Board(fen)
                 # if b.is_check():
