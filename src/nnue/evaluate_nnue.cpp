@@ -34,10 +34,10 @@
 
 namespace Stockfish::Eval::NNUE {
 
-    int TUNE_psqtConst = 985;
-    int TUNE_psqtDenom = 9605;
-    int TUNE_posConst = 1026;
-    int TUNE_posDenom = 9593;
+    int TUNE_psqtConst = 980;
+    int TUNE_psqtDenom = 9538;
+    int TUNE_posConst = 1009;
+    int TUNE_posDenom = 9287;
     TUNE(SetRange(800, 1200), TUNE_psqtConst);
     TUNE(SetRange(7000, 12000), TUNE_psqtDenom);
     TUNE(SetRange(850, 1250), TUNE_posConst);
