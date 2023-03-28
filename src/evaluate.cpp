@@ -58,22 +58,22 @@ using namespace std;
 
 namespace Stockfish {
 
-      int TUNE_scaleBase = 1017;
-      int TUNE_scalePawnMult = 5;
+      int TUNE_scaleBase = 1001;
+      int TUNE_scalePawnMult = 4;
       int TUNE_scaleNonPawnMult = 62;
       TUNE(SetRange(800, 1200), TUNE_scaleBase);
       TUNE(SetRange(0, 15), TUNE_scalePawnMult);
       TUNE(SetRange(40, 80), TUNE_scaleNonPawnMult);
 
-      int TUNE_optComplexOffset = 276;
-      int TUNE_vScaleOffset = 756;
+      int TUNE_optComplexOffset = 275;
+      int TUNE_vScaleOffset = 760;
       TUNE(SetRange(200, 350), TUNE_optComplexOffset);
       TUNE(SetRange(700, 800), TUNE_vScaleOffset);
 
-      int TUNE_psqThresh = 1791;
+      int TUNE_psqThresh = 1787;
       int TUNE_nnueComplexMult = 414;
-      int TUNE_nnueComplexOptOffset = 429;
-      int TUNE_nnueDampNum = 248;
+      int TUNE_nnueComplexOptOffset = 431;
+      int TUNE_nnueDampNum = 251;
       TUNE(SetRange(1680, 1880), TUNE_psqThresh);
       TUNE(SetRange(320, 480), TUNE_nnueComplexMult);
       TUNE(SetRange(380, 470), TUNE_nnueComplexOptOffset);
