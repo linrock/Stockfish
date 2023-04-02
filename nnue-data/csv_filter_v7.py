@@ -56,6 +56,7 @@ class PositionCsvIterator:
 
     def process_csv_rows(self):
         positions = []
+        prev_ply = -1
         for row in self.infile:
             split_row = row.strip().split(",")
             if len(split_row) == 10:
@@ -74,7 +75,7 @@ class PositionCsvIterator:
             sf_bestmove1_score = int(sf_bestmove1_score)
             sf_bestmove2_score = int(sf_bestmove2_score)
             should_filter_out = False
-            if ply == 0:
+            if ply < prev_ply:
                 if 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq' in fen:
                     self.num_standard_games += 1
                 else:
@@ -106,6 +107,7 @@ class PositionCsvIterator:
                     self.num_one_good_move += 1
                     should_filter_out = True
             self.num_positions += 1
+            prev_ply = ply
             if should_filter_out:
                 self.num_positions_filtered_out += 1
             else:
@@ -142,10 +144,6 @@ class PositionCsvIterator:
         print(f'  # positions:                   {self.num_positions:8d}')
         print(f'    # startpos:                  {self.num_start_positions:8d}')
         print(f'    # early plies <= 28:         {self.num_early_plies:8d}')
-        # print(f'    # in check:                  {self.num_in_check:8d}')
-        # print(f'    # bestmove captures:         {self.num_bestmove_captures:8d}')
-        # print(f'    # bestmove promos:           {self.num_bestmove_promos:8d}')
-        # print(f'    # sf bestmove1 cap promo:    {self.num_sf_bestmove1_captures:8d}')
         print(f'    # only one move:             {self.num_only_one_move:8d}')
         print(f'    # one good move:             {self.num_one_good_move:8d}')
         print(f'  # positions after filtering:   {num_positions_after_filter:8d}')
