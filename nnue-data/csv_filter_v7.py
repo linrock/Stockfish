@@ -48,7 +48,8 @@ class PositionCsvIterator:
         self.num_bestmove_captures = 0
         self.num_bestmove_promos = 0
         self.num_sf_bestmove1_captures = 0
-        self.num_one_good_move = 0
+        self.num_one_good_move_v6 = 0
+        self.num_one_good_move_v7 = 0
         self.num_positions_filtered_out = 0
 
         # v7 additions
@@ -94,25 +95,29 @@ class PositionCsvIterator:
             # skip if there's only one good move in the position (best two moves score diff is high enough)
             elif abs(sf_bestmove1_score) < 100 and abs(sf_bestmove2_score) > 150:
                 # best move about equal, 2nd best move loses
-                self.num_one_good_move += 1
-                should_filter_out = True
-            elif abs(sf_bestmove1_score) < 80 and abs(sf_bestmove2_score) > 120:
-                # best move about equal, 2nd best move loses
-                self.num_one_good_move += 1
+                self.num_one_good_move_v6 += 1
                 should_filter_out = True
             elif abs(sf_bestmove1_score) > 150 and abs(sf_bestmove2_score) < 100:
                 # best move gains advantage, 2nd best move equalizes
-                self.num_one_good_move += 1
+                self.num_one_good_move_v6 += 1
+                should_filter_out = True
+            elif abs(sf_bestmove1_score) < 80 and abs(sf_bestmove2_score) > 120:
+                # best move about equal, 2nd best move loses
+                self.num_one_good_move_v7 += 1
                 should_filter_out = True
             elif abs(sf_bestmove1_score) > 120 and abs(sf_bestmove2_score) < 80:
                 # best move gains advantage, 2nd best move equalizes
-                self.num_one_good_move += 1
+                self.num_one_good_move_v7 += 1
                 should_filter_out = True
             # if the 2 best moves favor different sides
             elif (sf_bestmove1_score > 0) != (sf_bestmove2_score > 0):
-                if abs(sf_bestmove1_score - sf_bestmove2_score) > 120:
-                    # remove positions where the score diff is high enough
-                    self.num_one_good_move += 1
+                pv2_score_diff = abs(sf_bestmove1_score - sf_bestmove2_score)
+                # remove positions where the pv2 score difference is high enough
+                if pv2_score_diff > 200:
+                    self.num_one_good_move_v6 += 1
+                    should_filter_out = True
+                elif pv2_score_diff > 120:
+                    self.num_one_good_move_v7 += 1
                     should_filter_out = True
             self.num_positions += 1
             prev_ply = ply
@@ -153,7 +158,8 @@ class PositionCsvIterator:
         print(f'    # startpos:                  {self.num_start_positions:8d}')
         print(f'    # early plies <= 28:         {self.num_early_plies:8d}')
         print(f'    # only one move:             {self.num_only_one_move:8d}')
-        print(f'    # one good move:             {self.num_one_good_move:8d}')
+        print(f'    # one good move v6:          {self.num_one_good_move_v6:8d}')
+        print(f'    # one good move v7:          {self.num_one_good_move_v7:8d}')
         print(f'  # positions after filtering:   {num_positions_after_filter:8d}')
         print(f'    % positions kept:            {num_positions_after_filter/self.num_positions*100:8.1f}')
 
