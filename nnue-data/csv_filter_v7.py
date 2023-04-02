@@ -4,7 +4,6 @@ from pprint import pprint
 import sys
 import textwrap
 
-import chess
 import zstandard
 
 ''' Iterate over positions .csv files and output .plain files
