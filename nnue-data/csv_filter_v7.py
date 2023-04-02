@@ -44,16 +44,10 @@ class PositionCsvIterator:
         self.num_positions = 0
         self.num_start_positions = 0
         self.num_early_plies = 0
-        self.num_in_check = 0
-        self.num_bestmove_captures = 0
-        self.num_bestmove_promos = 0
-        self.num_sf_bestmove1_captures = 0
+        self.num_only_one_move = 0
         self.num_one_good_move_v6 = 0
         self.num_one_good_move_v7 = 0
         self.num_positions_filtered_out = 0
-
-        # v7 additions
-        self.num_only_one_move = 0
 
     def process_csv_rows(self):
         positions = []
@@ -77,7 +71,8 @@ class PositionCsvIterator:
             sf_bestmove2_score = int(sf_bestmove2_score)
             should_filter_out = False
             if ply < prev_ply:
-                if 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq' in fen:
+                # assume this is the start of the next training game in the dataset
+                if fen.startswith('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq'):
                     self.num_standard_games += 1
                 else:
                     self.num_non_standard_games += 1
