@@ -144,18 +144,20 @@ class PositionCsvIterator:
         if self.num_positions % 100000 != 0:
             return
         num_positions_after_filter = self.num_positions - self.num_positions_filtered_out
-        print(f'Processed {self.num_positions} positions')
-        print(f'  # games:                       {self.num_games:8d}')
-        print(f'    # standard games:            {self.num_standard_games:8d}')
-        print(f'    # non-standard games:        {self.num_non_standard_games:8d}')
-        print(f'  # positions:                   {self.num_positions:8d}')
-        print(f'    # startpos:                  {self.num_start_positions:8d}')
-        print(f'    # early plies <= 28:         {self.num_early_plies:8d}')
-        print(f'    # only one move:             {self.num_only_one_move:8d}')
-        print(f'    # one good move v6:          {self.num_one_good_move_v6:8d}')
-        print(f'    # one good move v7:          {self.num_one_good_move_v7:8d}')
-        print(f'  # positions after filtering:   {num_positions_after_filter:8d}')
-        print(f'    % positions kept:            {num_positions_after_filter/self.num_positions*100:8.1f}')
+        print(textwrap.dedent(f'''
+            Processed {self.num_positions} positions
+              # games:                       {self.num_games:8d}
+                # standard games:            {self.num_standard_games:8d}
+                # non-standard games:        {self.num_non_standard_games:8d}
+              # positions:                   {self.num_positions:8d}
+                # startpos:                  {self.num_start_positions:8d}
+                # early plies <= 28:         {self.num_early_plies:8d}
+                # only one move:             {self.num_only_one_move:8d}
+                # one good move v6:          {self.num_one_good_move_v6:8d}
+                # one good move v7:          {self.num_one_good_move_v7:8d}
+              # positions after filtering:   {num_positions_after_filter:8d}
+                % positions kept:            {num_positions_after_filter/self.num_positions*100:8.1f}
+        '''))
 
 
 print(f'Processing {input_filename} ...')
