@@ -7,14 +7,14 @@ fi
 function csv_zst_to_filtered_binpack() {
   set -eu -o pipefail
   input_csv_zst_filename=$1
-  filtered_plain_filename=${input_csv_zst_filename}.filter-v6.plain
-  output_filtered_binpack_filename=${input_csv_zst_filename}.filter-v6.binpack
-  filter_log_filename=${input_csv_zst_filename}.filter-v6.log
+  filtered_plain_filename=${input_csv_zst_filename}.filter-v7.plain
+  output_filtered_binpack_filename=${input_csv_zst_filename}.filter-v7.binpack
+  filter_log_filename=${input_csv_zst_filename}.filter-v7.log
   if [ -f $output_filtered_binpack_filename ]; then
     echo "Doing nothing, filtered binpack exists: $output_filtered_binpack_filename"
   else
     echo "Filtering... $input_csv_zst_filename" | tee $filter_log_filename
-    python3 /home/ubuntu/stockfish/nnue-data/csv_filter_v6.py $input_csv_zst_filename >> $filter_log_filename
+    python3 /home/ubuntu/stockfish/nnue-data/csv_filter_v7.py $input_csv_zst_filename >> $filter_log_filename
     stockfish convert $filtered_plain_filename $output_filtered_binpack_filename >> $filter_log_filename
     ls -lth $output_filtered_binpack_filename >> $filter_log_filename
   fi
