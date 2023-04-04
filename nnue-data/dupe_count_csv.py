@@ -27,14 +27,19 @@ is_standard_game = False
 num_standard_games = 0
 num_non_standard_games = 0
 num_unique_piece_orientations = 0
+
 num_ply_gt_28 = 0
 num_unique_gt_28 = 0
-num_ply_lteq_24 = 0
-num_unique_lteq_24 = 0
+
 num_ply_gt_24 = 0
 num_unique_gt_24 = 0
-num_ply_gt_28 = 0
-num_unique_gt_28 = 0
+
+num_ply_gt_20 = 0
+num_unique_gt_20 = 0
+
+num_ply_lteq_20 = 0
+num_unique_lteq_20 = 0
+
 piece_orientations_seen = set()
 
 def move_is_promo(uci_move):
@@ -76,10 +81,14 @@ def process_csv_rows(infile):
             if piece_orientation not in piece_orientations_seen:
                 num_unique_gt_24 += 1
             num_ply_gt_24 += 1
-        if ply <= 24:
+        if ply > 20:
             if piece_orientation not in piece_orientations_seen:
-                num_unique_lteq_24 += 1
-            num_ply_lteq_24 += 1
+                num_unique_gt_20 += 1
+            num_ply_gt_20 += 1
+        if ply <= 20:
+            if piece_orientation not in piece_orientations_seen:
+                num_unique_lteq_20 += 1
+            num_ply_lteq_20 += 1
         num_positions += 1
         if (num_positions % 1000000 == 0) and num_positions > 0:
             print(f"Processed {num_positions} positions")
@@ -94,9 +103,12 @@ def process_csv_rows(infile):
             print(f'  # positions ply > 24:       {num_ply_gt_24}')
             print(f'    # unique:                 {num_unique_gt_24}')
             print(f'    % unique:                 {num_unique_gt_24 / num_ply_gt_24:.2f}')
-            print(f'  # positions ply <= 24:      {num_ply_lteq_24}')
-            print(f'    # unique:                 {num_unique_lteq_24}')
-            print(f'    % unique:                 {num_unique_lteq_24 / num_ply_lteq_24:.2f}')
+            print(f'  # positions ply > 20:       {num_ply_gt_20}')
+            print(f'    # unique:                 {num_unique_gt_20}')
+            print(f'    % unique:                 {num_unique_gt_20 / num_ply_gt_20:.2f}')
+            print(f'  # positions ply <= 20:      {num_ply_lteq_20}')
+            print(f'    # unique:                 {num_unique_lteq_20}')
+            print(f'    % unique:                 {num_unique_lteq_20 / num_ply_lteq_20:.2f}')
 
 print(f'Processing {input_filename} ...')
 if input_filename.endswith(".csv.zst"):
@@ -121,6 +133,9 @@ print(f'    % unique:                 {num_unique_gt_28 / num_ply_gt_28:.2f}')
 print(f'  # positions ply > 24:       {num_ply_gt_24}')
 print(f'    # unique:                 {num_unique_gt_24}')
 print(f'    % unique:                 {num_unique_gt_24 / num_ply_gt_24:.2f}')
-print(f'  # positions ply <= 24:      {num_ply_lteq_24}')
-print(f'    # unique:                 {num_unique_lteq_24}')
-print(f'    % unique:                 {num_unique_lteq_24 / num_ply_lteq_24:.2f}')
+print(f'  # positions ply > 20:       {num_ply_gt_20}')
+print(f'    # unique:                 {num_unique_gt_20}')
+print(f'    % unique:                 {num_unique_gt_20 / num_ply_gt_20:.2f}')
+print(f'  # positions ply <= 20:      {num_ply_lteq_20}')
+print(f'    # unique:                 {num_unique_lteq_20}')
+print(f'    % unique:                 {num_unique_lteq_20 / num_ply_lteq_20:.2f}')
