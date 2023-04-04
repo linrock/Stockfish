@@ -29,6 +29,9 @@ num_standard_games = 0
 num_non_standard_games = 0
 num_unique_piece_orientations = 0
 
+num_ply_gt_30 = 0
+num_unique_gt_30 = 0
+
 num_ply_gt_28 = 0
 num_unique_gt_28 = 0
 
@@ -50,6 +53,7 @@ def process_csv_rows(infile):
     global num_games, num_positions, num_positions_filtered_out, \
            num_bestmove_captures, num_bestmove_promos, num_sf_bestmove1_captures, num_sf_bestmove2_captures, \
            num_standard_games, num_non_standard_games, num_overlap_sf_bestmove_captures, num_unique_piece_orientations, \
+           num_ply_gt_30, num_unique_gt_30, \
            num_ply_gt_28, num_unique_gt_28, \
            num_ply_gt_24, num_unique_gt_24, \
            num_ply_gt_20, num_unique_gt_20, \
@@ -72,6 +76,10 @@ def process_csv_rows(infile):
             else:
                 num_non_standard_games += 1
         piece_orientation = fen.split(' ')[0]
+        if ply > 30:
+            if piece_orientation not in piece_orientations_seen:
+                num_unique_gt_30 += 1
+            num_ply_gt_30 += 1
         if ply > 28:
             if piece_orientation not in piece_orientations_seen:
                 num_unique_gt_28 += 1
@@ -99,6 +107,9 @@ def process_csv_rows(infile):
             print(f'  # positions:                {num_positions}')
             print(f'    # unique:                 {num_unique_piece_orientations}')
             print(f'    % unique:                 {num_unique_piece_orientations / num_positions * 100:.2f}')
+            print(f'  # positions ply > 30:       {num_ply_gt_30}')
+            print(f'    # unique:                 {num_unique_gt_30}')
+            print(f'    % unique:                 {num_unique_gt_30 / num_ply_gt_30 * 100:.2f}')
             print(f'  # positions ply > 28:       {num_ply_gt_28}')
             print(f'    # unique:                 {num_unique_gt_28}')
             print(f'    % unique:                 {num_unique_gt_28 / num_ply_gt_28 * 100:.2f}')
@@ -130,6 +141,9 @@ print(f'  # non-standard games:       {num_non_standard_games}')
 print(f'  # positions:                {num_positions}')
 print(f'    # unique:                 {num_unique_piece_orientations}')
 print(f'    % unique:                 {num_unique_piece_orientations / num_positions * 100:.2f}')
+print(f'  # positions ply > 30:       {num_ply_gt_30}')
+print(f'    # unique:                 {num_unique_gt_30}')
+print(f'    % unique:                 {num_unique_gt_30 / num_ply_gt_30 * 100:.2f}')
 print(f'  # positions ply > 28:       {num_ply_gt_28}')
 print(f'    # unique:                 {num_unique_gt_28}')
 print(f'    % unique:                 {num_unique_gt_28 / num_ply_gt_28 * 100:.2f}')
