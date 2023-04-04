@@ -1,3 +1,4 @@
+from glob import glob
 import io
 import os.path
 import sys
@@ -11,7 +12,7 @@ if len(sys.argv) != 2:
     print('Usage: ./dupe_count_csv.py <input_csv_file>')
     sys.exit(0)
 
-input_filename = sys.argv[1]
+input_filename_glob = sys.argv[1]
 
 position = None
 num_games = 0
@@ -111,16 +112,17 @@ def process_csv_rows(infile):
             print(f'    # unique:                 {num_unique_lteq_20}')
             print(f'    % unique:                 {num_unique_lteq_20 / num_ply_lteq_20 * 100:.2f}')
 
-print(f'Processing {input_filename} ...')
-if input_filename.endswith(".csv.zst"):
-    with open(input_filename, 'rb') as compressed_infile:
-        dctx = zstandard.ZstdDecompressor()
-        stream_reader = dctx.stream_reader(compressed_infile)
-        text_stream = io.TextIOWrapper(stream_reader, encoding='utf-8')
-        process_csv_rows(text_stream)
-else:
-    with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as outfile:
-        process_csv_rows(infile)
+for input_filename in glob(input_filename_glob):
+    print(f'Processing {input_filename} ...')
+    if input_filename.endswith(".csv.zst"):
+        with open(input_filename, 'rb') as compressed_infile:
+            dctx = zstandard.ZstdDecompressor()
+            stream_reader = dctx.stream_reader(compressed_infile)
+            text_stream = io.TextIOWrapper(stream_reader, encoding='utf-8')
+            process_csv_rows(text_stream)
+    else:
+        with open(input_filename, 'r') as infile: # , open(output_filename, 'w+') as outfile:
+            process_csv_rows(infile)
 
 print(f"Processed {num_positions} positions")
 print(f'  # standard games:           {num_standard_games}')
