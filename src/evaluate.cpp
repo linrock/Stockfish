@@ -204,10 +204,10 @@ namespace {
   TUNE(SetRange(250, 300), TUNE_nnueOptCompOffset);
 
   int TUNE_scaleBase = 1001;
-  int TUNE_scalePcMult = 5;
+  int TUNE_scalePcMult = 160;
   int TUNE_scaleNonPawnMat = 61;
   TUNE(SetRange(900, 1100), TUNE_scaleBase);
-  TUNE(SetRange(0, 10), TUNE_scalePcMult);
+  TUNE(SetRange(0, 320), TUNE_scalePcMult);
   TUNE(SetRange(40, 80), TUNE_scaleNonPawnMat);
 
   constexpr Value SpaceThreshold    =  Value(11551);
@@ -1078,7 +1078,9 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   else
   {
       int nnueComplexity;
-      int scale = TUNE_scaleBase + TUNE_scalePcMult * pos.count<PAWN>() + TUNE_scaleNonPawnMat * pos.non_pawn_material() / 4096;
+      int scale = TUNE_scaleBase
+                + TUNE_scalePcMult * pos.count<PAWN>() / 32
+                + TUNE_scaleNonPawnMat * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
