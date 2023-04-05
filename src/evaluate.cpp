@@ -191,14 +191,13 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1 = 3507;
-  constexpr Value LazyThreshold2 = 1752;
+  constexpr Value LazyThreshold1 = Value(3507);
+  constexpr Value LazyThreshold2 = Value(1752);
 
-constexpr   int TUNE_nnueComplexityMult = 403;
-constexpr   int TUNE_nnueOptCompOffset = 275;
-constexpr   int TUNE_scaleBase = 989;
-constexpr   int TUNE_scalePcMult = 5;
-constexpr   int TUNE_scaleNonPawnMat = 52;
+  constexpr   int TUNE_nnueComplexityMult = 403;
+  constexpr   int TUNE_nnueOptCompOffset = 275;
+  constexpr   int TUNE_scaleBase = 989;
+  constexpr   int TUNE_scaleNonPawnMat = 52;
 
   constexpr Value SpaceThreshold    =  Value(11551);
 
@@ -1070,7 +1069,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   else
   {
       int nnueComplexity;
-      int scale = TUNE_scaleBase + TUNE_scalePcMult * pos.count<PAWN>() + TUNE_scaleNonPawnMat * pos.non_pawn_material() / 4096;
+      int scale = TUNE_scaleBase + TUNE_scaleNonPawnMat * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
