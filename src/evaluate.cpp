@@ -191,14 +191,14 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1 = 3507;
-  constexpr Value LazyThreshold2 = 1752;
+  constexpr Value LazyThreshold1 = Value(3504);
+  constexpr Value LazyThreshold2 = Value(1745);
 
-constexpr   int TUNE_nnueComplexityMult = 403;
-constexpr   int TUNE_nnueOptCompOffset = 275;
-constexpr   int TUNE_scaleBase = 989;
-constexpr   int TUNE_scalePcMult = 5;
-constexpr   int TUNE_scaleNonPawnMat = 52;
+  constexpr   int TUNE_nnueComplexityMult = 405;
+  constexpr   int TUNE_nnueOptCompOffset = 277;
+  constexpr   int TUNE_scaleBase = 987;
+  constexpr   int TUNE_scalePcMult = 5;
+  constexpr   int TUNE_scaleNonPawnMat = 52;
 
   constexpr Value SpaceThreshold    =  Value(11551);
 
