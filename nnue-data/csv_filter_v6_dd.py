@@ -12,9 +12,11 @@ import zstandard
 ''' Iterate over positions .csv files and output .plain files
 '''
 if len(sys.argv) < 2:
-    print('Usage: ./csv_filter_v6-dd.py <input_csv_file_glob>')
+    print('Usage: ./csv_filter_v6_dd.py <input_csv_file_glob>')
     sys.exit(0)
 
+
+piece_orientations_seen = set()
 
 def filter_file(input_filename):
     ''' Filter a .csv or .csv.zst file '''
@@ -64,11 +66,11 @@ class PositionCsvIterator:
         self.num_early_plies = 0
         self.num_one_good_move = 0
         self.num_only_one_move = 0
+        self.num_seen_before = 0
         self.num_positions_filtered_out = 0
 
-        self.piece_orientations_seen = set()
-
     def process_csv_rows(self):
+        global piece_orientations_seen
         positions = []
         for row in self.infile:
             split_row = row.strip().split(",")
@@ -89,8 +91,8 @@ class PositionCsvIterator:
             sf_bestmove2_score = int(sf_bestmove2_score)
 
             piece_orientation = fen.split(' ')[0]
-            seen_position_before = piece_orientation in self.piece_orientations_seen
-            self.piece_orientations_seen.add(piece_orientation)
+            seen_position_before = piece_orientation in piece_orientations_seen
+            piece_orientations_seen.add(piece_orientation)
 
             should_filter_out = False
 
@@ -131,6 +133,7 @@ class PositionCsvIterator:
                     should_filter_out = True
             elif seen_position_before:
                 # remove duplicate positions
+                self.num_seen_before += 1
                 should_filter_out = True
             self.num_positions += 1
             if should_filter_out:
@@ -172,9 +175,10 @@ class PositionCsvIterator:
         print(f'    # early plies <= 28:         {self.num_early_plies:8d}')
         print(f'    # only one move:             {self.num_only_one_move:8d}')
         print(f'    # one good move:             {self.num_one_good_move:8d}')
+        print(f'    # seen before:               {self.num_seen_before:8d}')
         print(f'  # positions after filtering:   {num_positions_after_filter:8d}')
         print(f'    % positions kept:            {num_positions_after_filter/self.num_positions*100:8.1f}')
 
 
-for file in glob(sorted(sys.argv[1:])):
+for file in sorted(glob(sys.argv[1]))[::-1]:
     filter_file(file)
