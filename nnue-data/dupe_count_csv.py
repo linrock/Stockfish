@@ -1,6 +1,7 @@
 from glob import glob
 import io
 import os.path
+import re
 import sys
 
 import chess
@@ -44,6 +45,12 @@ num_unique_gt_20 = 0
 num_ply_lteq_20 = 0
 num_unique_lteq_20 = 0
 
+num_unique_num_pieces_gt7 = 0
+num_pieces_gt7 = 0
+
+num_unique_num_pieces_lteq7 = 0
+num_pieces_lteq7 = 0
+
 piece_orientations_seen = set()
 
 def move_is_promo(uci_move):
@@ -57,7 +64,9 @@ def process_csv_rows(infile):
            num_ply_gt_28, num_unique_gt_28, \
            num_ply_gt_24, num_unique_gt_24, \
            num_ply_gt_20, num_unique_gt_20, \
-           num_ply_lteq_20, num_unique_lteq_20
+           num_ply_lteq_20, num_unique_lteq_20, \
+           num_unique_num_pieces_gt7, num_pieces_gt7, \
+           num_unique_num_pieces_lteq7, num_pieces_lteq7
     for row in infile:
         split_row = row.strip().split(",")
         if len(split_row) == 10:
@@ -76,27 +85,37 @@ def process_csv_rows(infile):
             else:
                 num_non_standard_games += 1
         piece_orientation = fen.split(' ')[0]
+        not_seen_before = piece_orientation not in piece_orientations_seen
+        num_pieces = len(re.sub("[^rnbkqp]", "", piece_orientation, flags=re.IGNORECASE))
+        if num_pieces > 7:
+            if not_seen_before:
+                num_unique_num_pieces_gt7 += 1
+            num_pieces_gt7 += 1
+        else:
+            if not_seen_before:
+                num_unique_num_pieces_lteq7 += 1
+            num_pieces_lteq7 += 1
         if ply > 30:
-            if piece_orientation not in piece_orientations_seen:
+            if not_seen_before:
                 num_unique_gt_30 += 1
             num_ply_gt_30 += 1
         if ply > 28:
-            if piece_orientation not in piece_orientations_seen:
+            if not_seen_before:
                 num_unique_gt_28 += 1
             num_ply_gt_28 += 1
         if ply > 24:
-            if piece_orientation not in piece_orientations_seen:
+            if not_seen_before:
                 num_unique_gt_24 += 1
             num_ply_gt_24 += 1
         if ply > 20:
-            if piece_orientation not in piece_orientations_seen:
+            if not_seen_before:
                 num_unique_gt_20 += 1
             num_ply_gt_20 += 1
         if ply <= 20:
-            if piece_orientation not in piece_orientations_seen:
+            if not_seen_before:
                 num_unique_lteq_20 += 1
             num_ply_lteq_20 += 1
-        if piece_orientation not in piece_orientations_seen:
+        if not_seen_before:
             num_unique_piece_orientations += 1
         piece_orientations_seen.add(piece_orientation)
         num_positions += 1
@@ -122,6 +141,12 @@ def process_csv_rows(infile):
             print(f'  # positions ply <= 20:      {num_ply_lteq_20}')
             print(f'    # unique:                 {num_unique_lteq_20}')
             print(f'    % unique:                 {num_unique_lteq_20 / num_ply_lteq_20 * 100:.2f}')
+            print(f'  # positions pieces  > 7     {num_pieces_gt7}')
+            print(f'    # unique:                 {num_unique_num_pieces_gt7}')
+            print(f'    % unique:                 {num_unique_num_pieces_gt7 / num_pieces_gt7 * 100:.2f}')
+            print(f'  # positions pieces <= 7     {num_pieces_lteq7}')
+            print(f'    # unique:                 {num_unique_num_pieces_lteq7}')
+            print(f'    % unique:                 {num_unique_num_pieces_lteq7 / num_pieces_lteq7 * 100:.2f}')
 
 for input_filename in glob(input_filename_glob):
     print(f'Processing {input_filename} ...')
