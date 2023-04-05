@@ -191,24 +191,14 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  Value LazyThreshold1 = Value(3622);
-  Value LazyThreshold2 = Value(1962);
-  TUNE(SetRange(2800, 3800), LazyThreshold1);
-  TUNE(SetRange(1400, 2400), LazyThreshold2);
-
-  int TUNE_psqThresh = 1781;
-  int TUNE_nnueComplexityMult = 406;
-  int TUNE_nnueOptCompOffset = 272;
-  TUNE(SetRange(1750, 1810), TUNE_psqThresh);
-  TUNE(SetRange(380, 430), TUNE_nnueComplexityMult);
-  TUNE(SetRange(250, 300), TUNE_nnueOptCompOffset);
-
-  int TUNE_scaleBase = 1001;
-  int TUNE_scalePcMult = 5;
-  int TUNE_scaleNonPawnMat = 61;
-  TUNE(SetRange(900, 1100), TUNE_scaleBase);
-  TUNE(SetRange(0, 10), TUNE_scalePcMult);
-  TUNE(SetRange(40, 80), TUNE_scaleNonPawnMat);
+constexpr   Value LazyThreshold1 = Value(3562);
+constexpr   Value LazyThreshold2 = Value(1903);
+constexpr   int TUNE_psqThresh = 1780;
+constexpr   int TUNE_nnueComplexityMult = 409;
+constexpr   int TUNE_nnueOptCompOffset = 277;
+constexpr   int TUNE_scaleBase = 991;
+constexpr   int TUNE_scalePcMult = 102;
+constexpr   int TUNE_scaleNonPawnMat = 58;
 
   constexpr Value SpaceThreshold    =  Value(11551);
 
@@ -1080,7 +1070,7 @@ Value Eval::evaluate(const Position& pos) {
   else
   {
       int nnueComplexity;
-      int scale = TUNE_scaleBase + TUNE_scalePcMult * pos.count<PAWN>() + TUNE_scaleNonPawnMat * pos.non_pawn_material() / 4096;
+      int scale = TUNE_scaleBase + TUNE_scalePcMult * pos.count<PAWN>() / 32 + TUNE_scaleNonPawnMat * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
