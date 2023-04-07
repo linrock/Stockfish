@@ -72,6 +72,7 @@ class PositionCsvIterator:
     def process_csv_rows(self):
         global piece_orientations_seen
         positions = []
+        prev_ply = -1
         for row in self.infile:
             split_row = row.strip().split(",")
             if len(split_row) == 10:
@@ -96,7 +97,8 @@ class PositionCsvIterator:
 
             should_filter_out = False
 
-            if ply == 0:
+            # assume the dataset contains entire training games
+            if ply < prev_ply:
                 if 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq' in fen:
                     self.num_standard_games += 1
                 else:
@@ -147,6 +149,7 @@ class PositionCsvIterator:
                     'result': game_result,
                     'should_filter_out': should_filter_out,
                 })
+            prev_ply = ply
             self.print_stats()
         self.print_stats()
 
