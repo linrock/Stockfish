@@ -145,13 +145,13 @@ class PositionCsvIterator:
                     'result': game_result,
                 })
             prev_ply = ply
-            if self.write_positions_and_print_stats(positions):
+            if self.write_positions_and_print_stats(positions, self.num_positions % 100000 == 0):
                 positions = []
-        if self.write_positions_and_print_stats(positions):
+        if self.write_positions_and_print_stats(positions, True):
             positions = []
 
-    def write_positions_and_print_stats(self, positions) -> bool:
-        if self.num_positions % 100000 != 0:
+    def write_positions_and_print_stats(self, positions, should_write) -> bool:
+        if not should_write:
             return False
         self.print_stats()
         if len(positions):
