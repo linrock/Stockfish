@@ -106,10 +106,6 @@ class PositionCsvIterator:
                 self.num_games += 1
                 self.num_start_positions += 1
                 should_filter_out = True
-                if len(positions):
-                    # finished processing a game. time to save it to a file
-                    self.write_positions_to_file(positions)
-                    positions = []
             elif ply <= self.EARLY_PLY_SKIP:
                 # skip if an early ply position
                 self.num_early_plies += 1
@@ -147,11 +143,21 @@ class PositionCsvIterator:
                     'score': bestmove_score,
                     'ply': ply,
                     'result': game_result,
-                    'should_filter_out': should_filter_out,
                 })
             prev_ply = ply
-            self.print_stats()
+            if self.write_positions_and_print_stats(positions):
+                positions = []
+        if self.write_positions_and_print_stats(positions):
+            positions = []
+
+    def write_positions_and_print_stats(self, positions) -> bool:
+        if self.num_positions % 100000 != 0:
+            return False
         self.print_stats()
+        if len(positions):
+            self.write_positions_to_file(positions)
+            return True
+        return False
 
     def write_positions_to_file(self, positions):
         game_plain = ''
@@ -166,8 +172,6 @@ class PositionCsvIterator:
         self.outfile.write(game_plain.strip() + "\n")
 
     def print_stats(self):
-        if self.num_positions % 100000 != 0:
-            return
         num_positions_after_filter = self.num_positions - self.num_positions_filtered_out
         print(f'Processed {self.num_positions} positions')
         print(f'  # games:                       {self.num_games:8d}')
