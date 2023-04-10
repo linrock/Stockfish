@@ -1,5 +1,6 @@
 from glob import glob
 import io
+import os
 import os.path
 from pprint import pprint
 import re
@@ -18,7 +19,7 @@ if len(sys.argv) < 2:
 
 piece_orientations_seen = set()
 
-def filter_file(input_filename):
+def filter_csv_to_plain(input_filename):
     ''' Filter a .csv or .csv.zst file '''
     print(f'Processing {input_filename} ...')
     if input_filename.endswith(".csv.zst"):
@@ -48,6 +49,7 @@ def filter_file(input_filename):
              open(output_filename, 'w+') as outfile:
             PositionCsvIterator(infile, outfile).process_csv_rows()
     print(f'Saved to {output_filename}')
+    return output_filename
 
 
 class PositionCsvIterator:
@@ -187,5 +189,10 @@ class PositionCsvIterator:
         print(f'    % positions kept:            {num_positions_after_filter/self.num_positions*100:8.1f}')
 
 
+# prioritize position scores from later in time (ie. seen end of month vs. beginning of month)
 for file in sorted(glob(sys.argv[1]))[::-1]:
-    filter_file(file)
+    filtered_plain_filename = filter_csv_to_plain(file)
+    # convert the filtered .plain file into a .binpack
+    filtered_binpack_filename = filtered_plain_filename.replace('-v6-dd.plain', '-v6-dd.binpack')
+    print(os.system(f"stockfish convert {filtered_plain_filename} {output_binpack_filename}"))
+    os.system(f"rm {filtered_plain_filename}")
