@@ -192,7 +192,8 @@ class PositionCsvIterator:
 # prioritize position scores from later in time (ie. seen end of month vs. beginning of month)
 for file in sorted(glob(sys.argv[1]))[::-1]:
     filtered_plain_filename = filter_csv_to_plain(file)
-    # convert the filtered .plain file into a .binpack
-    filtered_binpack_filename = filtered_plain_filename.replace('-v6-dd.plain', '-v6-dd.binpack')
-    print(os.system(f"stockfish convert {filtered_plain_filename} {output_binpack_filename}"))
-    os.system(f"rm {filtered_plain_filename}")
+    if filtered_plain_filename:
+        # convert the filtered .plain file into a .binpack
+        filtered_binpack_filename = filtered_plain_filename.replace('-v6-dd.plain', '-v6-dd.binpack')
+        print(os.system(f"stockfish convert {filtered_plain_filename} {filtered_binpack_filename}"))
+        os.system(f"rm {filtered_plain_filename}")
