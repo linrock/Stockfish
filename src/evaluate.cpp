@@ -194,12 +194,9 @@ namespace {
   constexpr Value LazyThreshold1    =  Value(3622);
   constexpr Value LazyThreshold2    =  Value(1962);
 
-  int TUNE_psqThresh = 2048;
-  int TUNE_scaleBase = 1001;
-  int TUNE_scaleNonPawnMat = 64;
-  TUNE(SetRange(1648, 2448), TUNE_psqThresh);
-  TUNE(SetRange(701, 1301), TUNE_scaleBase);
-  TUNE(SetRange(0, 128), TUNE_scaleNonPawnMat);
+constexpr   int TUNE_psqThresh = 2110;
+constexpr   int TUNE_scaleBase = 1004;
+constexpr   int TUNE_scaleNonPawnMat = 58;
 
   constexpr Value SpaceThreshold    =  Value(11551);
 
