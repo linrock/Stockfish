@@ -62,6 +62,8 @@ class PositionCsvIterator:
 
         self.EARLY_PLY_SKIP = 28
 
+        self.prev_ply = -1
+
         self.num_games = 0
         self.num_standard_games = 0
         self.num_non_standard_games = 0
@@ -85,7 +87,7 @@ class PositionCsvIterator:
 
         self.num_positions_filtered_out = 0
 
-    def process_csv_row(self, csv_row, prev_ply):
+    def process_csv_row(self, csv_row):
         split_row = csv_row.strip().split(",")
         if len(split_row) == 10:
             ply, fen, bestmove_uci, bestmove_score, game_result, \
@@ -95,8 +97,6 @@ class PositionCsvIterator:
         elif len(split_row) == 8:
             # only one possible move in the position
             self.num_only_one_move += 1
-            self.num_positions += 1
-            self.num_positions_filtered_out += 1
             return
         ply = int(ply)
         bestmove_score = int(bestmove_score)
@@ -108,14 +108,17 @@ class PositionCsvIterator:
         piece_orientations_seen.add(piece_orientation)
 
         # assume the dataset is a sequence of training games
-        if ply < prev_ply:
+        # and that we're at the beginning of a game in this case
+        if ply < self.prev_ply:
             if 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq' in fen:
                 self.num_standard_games += 1
             else:
                 self.num_non_standard_games += 1
             self.num_games += 1
             self.num_start_positions += 1
+            self.prev_ply = ply
             return
+        self.prev_ply = ply
         elif ply <= self.EARLY_PLY_SKIP:
             # skip if an early ply position
             self.num_early_plies += 1
@@ -181,103 +184,11 @@ class PositionCsvIterator:
     def process_csv_rows(self):
         global piece_orientations_seen
         positions = []
-        prev_ply = -1
         for row in self.infile:
-            split_row = row.strip().split(",")
-            if len(split_row) == 10:
-                ply, fen, bestmove_uci, bestmove_score, game_result, \
-                sf_search_method, sf_bestmove1_uci, sf_bestmove1_score, \
-                sf_bestmove2_uci, sf_bestmove2_score = \
-                    split_row
-            elif len(split_row) == 8:
-                # only one possible move in the position
-                self.num_only_one_move += 1
-                self.num_positions += 1
-                self.num_positions_filtered_out += 1
-                continue
-            ply = int(ply)
-            bestmove_score = int(bestmove_score)
-            sf_bestmove1_score = int(sf_bestmove1_score)
-            sf_bestmove2_score = int(sf_bestmove2_score)
-
-            piece_orientation = fen.split(' ')[0]
-            seen_position_before = piece_orientation in piece_orientations_seen
-            piece_orientations_seen.add(piece_orientation)
-
-            should_filter_out = False
-
-            # assume the dataset is a sequence of training games
-            if ply < prev_ply:
-                if 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq' in fen:
-                    self.num_standard_games += 1
-                else:
-                    self.num_non_standard_games += 1
-                self.num_games += 1
-                self.num_start_positions += 1
-                should_filter_out = True
-            elif ply <= self.EARLY_PLY_SKIP:
-                # skip if an early ply position
-                self.num_early_plies += 1
-                should_filter_out = True
-            # skip if there's only one good move in the position (best two moves score diff is high enough)
-            elif abs(sf_bestmove1_score) < 100 and abs(sf_bestmove2_score) > 150:
-                # best move about equal, 2nd best move loses
-                self.num_one_good_move += 1
-                should_filter_out = True
-            elif abs(sf_bestmove1_score) > 150 and abs(sf_bestmove2_score) < 100:
-                # best move gains advantage, 2nd best move equalizes
-                self.num_one_good_move += 1
-                should_filter_out = True
-            elif (sf_bestmove1_score > 0) != (sf_bestmove2_score > 0):
-                # if the 2 best move scores favor different sides
-                if abs(sf_bestmove1_score) > 125 and abs(sf_bestmove2_score) > 125:
-                    # best move gains an advantage, 2nd best move loses
-                    self.num_one_good_move += 1
-                    should_filter_out = True
-                elif abs(sf_bestmove1_score - sf_bestmove2_score) > 200:
-                    # lower score diff threshold when best moves favor different sides
-                    self.num_one_good_move += 1
-                    should_filter_out = True
-            elif seen_position_before:
-                # remove duplicate positions
-                self.num_seen_before += 1
-                should_filter_out = True
-            elif move_is_promo(bestmove_uci):
-                # remove bestmove promotions
-                self.num_bestmove_promos += 1
-                should_filter_out = True
-            else:
-                b = chess.Board(fen)
-                if b.is_check():
-                    # skip if in check
-                    self.num_in_check += 1
-                    should_filter_out = True
-                else:
-                    # filter out if provided move is a capture or promo
-                    bestmove = chess.Move.from_uci(bestmove_uci)
-                    if b.is_capture(bestmove):
-                        self.num_bestmove_captures += 1
-                        should_filter_out = True
-                    elif b.is_en_passant(bestmove):
-                        self.num_bestmove_ep_captures += 1
-                        should_filter_out = True
-                    else:
-                        # check if moves from SF search are captures or promos
-                        sf_bestmove1 = chess.Move.from_uci(sf_bestmove1_uci)
-                        if b.is_capture(sf_bestmove1) or move_is_promo(sf_bestmove1_uci):
-                            # skip if SF search 1st best move is a capture or promo
-                            self.num_sf_bestmove1_capture_promos += 1
-                            should_filter_out = True
-                        else:
-                            sf_bestmove2 = chess.Move.from_uci(sf_bestmove2_uci)
-                            if b.is_capture(sf_bestmove2) or move_is_promo(sf_bestmove2_uci):
-                                # skip if SF search 2nd best move is a capture or promo
-                                self.num_sf_bestmove2_capture_promos += 1
-                                should_filter_out = True
+            position = self.process_csv_row(row)
             self.num_positions += 1
-            if should_filter_out:
-                self.num_positions_filtered_out += 1
-            else:
+            if position:
+                (fen, bestmove_uci, bestmove_score, ply, game_result) = position
                 positions.append({
                     'fen': fen,
                     'move': bestmove_uci,
@@ -285,7 +196,8 @@ class PositionCsvIterator:
                     'ply': ply,
                     'result': game_result,
                 })
-            prev_ply = ply
+            else:
+                self.num_positions_filtered_out += 1
             if self.write_positions_and_print_stats(positions, self.num_positions % 100000 == 0):
                 positions = []
         if self.write_positions_and_print_stats(positions, True):
