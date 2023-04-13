@@ -73,9 +73,6 @@ class PositionCsvIterator:
         self.num_one_good_move = 0
         self.num_only_one_move = 0
 
-        # filtering based on piece orientations seen
-        self.num_seen_before = 0
-
         # filtering based on move types
         self.num_in_check = 0
         self.num_bestmove_promos = 0
@@ -143,10 +140,6 @@ class PositionCsvIterator:
         elif move_is_promo(bestmove_uci):
             # remove bestmove promotions
             self.num_bestmove_promos += 1
-            return
-        elif seen_position_before:
-            # remove duplicate positions
-            self.num_seen_before += 1
             return
 
         # filtering is slower when needing to initialize a board
@@ -230,7 +223,6 @@ class PositionCsvIterator:
                 # early plies <= 28:         {self.num_early_plies:8d}
                 # only one move:             {self.num_only_one_move:8d}
                 # one good move:             {self.num_one_good_move:8d}
-                # seen before:               {self.num_seen_before:8d}
                 # bestmove promos:           {self.num_bestmove_promos:8d}
                 # bestmove captures:         {self.num_bestmove_captures:8d}
                 # bestmove en passant:       {self.num_bestmove_ep_captures:8d}
