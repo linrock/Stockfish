@@ -108,17 +108,19 @@ class PositionCsvIterator:
         piece_orientations_seen.add(piece_orientation)
 
         # assume the dataset is a sequence of training games
-        # and that we're at the beginning of a game in this case
-        if ply < self.prev_ply:
+        # and that we're at the beginning of a training game when this is true
+        is_start_of_game = self.prev_ply == -1 or ply < self.prev_ply
+
+        self.prev_ply = ply
+        if is_start_of_game:
+            # skip if it's a starting position
             if 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq' in fen:
                 self.num_standard_games += 1
             else:
                 self.num_non_standard_games += 1
             self.num_games += 1
             self.num_start_positions += 1
-            self.prev_ply = ply
             return
-        self.prev_ply = ply
         elif ply <= self.EARLY_PLY_SKIP:
             # skip if an early ply position
             self.num_early_plies += 1
@@ -151,6 +153,8 @@ class PositionCsvIterator:
             # remove duplicate positions
             self.num_seen_before += 1
             return
+
+        # filtering is slower when needing to initialize a board
         b = chess.Board(fen)
         if b.is_check():
             # skip if in check since eval never gets called when in check
