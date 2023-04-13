@@ -79,6 +79,7 @@ class PositionCsvIterator:
         self.num_seen_before = 0
 
         # filtering based on move types
+        self.num_in_check = 0
         self.num_bestmove_promos = 0
         self.num_bestmove_captures = 0
         self.num_bestmove_ep_captures = 0
@@ -252,6 +253,6 @@ for file in sorted(glob(sys.argv[1]))[::-1]:
     filtered_plain_filename = filter_csv_to_plain(file)
     if filtered_plain_filename:
         # convert the filtered .plain file into a .binpack
-        filtered_binpack_filename = filtered_plain_filename.replace('-v6-dd.plain', '-v6-dd.binpack')
+        filtered_binpack_filename = filtered_plain_filename.replace('-v8-dd.plain', '-v8-dd.binpack')
         print(os.system(f"stockfish convert {filtered_plain_filename} {filtered_binpack_filename}"))
         os.system(f"rm {filtered_plain_filename}")
