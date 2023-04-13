@@ -143,42 +143,38 @@ class PositionCsvIterator:
                 # lower score diff threshold when best moves favor different sides
                 self.num_one_good_move += 1
                 return
-        elif seen_position_before:
-            # remove duplicate positions
-            self.num_seen_before += 1
-            return
         elif move_is_promo(bestmove_uci):
             # remove bestmove promotions
             self.num_bestmove_promos += 1
             return
-        else:
-            b = chess.Board(fen)
-            if b.is_check():
-                # skip if in check
-                self.num_in_check += 1
-                return
-            else:
-                # filter out if provided move is a capture or promo
-                bestmove = chess.Move.from_uci(bestmove_uci)
-                if b.is_capture(bestmove):
-                    self.num_bestmove_captures += 1
-                    return
-                elif b.is_en_passant(bestmove):
-                    self.num_bestmove_ep_captures += 1
-                    return
-                else:
-                    # check if moves from SF search are captures or promos
-                    sf_bestmove1 = chess.Move.from_uci(sf_bestmove1_uci)
-                    if b.is_capture(sf_bestmove1) or move_is_promo(sf_bestmove1_uci):
-                        # skip if SF search 1st best move is a capture or promo
-                        self.num_sf_bestmove1_capture_promos += 1
-                        return
-                    else:
-                        sf_bestmove2 = chess.Move.from_uci(sf_bestmove2_uci)
-                        if b.is_capture(sf_bestmove2) or move_is_promo(sf_bestmove2_uci):
-                            # skip if SF search 2nd best move is a capture or promo
-                            self.num_sf_bestmove2_capture_promos += 1
-                            return
+        elif seen_position_before:
+            # remove duplicate positions
+            self.num_seen_before += 1
+            return
+        b = chess.Board(fen)
+        if b.is_check():
+            # skip if in check since eval never gets called when in check
+            self.num_in_check += 1
+            return
+        # filter out if provided move is a capture or promo
+        bestmove = chess.Move.from_uci(bestmove_uci)
+        if b.is_capture(bestmove):
+            self.num_bestmove_captures += 1
+            return
+        elif b.is_en_passant(bestmove):
+            self.num_bestmove_ep_captures += 1
+            return
+        # check if moves from SF search are captures or promos
+        sf_bestmove1 = chess.Move.from_uci(sf_bestmove1_uci)
+        if b.is_capture(sf_bestmove1) or move_is_promo(sf_bestmove1_uci):
+            # skip if SF search 1st best move is a capture or promo
+            self.num_sf_bestmove1_capture_promos += 1
+            return
+        sf_bestmove2 = chess.Move.from_uci(sf_bestmove2_uci)
+        if b.is_capture(sf_bestmove2) or move_is_promo(sf_bestmove2_uci):
+            # skip if SF search 2nd best move is a capture or promo
+            self.num_sf_bestmove2_capture_promos += 1
+            return
         return (fen, bestmove_uci, bestmove_score, ply, game_result)
 
     def process_csv_rows(self):
