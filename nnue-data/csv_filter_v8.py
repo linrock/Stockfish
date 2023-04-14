@@ -77,7 +77,6 @@ class PositionCsvIterator:
         self.num_in_check = 0
         self.num_bestmove_promos = 0
         self.num_bestmove_captures = 0
-        self.num_bestmove_ep_captures = 0
         self.num_sf_bestmove1_capture_promos = 0
         self.num_sf_bestmove2_capture_promos = 0
 
@@ -153,9 +152,6 @@ class PositionCsvIterator:
         if b.is_capture(bestmove):
             self.num_bestmove_captures += 1
             return
-        elif b.is_en_passant(bestmove):
-            self.num_bestmove_ep_captures += 1
-            return
         # check if moves from SF search are captures or promos
         sf_bestmove1 = chess.Move.from_uci(sf_bestmove1_uci)
         if b.is_capture(sf_bestmove1) or move_is_promo(sf_bestmove1_uci):
@@ -225,7 +221,6 @@ class PositionCsvIterator:
                 # one good move:             {self.num_one_good_move:8d}
                 # bestmove promos:           {self.num_bestmove_promos:8d}
                 # bestmove captures:         {self.num_bestmove_captures:8d}
-                # bestmove en passant:       {self.num_bestmove_ep_captures:8d}
                 # sf bestmove1 cap/promos:   {self.num_sf_bestmove1_capture_promos:8d}
                 # sf bestmove2 cap/promos:   {self.num_sf_bestmove2_capture_promos:8d}
               # positions after filtering:   {num_positions_after_filter:8d}
