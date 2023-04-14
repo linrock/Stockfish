@@ -13,7 +13,7 @@ function csv_zst_to_filtered_binpack() {
   if [ -f $output_filtered_binpack_filename ]; then
     echo "Doing nothing, filtered binpack exists: $output_filtered_binpack_filename"
   else
-    echo "Filtering... $input_csv_zst_filename" | tee $filter_log_filename
+    echo "Filtering v8 ... $input_csv_zst_filename" | tee $filter_log_filename
     python3 /home/ubuntu/stockfish/nnue-data/csv_filter_v8.py $input_csv_zst_filename >> $filter_log_filename
     stockfish convert $filtered_plain_filename $output_filtered_binpack_filename >> $filter_log_filename
     rm $filtered_plain_filename
