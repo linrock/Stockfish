@@ -73,6 +73,7 @@ class PositionCsvIterator:
         self.num_start_positions = 0
         self.num_early_plies = 0
         self.num_one_good_move = 0
+        self.num_one_good_move_v8 = 0
         self.num_only_one_move = 0
 
         # filtering based on piece orientations seen
@@ -136,15 +137,25 @@ class PositionCsvIterator:
             # best move gains advantage, 2nd best move equalizes
             self.num_one_good_move += 1
             return
+        # if the 2 best move scores favor different sides
         elif (sf_bestmove1_score > 0) != (sf_bestmove2_score > 0):
-            # if the 2 best move scores favor different sides
-            if abs(sf_bestmove1_score) > 125 and abs(sf_bestmove2_score) > 125:
+            # v6 score thresholds
+            if abs(sf_bestmove1_score) > 150 and abs(sf_bestmove2_score) > 150:
                 # best move gains an advantage, 2nd best move loses
                 self.num_one_good_move += 1
                 return
             elif abs(sf_bestmove1_score - sf_bestmove2_score) > 200:
                 # lower score diff threshold when best moves favor different sides
                 self.num_one_good_move += 1
+                return
+            # v8: stricter score thresholds
+            if abs(sf_bestmove1_score) > 100 and abs(sf_bestmove2_score) > 100:
+                # best move gains an advantage, 2nd best move loses
+                self.num_one_good_move_v8 += 1
+                return
+            elif abs(sf_bestmove1_score - sf_bestmove2_score) > 150:
+                # lower score diff threshold when best moves favor different sides
+                self.num_one_good_move_v8 += 1
                 return
         elif move_is_promo(bestmove_uci):
             # remove bestmove promotions
@@ -236,7 +247,8 @@ class PositionCsvIterator:
                 # startpos:                  {self.num_start_positions:8d}
                 # early plies <= 28:         {self.num_early_plies:8d}
                 # only one move:             {self.num_only_one_move:8d}
-                # one good move:             {self.num_one_good_move:8d}
+                # one good move (v6):        {self.num_one_good_move:8d}
+                # one good move (v8):        {self.num_one_good_move_v8:8d}
                 # seen before:               {self.num_seen_before:8d}
                 # bestmove promos:           {self.num_bestmove_promos:8d}
                 # bestmove captures:         {self.num_bestmove_captures:8d}
