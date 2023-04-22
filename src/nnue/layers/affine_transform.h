@@ -257,8 +257,21 @@ namespace Stockfish::Eval::NNUE::Layers {
     bool read_parameters(std::istream& stream) {
       read_little_endian<BiasType>(stream, biases, OutputDimensions);
 
-      for (IndexType i = 0; i < OutputDimensions * PaddedInputDimensions; ++i)
+      for (IndexType i = 0; i < OutputDimensions * PaddedInputDimensions; ++i) {
         weights[get_weight_index(i)] = read_little_endian<WeightType>(stream);
+        if (i == OutputDimensions * PaddedInputDimensions - 4) {
+          std::cout << " -4: " << (int)weights[get_weight_index(i)] << std::endl;
+        }
+        if (i == OutputDimensions * PaddedInputDimensions - 3) {
+          std::cout << " -3: " << (int)weights[get_weight_index(i)] << std::endl;
+        }
+        if (i == OutputDimensions * PaddedInputDimensions - 2) {
+          std::cout << " -2: " << (int)weights[get_weight_index(i)] << std::endl;
+        }
+        if (i == OutputDimensions * PaddedInputDimensions - 1) {
+          std::cout << " -1: " << (int)weights[get_weight_index(i)] << std::endl;
+        }
+      }
 
       return !stream.fail();
     }
@@ -446,8 +459,21 @@ namespace Stockfish::Eval::NNUE::Layers {
     // Read network parameters
     bool read_parameters(std::istream& stream) {
       read_little_endian<BiasType>(stream, biases, OutputDimensions);
-      for (IndexType i = 0; i < OutputDimensions * PaddedInputDimensions; ++i)
+      for (IndexType i = 0; i < OutputDimensions * PaddedInputDimensions; ++i) {
         weights[get_weight_index(i)] = read_little_endian<WeightType>(stream);
+        if (i == OutputDimensions * PaddedInputDimensions - 4) {
+          std::cout << " -4: " << (int)weights[get_weight_index(i)] << std::endl;
+        }
+        if (i == OutputDimensions * PaddedInputDimensions - 3) {
+          std::cout << " -3: " << (int)weights[get_weight_index(i)] << std::endl;
+        }
+        if (i == OutputDimensions * PaddedInputDimensions - 2) {
+          std::cout << " -2: " << (int)weights[get_weight_index(i)] << std::endl;
+        }
+        if (i == OutputDimensions * PaddedInputDimensions - 1) {
+          std::cout << " -1: " << (int)weights[get_weight_index(i)] << std::endl;
+        }
+      }
 
       return !stream.fail();
     }
