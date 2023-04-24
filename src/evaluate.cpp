@@ -193,25 +193,13 @@ namespace {
   // Threshold for lazy and space evaluation
   constexpr Value LazyThreshold1    =  Value(3622);
   constexpr Value LazyThreshold2    =  Value(1962);
-
-  int TUNE_psqThresh = 2048;
-  int TUNE_nnueComplexityMult = 406;
-  int TUNE_nnueOptCompOffset = 272;
-  TUNE(SetRange(1748, 2348), TUNE_psqThresh);
-  TUNE(SetRange(356, 456), TUNE_nnueComplexityMult);
-  TUNE(SetRange(222, 322), TUNE_nnueOptCompOffset);
-
-  int TUNE_scaleBase = 1001;
-  int TUNE_scaleNonPawnMat = 64;
-  TUNE(SetRange(801, 1201), TUNE_scaleBase);
-  TUNE(SetRange(0, 128), TUNE_scaleNonPawnMat);
-
-  int TUNE_optimismOffset = 424;
-  int TUNE_scaleOffset = 748;
-  TUNE(SetRange(374, 474), TUNE_optimismOffset);
-  TUNE(SetRange(648, 848), TUNE_scaleOffset);
-
   constexpr Value SpaceThreshold    =  Value(11551);
+
+constexpr   int TUNE_psqThresh = 2275;
+constexpr   int TUNE_nnueComplexityMult = 417;
+constexpr   int TUNE_scaleBase = 964;
+constexpr   int TUNE_scaleNonPawnMat = 48;
+constexpr   int TUNE_optimismOffset = 410;
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 76, 46, 45, 14 };
