@@ -60,6 +60,18 @@ namespace Stockfish {
 
 namespace Eval {
 
+  int TUNE_nnueScaleBase = 967;
+  int TUNE_nnueComplexityMult = 402;
+  TUNE(SetRange(767, 1167), TUNE_nnueScaleBase);
+  TUNE(SetRange(302, 502), TUNE_nnueComplexityMult);
+
+  int TUNE_evalOptOffset = 454;
+  int TUNE_evalOptComplexityOffset = 274;
+  int TUNE_scaleOffset = 791;
+  TUNE(SetRange(354, 554), TUNE_evalOptOffset);
+  TUNE(SetRange(174, 374), TUNE_evalOptComplexityOffset);
+  TUNE(SetRange(691, 891), TUNE_scaleOffset);
+
   bool useNNUE;
   string currentEvalFileName = "None";
 
@@ -192,7 +204,7 @@ namespace {
 
   // Threshold for lazy and space evaluation
   constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
+  constexpr Value LazyThreshold2    =  Value(1764);
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1063,7 +1075,7 @@ Value Eval::evaluate(const Position& pos) {
   else
   {
       int nnueComplexity;
-      int scale = 1001 + pos.non_pawn_material() / 64;
+      int scale = TUNE_nnueScaleBase + pos.non_pawn_material() / 64;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1071,12 +1083,12 @@ Value Eval::evaluate(const Position& pos) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
-                        + (424 + optimism) * abs(psq - nnue)
+      nnueComplexity = (  TUNE_nnueComplexityMult * nnueComplexity
+                        + (TUNE_evalOptOffset + optimism) * abs(psq - nnue)
                         ) / 1024;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      optimism = optimism * (TUNE_evalOptComplexityOffset + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - TUNE_scaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
