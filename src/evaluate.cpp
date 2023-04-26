@@ -60,6 +60,10 @@ namespace Stockfish {
 
 namespace Eval {
 
+constexpr   int TUNE_evalOptOffset = 399;
+constexpr   int TUNE_evalOptComplexityOffset = 288;
+constexpr   int TUNE_scaleOffset = 788;
+
   bool useNNUE;
   string currentEvalFileName = "None";
 
@@ -1072,11 +1076,11 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  402 * nnueComplexity
-                        + (454 + optimism) * abs(psq - nnue)
+                        + (TUNE_evalOptOffset + optimism) * abs(psq - nnue)
                         ) / 1024;
 
-      optimism = optimism * (274 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 791)) / 1024;
+      optimism = optimism * (TUNE_evalOptComplexityOffset + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - TUNE_scaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
