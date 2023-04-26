@@ -191,8 +191,8 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
+  constexpr Value LazyThreshold1    =  Value(3433);
+  constexpr Value LazyThreshold2    =  Value(1787);
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1071,16 +1071,16 @@ Value Eval::evaluate(const Position& pos) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  406 * nnueComplexity
+      nnueComplexity = (  397 * nnueComplexity
                         + (424 + optimism) * abs(psq - nnue)
                         ) / 1024;
 
-      optimism = optimism * (272 + nnueComplexity) / 256;
+      optimism = optimism * (283 + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
+  v = v * (231 - pos.rule50_count()) / 256;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
