@@ -60,12 +60,9 @@ namespace Stockfish {
 
 namespace Eval {
 
-  int TUNE_evalOptOffset = 424;
-  int TUNE_evalOptComplexityOffset = 272;
-  int TUNE_scaleOffset = 748;
-  TUNE(SetRange(324, 524), TUNE_evalOptOffset);
-  TUNE(SetRange(172, 372), TUNE_evalOptComplexityOffset);
-  TUNE(SetRange(648, 848), TUNE_scaleOffset);
+constexpr   int TUNE_evalOptOffset = 364;
+constexpr   int TUNE_evalOptComplexityOffset = 254;
+constexpr   int TUNE_scaleOffset = 795;
 
   bool useNNUE;
   string currentEvalFileName = "None";

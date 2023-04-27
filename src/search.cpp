@@ -59,10 +59,8 @@ using namespace Search;
 
 namespace {
 
-  int TUNE_searchOptBase = 120;
-  int TUNE_searchOptDenom = 161;
-  TUNE(SetRange(20, 220), TUNE_searchOptBase);
-  TUNE(SetRange(111, 211), TUNE_searchOptDenom);
+constexpr   int TUNE_searchOptBase = 110;
+constexpr   int TUNE_searchOptDenom = 156;
 
   // Different node types, used as a template parameter
   enum NodeType { NonPV, PV, Root };
