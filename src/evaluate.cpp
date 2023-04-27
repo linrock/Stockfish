@@ -194,15 +194,15 @@ namespace {
   constexpr Value LazyThreshold1    =  Value(3622);
   constexpr Value LazyThreshold2    =  Value(1962);
 
-  int TUNE_psqThresh = 2048;
-  int TUNE_nnueComplexityMult = 406;
-  int TUNE_nnueOptCompOffset = 272;
+  int TUNE_psqThresh = 2100;
+  int TUNE_nnueComplexityMult = 405;
+  int TUNE_nnueOptCompOffset = 297;
   TUNE(SetRange(1748, 2348), TUNE_psqThresh);
   TUNE(SetRange(356, 456), TUNE_nnueComplexityMult);
   TUNE(SetRange(232, 312), TUNE_nnueOptCompOffset);
 
-  int TUNE_scaleBase = 1001;
-  int TUNE_scaleNonPawnMat = 64;
+  int TUNE_scaleBase = 1041;
+  int TUNE_scaleNonPawnMat = 69;
   TUNE(SetRange(900, 1100), TUNE_scaleBase);
   TUNE(SetRange(0, 128), TUNE_scaleNonPawnMat);
 
