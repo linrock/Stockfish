@@ -58,6 +58,11 @@ using namespace std;
 
 namespace Stockfish {
 
+constexpr   int TUNE_classicDampNum = 194;
+constexpr   int TUNE_classicDampDenom = 210;
+constexpr   int TUNE_nnueDampNum = 189;
+constexpr   int TUNE_nnueDampDenom = 219;
+
 namespace Eval {
 
   bool useNNUE;
@@ -1058,8 +1063,11 @@ Value Eval::evaluate(const Position& pos) {
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
   bool useClassical = !useNNUE || abs(psq) > 2048;
 
-  if (useClassical)
+  if (useClassical) {
       v = Evaluation<NO_TRACE>(pos).value();
+      // Damp down the evaluation linearly when shuffling
+      v = v * (TUNE_classicDampNum - pos.rule50_count()) / TUNE_classicDampDenom;
+  }
   else
   {
       int nnueComplexity;
@@ -1077,10 +1085,9 @@ Value Eval::evaluate(const Position& pos) {
 
       optimism = optimism * (272 + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
+      // Damp down the evaluation linearly when shuffling
+      v = v * (TUNE_nnueDampNum - pos.rule50_count()) / TUNE_nnueDampDenom;
   }
-
-  // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
