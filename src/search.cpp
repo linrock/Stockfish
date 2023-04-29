@@ -59,8 +59,8 @@ using namespace Search;
 
 namespace {
 
-  int TUNE_searchOptBase = 120;
-  int TUNE_searchOptDenom = 161;
+  int TUNE_searchOptBase = 47;
+  int TUNE_searchOptDenom = 162;
   TUNE(SetRange(20, 220), TUNE_searchOptBase);
   TUNE(SetRange(111, 211), TUNE_searchOptDenom);
 
