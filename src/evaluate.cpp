@@ -58,6 +58,11 @@ using namespace std;
 
 namespace Stockfish {
 
+constexpr       int TUNE_nnueScaleBase = 974;
+constexpr       int TUNE_nnueScaleNpMult = 24;
+constexpr       int TUNE_optScaleBase = 176;
+constexpr       int TUNE_optScaleNpMult = 35;
+
 namespace Eval {
 
   bool useNNUE;
@@ -1063,7 +1068,10 @@ Value Eval::evaluate(const Position& pos) {
   else
   {
       int nnueComplexity;
-      int scale = 967 + pos.non_pawn_material() / 64;
+      int nnueScale = TUNE_nnueScaleBase
+                    + TUNE_nnueScaleNpMult * pos.non_pawn_material() / 2048;
+      int optScale  = TUNE_optScaleBase
+                    + TUNE_optScaleNpMult * pos.non_pawn_material() / 2048;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1076,7 +1084,7 @@ Value Eval::evaluate(const Position& pos) {
                         ) / 1024;
 
       optimism = optimism * (274 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 791)) / 1024;
+      v = (nnue * nnueScale + optimism * optScale) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
