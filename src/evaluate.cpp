@@ -58,6 +58,16 @@ using namespace std;
 
 namespace Stockfish {
 
+  int TUNE_nnueScaleBase = 967;
+  int TUNE_nnueScaleNpMult = 32;
+  TUNE(SetRange(817, 1117), TUNE_nnueScaleBase);
+  TUNE(SetRange(-32, 96), TUNE_nnueScaleNpMult);
+
+  int TUNE_complexityMult = 454;
+  int TUNE_optScaleOffset = 791;
+  TUNE(SetRange(354, 554), TUNE_complexityMult);
+  TUNE(SetRange(691, 891), TUNE_optScaleOffset);
+
 namespace Eval {
 
   bool useNNUE;
@@ -1063,7 +1073,7 @@ Value Eval::evaluate(const Position& pos) {
   else
   {
       int nnueComplexity;
-      int scale = 967 + pos.non_pawn_material() / 64;
+      int scale = TUNE_nnueScaleBase + TUNE_nnueScaleNpMult * pos.non_pawn_material() / 2048;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1072,11 +1082,12 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  402 * nnueComplexity
-                        + (454 + optimism) * abs(psq - nnue)
+                        + TUNE_complexityMult * abs(psq - nnue)
+                        + int(optimism) * int(psq - nnue)
                         ) / 1024;
 
       optimism = optimism * (274 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 791)) / 1024;
+      v = (nnue * scale + optimism * (scale - TUNE_optScaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
