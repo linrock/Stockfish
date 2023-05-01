@@ -58,6 +58,23 @@ using namespace std;
 
 namespace Stockfish {
 
+  Value TUNE_LazyThreshold1 = Value(3622);
+  Value TUNE_LazyThreshold2 = Value(1962);
+  TUNE(SetRange(3422, 3722), TUNE_LazyThreshold1);
+  TUNE(SetRange(1762, 2062), TUNE_LazyThreshold2);
+
+  int TUNE_scaleBase = 967;
+  int TUNE_nnueComplexityOptOffset = 454;
+  int TUNE_optScaleOffset = 791;
+  TUNE(SetRange(867, 1067), TUNE_scaleBase);
+  TUNE(SetRange(354, 554), TUNE_nnueComplexityOptOffset);
+  TUNE(SetRange(691, 891), TUNE_optScaleOffset);
+
+  int TUNE_nnuePieceCountThresh = 2;
+  int TUNE_nnuePsqClassicThresh = 2048;
+  TUNE(SetRange(2, 30), TUNE_nnuePieceCountThresh);
+  TUNE(SetRange(1548, 2548), TUNE_nnuePsqClassicThresh);
+
 namespace Eval {
 
   bool useNNUE;
@@ -191,8 +208,8 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
+  Value LazyThreshold1    =  TUNE_LazyThreshold1;
+  Value LazyThreshold2    =  TUNE_LazyThreshold2;
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1056,14 +1073,15 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > 2048;
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > TUNE_nnuePieceCountThresh &&
+                                                  abs(psq) > TUNE_nnuePsqClassicThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
       int nnueComplexity;
-      int scale = 967 + pos.non_pawn_material() / 64;
+      int scale = TUNE_scaleBase + pos.non_pawn_material() / 64;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1072,11 +1090,11 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  402 * nnueComplexity
-                        + (454 + optimism) * abs(psq - nnue)
+                        + (TUNE_nnueComplexityOptOffset + optimism) * abs(psq - nnue)
                         ) / 1024;
 
       optimism = optimism * (274 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 791)) / 1024;
+      v = (nnue * scale + optimism * (scale - TUNE_optScaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
