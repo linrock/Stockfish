@@ -58,20 +58,6 @@ using namespace std;
 
 namespace Stockfish {
 
-      int TUNE_nnueScaleBase = 1001;
-      int TUNE_nnueScalePawnMult = 0;
-      int TUNE_nnueScaleNpMult = 32;
-      TUNE(SetRange(700, 1300), TUNE_nnueScaleBase);
-      TUNE(SetRange(-200, 200), TUNE_nnueScalePawnMult);
-      TUNE(SetRange(0, 128), TUNE_nnueScaleNpMult);
-
-      int TUNE_optScaleBase = 253;
-      int TUNE_optScalePawnMult = 0;
-      int TUNE_optScaleNpMult = 32;
-      TUNE(SetRange(0, 500), TUNE_optScaleBase);
-      TUNE(SetRange(-200, 200), TUNE_optScalePawnMult);
-      TUNE(SetRange(0, 128), TUNE_optScaleNpMult);
-
 namespace Eval {
 
   bool useNNUE;
@@ -1077,12 +1063,8 @@ Value Eval::evaluate(const Position& pos) {
   else
   {
 
-      int nnueScale = TUNE_nnueScaleBase
-                    + TUNE_nnueScalePawnMult * pos.count<PAWN>() / 8
-                    + TUNE_nnueScaleNpMult * pos.non_pawn_material() / 2048;
-      int optScale  = TUNE_optScaleBase
-                    + TUNE_optScalePawnMult * pos.count<PAWN>() / 8
-                    + TUNE_optScaleNpMult * pos.non_pawn_material() / 2048;
+      int nnueScale = 960 + 7 * pos.count<PAWN>();
+      int optScale  = 158 + pos.non_pawn_material() / 64;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
