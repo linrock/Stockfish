@@ -1020,7 +1020,11 @@ namespace {
 
 make_v:
     // Derive single value from mg and eg parts of score
-    Value v = winnable(score);
+    Value mg = mg_value(score);
+    Value eg = eg_value(score);
+
+    int v = mg * int(me->game_phase()) + eg * int(PHASE_MIDGAME - me->game_phase());
+    v /= PHASE_MIDGAME;
 
     // In case of tracing add all remaining individual evaluation terms
     if constexpr (T)
@@ -1037,7 +1041,7 @@ make_v:
     // Side to move point of view
     v = (pos.side_to_move() == WHITE ? v : -v);
 
-    return v;
+    return Value(v);
   }
 
 } // namespace Eval
