@@ -58,19 +58,12 @@ using namespace std;
 
 namespace Stockfish {
 
-      int TUNE_nnueScaleBase = 1001;
-      int TUNE_nnueScalePawnMult = 0;
-      int TUNE_nnueScaleNpMult = 32;
-      TUNE(SetRange(700, 1300), TUNE_nnueScaleBase);
-      TUNE(SetRange(-200, 200), TUNE_nnueScalePawnMult);
-      TUNE(SetRange(0, 128), TUNE_nnueScaleNpMult);
-
-      int TUNE_optScaleBase = 253;
-      int TUNE_optScalePawnMult = 0;
-      int TUNE_optScaleNpMult = 32;
-      TUNE(SetRange(0, 500), TUNE_optScaleBase);
-      TUNE(SetRange(-200, 200), TUNE_optScalePawnMult);
-      TUNE(SetRange(0, 128), TUNE_optScaleNpMult);
+constexpr       int TUNE_nnueScaleBase = 889;
+constexpr       int TUNE_nnueScalePawnMult = 58;
+constexpr       int TUNE_nnueScaleNpMult = 16;
+constexpr       int TUNE_optScaleBase = 131;
+constexpr       int TUNE_optScalePawnMult = 8;
+constexpr       int TUNE_optScaleNpMult = 36;
 
 namespace Eval {
 
