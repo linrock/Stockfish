@@ -58,14 +58,10 @@ using namespace std;
 
 namespace Stockfish {
 
-  int TUNE_classicDampNum = 200;
-  int TUNE_classicDampDenom = 214;
-  int TUNE_nnueDampNum = 200;
-  int TUNE_nnueDampDenom = 214;
-  TUNE(SetRange(100, 300), TUNE_classicDampNum);
-  TUNE(SetRange(114, 314), TUNE_classicDampDenom);
-  TUNE(SetRange(100, 300), TUNE_nnueDampNum);
-  TUNE(SetRange(114, 314), TUNE_nnueDampDenom);
+constexpr   int TUNE_classicDampNum = 240;
+constexpr   int TUNE_classicDampDenom = 269;
+constexpr   int TUNE_nnueDampNum = 221;
+constexpr   int TUNE_nnueDampDenom = 250;
 
 namespace Eval {
 
