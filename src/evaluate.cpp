@@ -60,17 +60,11 @@ namespace Stockfish {
 
 namespace Eval {
 
-  int TUNE_nnueScaleBase = 967;
-  int TUNE_nnueComplexityMult = 402;
-  TUNE(SetRange(767, 1167), TUNE_nnueScaleBase);
-  TUNE(SetRange(302, 502), TUNE_nnueComplexityMult);
-
-  int TUNE_evalOptOffset = 454;
-  int TUNE_evalOptComplexityOffset = 274;
-  int TUNE_scaleOffset = 791;
-  TUNE(SetRange(354, 554), TUNE_evalOptOffset);
-  TUNE(SetRange(174, 374), TUNE_evalOptComplexityOffset);
-  TUNE(SetRange(691, 891), TUNE_scaleOffset);
+constexpr   int TUNE_nnueScaleBase = 976;
+constexpr   int TUNE_nnueComplexityMult = 414;
+constexpr   int TUNE_evalOptOffset = 420;
+constexpr   int TUNE_evalOptComplexityOffset = 266;
+constexpr   int TUNE_scaleOffset = 807;
 
   bool useNNUE;
   string currentEvalFileName = "None";
