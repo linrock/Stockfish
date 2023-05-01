@@ -58,6 +58,16 @@ using namespace std;
 
 namespace Stockfish {
 
+  Value TUNE_LazyThreshold1 = Value(3622);
+  Value TUNE_LazyThreshold2 = Value(1962);
+  TUNE(SetRange(3322, 3922), TUNE_LazyThreshold1);
+  TUNE(SetRange(1662, 2262), TUNE_LazyThreshold2);
+
+  int TUNE_nnuePieceCountThresh = 2;
+  int TUNE_nnuePsqClassicThresh = 2048;
+  TUNE(SetRange(2, 30), TUNE_nnuePieceCountThresh);
+  TUNE(SetRange(1548, 2548), TUNE_nnuePsqClassicThresh);
+
 namespace Eval {
 
   bool useNNUE;
@@ -191,8 +201,8 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
+  Value LazyThreshold1    =  TUNE_LazyThreshold1;
+  Value LazyThreshold2    =  TUNE_LazyThreshold2;
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1056,7 +1066,8 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > 2048;
+  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > TUNE_nnuePieceCountThresh &&
+                                                  abs(psq) > TUNE_nnuePsqClassicThresh);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
