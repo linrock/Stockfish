@@ -38,6 +38,9 @@
 
 namespace Stockfish {
 
+constexpr   int TUNE_searchOptBase = 76;
+constexpr   int TUNE_searchOptDenom = 88;
+
 namespace Search {
 
   LimitsType Limits;
@@ -353,7 +356,7 @@ void Thread::search() {
           beta  = std::min(prev + delta, VALUE_INFINITE);
 
           // Adjust optimism based on root move's previousScore
-          int opt = 102 * prev / (std::abs(prev) + 147);
+          int opt = TUNE_searchOptBase * prev / (std::abs(prev) + TUNE_searchOptDenom);
           optimism[ us] = Value(opt);
           optimism[~us] = -optimism[us];
 
