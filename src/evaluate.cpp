@@ -58,14 +58,9 @@ using namespace std;
 
 namespace Stockfish {
 
-      int TUNE_scaleBase = 967;
-      int TUNE_scalePawnMult = 0;
-      int TUNE_scaleNonPawnMult = 32;
-      int TUNE_optScaleMultOffset = 791;
-      TUNE(SetRange(817, 1117), TUNE_scaleBase);
-      TUNE(SetRange(-24, 24), TUNE_scalePawnMult);
-      TUNE(SetRange(-16, 80), TUNE_scaleNonPawnMult);
-      TUNE(SetRange(691, 891), TUNE_optScaleMultOffset);
+constexpr       int TUNE_scaleBase = 1000;
+constexpr       int TUNE_scalePawnMult = 3;
+constexpr       int TUNE_optScaleMultOffset = 758;
 
 namespace Eval {
 
@@ -1075,7 +1070,7 @@ Value Eval::evaluate(const Position& pos) {
       int nnueComplexity;
       int scale =   TUNE_scaleBase
                   + TUNE_scalePawnMult * pos.count<PAWN>()
-                  + TUNE_scaleNonPawnMult * pos.non_pawn_material() / 2048;
+                  + pos.non_pawn_material() / 64;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
