@@ -58,19 +58,10 @@ using namespace std;
 
 namespace Stockfish {
 
-      int TUNE_nnueScaleBase = 967;
-      int TUNE_nnueScalePawnMult = 0;
-      int TUNE_nnueScaleNpMult = 32;
-      TUNE(SetRange(867, 1067), TUNE_nnueScaleBase);
-      TUNE(SetRange(-100, 100), TUNE_nnueScalePawnMult);
-      TUNE(SetRange(-32, 96), TUNE_nnueScaleNpMult);
-
-      int TUNE_optScaleBase = 176;
-      int TUNE_optScalePawnMult = 0;
-      int TUNE_optScaleNpMult = 32;
-      TUNE(SetRange(0, 352), TUNE_optScaleBase);
-      TUNE(SetRange(-100, 100), TUNE_optScalePawnMult);
-      TUNE(SetRange(-32, 96), TUNE_optScaleNpMult);
+constexpr   int TUNE_nnueScaleBase = 995;
+constexpr   int TUNE_nnueScaleNpMult = 32;
+constexpr   int TUNE_complexityMult = 413;
+constexpr   int TUNE_optScaleOffset = 820;
 
 namespace Eval {
 
@@ -1077,12 +1068,7 @@ Value Eval::evaluate(const Position& pos) {
   else
   {
       int nnueComplexity;
-      int nnueScale = TUNE_nnueScaleBase
-                    + TUNE_nnueScalePawnMult * pos.count<PAWN>() / 8
-                    + TUNE_nnueScaleNpMult * pos.non_pawn_material() / 2048;
-      int optScale  = TUNE_optScaleBase
-                    + TUNE_optScalePawnMult * pos.count<PAWN>() / 8
-                    + TUNE_optScaleNpMult * pos.non_pawn_material() / 2048;
+      int scale = TUNE_nnueScaleBase + TUNE_nnueScaleNpMult * pos.non_pawn_material() / 2048;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1091,11 +1077,12 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  402 * nnueComplexity
-                        + (454 + optimism) * abs(psq - nnue)
+                        + TUNE_complexityMult * abs(psq - nnue)
+                        + int(optimism) * int(psq - nnue)
                         ) / 1024;
 
       optimism = optimism * (274 + nnueComplexity) / 256;
-      v = (nnue * nnueScale + optimism * optScale) / 1024;
+      v = (nnue * scale + optimism * (scale - TUNE_optScaleOffset)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
