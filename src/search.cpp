@@ -38,10 +38,8 @@
 
 namespace Stockfish {
 
-  int TUNE_searchOptBase = 102;
-  int TUNE_searchOptDenom = 147;
-  TUNE(SetRange(2, 202), TUNE_searchOptBase);
-  TUNE(SetRange(47, 247), TUNE_searchOptDenom);
+constexpr   int TUNE_searchOptBase = 96;
+constexpr   int TUNE_searchOptDenom = 164;
 
 namespace Search {
 
