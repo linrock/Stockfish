@@ -39,13 +39,13 @@ namespace Stockfish::Eval::NNUE {
 using FeatureSet = Features::HalfKAv2_hm;
 
 // Number of input feature dimensions after conversion
-constexpr IndexType TransformedFeatureDimensions = 1024;
+constexpr IndexType TransformedFeatureDimensions = 1536;
 constexpr IndexType PSQTBuckets = 8;
 constexpr IndexType LayerStacks = 8;
 
 struct Network
 {
-  static constexpr int FC_0_OUTPUTS = 15;
+  static constexpr int FC_0_OUTPUTS = 11;
   static constexpr int FC_1_OUTPUTS = 32;
 
   Layers::AffineTransform<TransformedFeatureDimensions, FC_0_OUTPUTS + 1> fc_0;
