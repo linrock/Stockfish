@@ -58,6 +58,11 @@ using namespace std;
 
 namespace Stockfish {
 
+constexpr       int TUNE_psqThresh = 2116;
+constexpr       int TUNE_complexityOptOffset = 476;
+constexpr       int TUNE_npmOffset = 987;
+constexpr       int TUNE_optOffset = 194;
+
 namespace Eval {
 
   bool useNNUE;
@@ -1056,7 +1061,7 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > 2048;
+  bool useClassical = !useNNUE || abs(psq) > TUNE_psqThresh;
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
@@ -1072,11 +1077,11 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  397 * nnueComplexity
-                        + (477 + optimism) * abs(psq - nnue)
+                        + (TUNE_complexityOptOffset + optimism) * abs(psq - nnue)
                         ) / 1024;
 
       optimism += optimism * nnueComplexity / 256;
-      v = (nnue * (945 + npm) + optimism * (174 + npm)) / 1024;
+      v = (nnue * (TUNE_npmOffset + npm) + optimism * (TUNE_optOffset + npm)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
