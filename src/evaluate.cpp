@@ -58,16 +58,10 @@ using namespace std;
 
 namespace Stockfish {
 
-      int TUNE_psqThresh = 2048;
-      int TUNE_psqThreshPawnCount = 0;
-      int TUNE_complexityOptOffset = 477;
-      int TUNE_npmOffset = 945;
-      int TUNE_optOffset = 174;
-      TUNE(SetRange(1848, 2248), TUNE_psqThresh);
-      TUNE(SetRange(-32, 32), TUNE_psqThreshPawnCount);
-      TUNE(SetRange(377, 577), TUNE_complexityOptOffset);
-      TUNE(SetRange(845, 1045), TUNE_npmOffset);
-      TUNE(SetRange(74, 274), TUNE_optOffset);
+constexpr       int TUNE_psqThresh = 2000;
+constexpr       int TUNE_complexityOptOffset = 484;
+constexpr       int TUNE_npmOffset = 943;
+constexpr       int TUNE_optOffset = 132;
 
 namespace Eval {
 
@@ -1067,7 +1061,7 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > TUNE_psqThresh + TUNE_psqThreshPawnCount * pos.count<PAWN>() / 4;
+  bool useClassical = !useNNUE || abs(psq) > TUNE_psqThresh + 3 * pos.count<PAWN>() + pos.non_pawn_material();
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
