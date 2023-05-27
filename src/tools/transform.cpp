@@ -797,7 +797,7 @@ namespace Stockfish::Tools
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
                     bool should_skip_position = false;
-                    if (pos.score == 32002) { // VALUE_NONE
+                    if (ps.score == 32002) { // VALUE_NONE
                       num_removed.fetch_add(1);
                     } else {
                       pos.sfen_pack(ps.sfen, false);
@@ -807,7 +807,7 @@ namespace Stockfish::Tools
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 10000 == 0) {
                         sync_cout << "Processed " << p << " positions. Removed " << num_removed.load() << " positions."
-                                  << sync_endl
+                                  << sync_endl;
                     }
                 }
             }
@@ -1262,7 +1262,7 @@ namespace Stockfish::Tools
             { "nudged_static", &nudged_static },
             { "rescore", &rescore },
             { "filter_335a9b2d8a80", &filter_335a9b2d8a80 },
-            { "minimize_binpack", &minimize_binpack }
+            { "minimize_binpack", &minimize_binpack },
             { "unminify", &unminify }
         };
 
