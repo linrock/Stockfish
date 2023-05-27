@@ -58,10 +58,13 @@ using namespace std;
 
 namespace Stockfish {
 
+      Value TUNE_LazyThreshold1 = Value(3622);
       int TUNE_psqThresh = 2048;
       int TUNE_complexityOptOffset = 477;
       int TUNE_npmOffset = 945;
       int TUNE_optOffset = 174;
+
+      TUNE(SetRange(3322, 3922), TUNE_LazyThreshold1);
       TUNE(SetRange(1848, 2248), TUNE_psqThresh);
       TUNE(SetRange(377, 577), TUNE_complexityOptOffset);
       TUNE(SetRange(845, 1045), TUNE_npmOffset);
@@ -200,7 +203,7 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
+  Value LazyThreshold1    =  TUNE_LazyThreshold1;
   constexpr Value LazyThreshold2    =  Value(1962);
   constexpr Value SpaceThreshold    =  Value(11551);
 
