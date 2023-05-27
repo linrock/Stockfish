@@ -727,6 +727,142 @@ namespace Stockfish::Tools
         do_filter_335a9b2d8a80(params);
     }
 
+    void do_unminify_binpack(FilterParams& params)
+    {
+        // TODO: Use SfenReader once it works correctly in sequential mode. See issue #271
+        auto in = Tools::open_sfen_input_file(params.input_filename);
+        auto readsome = [&in, mutex = std::mutex{}](int n) mutable -> PSVector {
+
+            PSVector psv;
+            psv.reserve(n);
+
+            std::unique_lock lock(mutex);
+
+            for (int i = 0; i < n; ++i)
+            {
+                auto ps_opt = in->next();
+                if (ps_opt.has_value())
+                {
+                    psv.emplace_back(*ps_opt);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return psv;
+        };
+
+        auto sfen_format = SfenOutputType::Binpack;
+
+        auto out = SfenWriter(
+            params.output_filename,
+            Threads.size(),
+            std::numeric_limits<std::uint64_t>::max(),
+            sfen_format);
+
+        // About Search::Limits
+        // Be careful because this member variable is global and affects other threads.
+        auto& limits = Search::Limits;
+
+        // Make the search equivalent to the "go infinite" command. (Because it is troublesome if time management is done)
+        limits.infinite = true;
+
+        // Since PV is an obstacle when displayed, erase it.
+        limits.silent = true;
+
+        // If you use this, it will be compared with the accumulated nodes of each thread. Therefore, do not use it.
+        limits.nodes = 0;
+
+        // depth is also processed by the one passed as an argument of Tools::search().
+        limits.depth = 0;
+
+        std::atomic<std::uint64_t> num_processed = 0;
+        std::atomic<std::uint64_t> num_removed = 0;
+
+        Threads.execute_with_workers([&](auto& th){
+            Position& pos = th.rootPos;
+            StateInfo si;
+            const bool frc = Options["UCI_Chess960"];
+
+            const bool debug_print = params.debug_print;
+            for (;;)
+            {
+                PSVector psv = readsome(5000);
+                if (psv.empty())
+                    break;
+
+                for (auto& ps : psv)
+                {
+                    pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
+                    bool should_skip_position = false;
+                    if (pos.score == 32002) { // VALUE_NONE
+                      num_removed.fetch_add(1);
+                    } else {
+                      pos.sfen_pack(ps.sfen, false);
+                      ps.padding = 0;
+                      out.write(th.id(), ps);
+                    }
+                    auto p = num_processed.fetch_add(1) + 1;
+                    if (p % 10000 == 0) {
+                        sync_cout << "Processed " << p << " positions. Removed " << num_removed.load() << " positions."
+                                  << sync_endl
+                    }
+                }
+            }
+        });
+        Threads.wait_for_workers_finished();
+
+        std::cout << "Finished.\n";
+    }
+
+    void do_unminify(FilterParams& params)
+    {
+        if (ends_with(params.input_filename, ".binpack"))
+        {
+            do_unminify_binpack(params);
+        }
+        else
+        {
+            std::cerr << "Invalid input file type.\n";
+        }
+    }
+
+    void unminify(std::istringstream& is)
+    {
+        FilterParams params{};
+
+        while(true)
+        {
+            std::string token;
+            is >> token;
+
+            if (token == "")
+                break;
+
+            else if (token == "input_file")
+                is >> params.input_filename;
+            else if (token == "output_file")
+                is >> params.output_filename;
+            else if (token == "debug_print")
+                is >> params.debug_print;
+            else
+            {
+                std::cout << "ERROR: Unknown option " << token << ". Exiting...\n";
+                return;
+            }
+        }
+
+        std::cout << "Performing transform unminify with parameters:\n";
+        std::cout << "input_file          : " << params.input_filename << '\n';
+        std::cout << "output_file         : " << params.output_filename << '\n';
+        std::cout << "debug_print         : " << params.debug_print << '\n';
+        std::cout << '\n';
+
+        do_unminify(params);
+    }
+
     struct MinimizeBinpackParams
     {
         std::string input_filename = "in.binpack";
