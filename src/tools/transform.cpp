@@ -1263,6 +1263,7 @@ namespace Stockfish::Tools
             { "rescore", &rescore },
             { "filter_335a9b2d8a80", &filter_335a9b2d8a80 },
             { "minimize_binpack", &minimize_binpack }
+            { "unminify", &unminify }
         };
 
         Eval::NNUE::init();
