@@ -1062,17 +1062,8 @@ Value Eval::evaluate(const Position& pos) {
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
-      int nnueComplexity;
       int npm = pos.non_pawn_material() / 64;
-
-      Color stm = pos.side_to_move();
-      Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
-
-      // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  397 * nnueComplexity
-                        + 477 * abs(psq - nnue)
-                        ) / 1024;
-
+      Value nnue = NNUE::evaluate(pos, true);
       v = nnue * (945 + npm) / 1024;
   }
 
@@ -1104,8 +1095,6 @@ std::string Eval::trace(Position& pos) {
 
   // Reset any global variable used in eval
   pos.this_thread()->bestValue       = VALUE_ZERO;
-  pos.this_thread()->optimism[WHITE] = VALUE_ZERO;
-  pos.this_thread()->optimism[BLACK] = VALUE_ZERO;
 
   v = Evaluation<TRACE>(pos).value();
 
