@@ -191,8 +191,8 @@ using namespace Trace;
 namespace {
 
   // Threshold for lazy and space evaluation
-  constexpr Value LazyThreshold1    =  Value(3622);
-  constexpr Value LazyThreshold2    =  Value(1962);
+  constexpr Value LazyThreshold1    =  Value(3690);
+  constexpr Value LazyThreshold2    =  Value(2178);
   constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
@@ -1056,7 +1056,7 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > 2048;
+  bool useClassical = !useNNUE || abs(psq) > 2130;
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
@@ -1076,7 +1076,7 @@ Value Eval::evaluate(const Position& pos) {
                         ) / 1024;
 
       optimism += optimism * nnueComplexity / 256;
-      v = (nnue * (945 + npm) + optimism * (174 + npm)) / 1024;
+      v = (nnue * (962 + npm) + optimism * (141 + npm)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
