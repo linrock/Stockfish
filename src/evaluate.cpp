@@ -58,6 +58,13 @@ using namespace std;
 
 namespace Stockfish {
 
+  int TUNE_psqThresh = 2048;
+  int TUNE_nnueEvalNpmOffset = 945;
+  int TUNE_optNpmOffset = 174;
+  TUNE(SetRange(1898, 2198), TUNE_psqThresh);
+  TUNE(SetRange(845, 1045), TUNE_nnueEvalNpmOffset);
+  TUNE(SetRange(74, 274), TUNE_optNpmOffset);
+
 namespace Eval {
 
   bool useNNUE;
@@ -1076,7 +1083,7 @@ Value Eval::evaluate(const Position& pos) {
                         ) / 1024;
 
       optimism += optimism * nnueComplexity / 256;
-      v = (nnue * (945 + npm) + optimism * (174 + npm)) / 1024;
+      v = (nnue * (TUNE_nnueEvalNpmOffset + npm) + optimism * (TUNE_optNpmOffset + npm)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
