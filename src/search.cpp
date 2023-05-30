@@ -38,26 +38,14 @@
 
 namespace Stockfish {
 
-    int TUNE_qmOrderBonusClamp = 1717;
-    int TUNE_improvementBase = 163;
-    TUNE(SetRange(63, 263), TUNE_improvementBase);
-    TUNE(SetRange(1517, 1917), TUNE_qmOrderBonusClamp);
-
-    int TUNE_nmMoveEvalOffset = 257;
-    TUNE(SetRange(157, 357), TUNE_nmMoveEvalOffset);
-
-    int TUNE_futPruneCapEvalOffset = 207;
-    int TUNE_futPruneCapLmrDepthMult = 223;
-    TUNE(SetRange(107, 307), TUNE_futPruneCapEvalOffset);
-    TUNE(SetRange(123, 323), TUNE_futPruneCapLmrDepthMult);
-
-    int TUNE_futPruneParentEvalOffset = 111;
-    int TUNE_futPruneParentLmrDepthMult = 136;
-    TUNE(SetRange(11, 211), TUNE_futPruneParentEvalOffset);
-    TUNE(SetRange(36, 236), TUNE_futPruneParentLmrDepthMult);
-
-    int TUNE_extensionsEvalThresh = 87;
-    TUNE(SetRange(0, 174), TUNE_extensionsEvalThresh);
+constexpr     int TUNE_qmOrderBonusClamp = 1680;
+constexpr     int TUNE_improvementBase = 180;
+constexpr     int TUNE_nmMoveEvalOffset = 250;
+constexpr     int TUNE_futPruneCapEvalOffset = 273;
+constexpr     int TUNE_futPruneCapLmrDepthMult = 248;
+constexpr     int TUNE_futPruneParentEvalOffset = 133;
+constexpr     int TUNE_futPruneParentLmrDepthMult = 128;
+constexpr     int TUNE_extensionsEvalThresh = 14;
 
 namespace Search {
 
