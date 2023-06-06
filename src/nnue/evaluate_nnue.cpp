@@ -167,7 +167,7 @@ namespace Stockfish::Eval::NNUE {
     const auto positional = network[bucket]->propagate(transformedFeatures);
 
     if (complexity)
-        *complexity = abs(psqt - positional) / OutputScale;
+        *complexity = (psqt - positional) / OutputScale;
 
     // Give more value to positional evaluation when adjusted flag is set
     if (adjusted)
