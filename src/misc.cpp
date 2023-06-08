@@ -319,6 +319,7 @@ DebugInfo<2> hit[MaxDebugSlots];
 DebugInfo<2> mean[MaxDebugSlots];
 DebugInfo<3> stdev[MaxDebugSlots];
 DebugInfo<6> correl[MaxDebugSlots];
+DebugInfo<1537> activations;
 
 }  // namespace
 
@@ -350,6 +351,12 @@ void dbg_correl_of(int64_t value1, int64_t value2, int slot) {
     correl[slot][3] += value2;
     correl[slot][4] += value2 * value2;
     correl[slot][5] += value1 * value2;
+}
+
+void dbg_activations(const uint8_t* input) {
+    for (int32_t i = 0; i < 1536; ++i)
+        activations[i] += (input[i] > 0);
+    ++activations[1536];
 }
 
 void dbg_print() {
@@ -392,6 +399,14 @@ void dbg_print() {
                       << ": Total " << n << " Coefficient " << r
                       << std::endl;
         }
+    
+    if (activations[1536])
+    {
+        std::cerr << "Activations: Total " << activations[1536] << " Hits";
+        for (int32_t i = 0; i < 1536; ++i)
+            std::cerr << " " << activations[i];
+        std::cerr << endl;
+    }
 }
 
 

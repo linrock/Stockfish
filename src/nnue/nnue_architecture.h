@@ -113,6 +113,7 @@ struct Network
     alignas(CacheLineSize) static thread_local Buffer buffer;
 #endif
 
+    dbg_activations(transformedFeatures);
     fc_0.propagate(transformedFeatures, buffer.fc_0_out);
     ac_sqr_0.propagate(buffer.fc_0_out, buffer.ac_sqr_0_out);
     ac_0.propagate(buffer.fc_0_out, buffer.ac_0_out);
