@@ -1058,8 +1058,12 @@ Value Eval::evaluate(const Position& pos) {
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
   bool useClassical = !useNNUE || abs(psq) > 2048;
 
-  if (useClassical)
+  if (useClassical) {
       v = Evaluation<NO_TRACE>(pos).value();
+
+      // Damp down the evaluation linearly when shuffling
+      v = v * (236 - pos.rule50_count()) / 256;
+  }
   else
   {
       int nnueComplexity;
@@ -1073,10 +1077,8 @@ Value Eval::evaluate(const Position& pos) {
       // Blend optimism with nnue complexity and (semi)classical complexity
       optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
       v = (nnue * (945 + npm) + optimism * (150 + npm)) / 1024;
+      v = v * (200 - pos.rule50_count()) / 214;
   }
-
-  // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
