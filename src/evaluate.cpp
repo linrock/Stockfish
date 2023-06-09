@@ -58,6 +58,15 @@ using namespace std;
 
 namespace Stockfish {
 
+  int TUNE_psqThresh = 2048;
+  int TUNE_nnueNpmOffset = 945;
+  int TUNE_optNpmOffset = 150;
+  int TUNE_nnueDampNum = 200;
+  TUNE(SetRange(1748, 2348), TUNE_psqThresh);
+  TUNE(SetRange(645, 1145), TUNE_nnueNpmOffset);
+  TUNE(SetRange(0, 300), TUNE_optNpmOffset);
+  TUNE(SetRange(114, 214), TUNE_nnueDampNum);
+
 namespace Eval {
 
   bool useNNUE;
@@ -1056,7 +1065,7 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > 2048;
+  bool useClassical = !useNNUE || abs(psq) > TUNE_psqThresh;
 
   if (useClassical) {
       v = Evaluation<NO_TRACE>(pos).value();
@@ -1076,8 +1085,8 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend optimism with nnue complexity and (semi)classical complexity
       optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-      v = (nnue * (945 + npm) + optimism * (150 + npm)) / 1024;
-      v = v * (200 - pos.rule50_count()) / 214;
+      v = (nnue * (TUNE_nnueNpmOffset + npm) + optimism * (TUNE_optNpmOffset + npm)) / 1024;
+      v = v * (TUNE_nnueDampNum - pos.rule50_count()) / 214;
   }
 
   // Guarantee evaluation does not hit the tablebase range
