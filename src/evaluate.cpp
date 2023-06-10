@@ -61,11 +61,9 @@ namespace Stockfish {
   int TUNE_psqThresh = 2048;
   int TUNE_nnueNpmOffset = 945;
   int TUNE_optNpmOffset = 150;
-  int TUNE_nnueDampNum = 200;
   TUNE(SetRange(1748, 2348), TUNE_psqThresh);
   TUNE(SetRange(645, 1145), TUNE_nnueNpmOffset);
   TUNE(SetRange(0, 300), TUNE_optNpmOffset);
-  TUNE(SetRange(114, 214), TUNE_nnueDampNum);
 
 namespace Eval {
 
@@ -1067,12 +1065,8 @@ Value Eval::evaluate(const Position& pos) {
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
   bool useClassical = !useNNUE || abs(psq) > TUNE_psqThresh;
 
-  if (useClassical) {
+  if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
-
-      // Damp down the evaluation linearly when shuffling
-      v = v * (234 - pos.rule50_count()) / 256;
-  }
   else
   {
       int nnueComplexity;
@@ -1086,8 +1080,10 @@ Value Eval::evaluate(const Position& pos) {
       // Blend optimism with nnue complexity and (semi)classical complexity
       optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
       v = (nnue * (TUNE_nnueNpmOffset + npm) + optimism * (TUNE_optNpmOffset + npm)) / 1024;
-      v = v * (TUNE_nnueDampNum - pos.rule50_count()) / 214;
   }
+
+  // Damp down the evaluation linearly when shuffling
+  v = v * (234 - pos.rule50_count()) / 256;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
