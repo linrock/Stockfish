@@ -1056,7 +1056,7 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > 2048;
+  bool useClassical = !useNNUE || abs(psq) > 2000;
 
   if (useClassical) {
       v = Evaluation<NO_TRACE>(pos).value();
@@ -1076,7 +1076,7 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend optimism with nnue complexity and (semi)classical complexity
       optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-      v = (nnue * (945 + npm) + optimism * (150 + npm)) / 1024;
+      v = (nnue * (1000 + npm) + optimism * (150 + npm)) / 1024;
       v = v * (200 - pos.rule50_count()) / 214;
   }
 
