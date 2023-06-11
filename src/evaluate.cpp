@@ -58,6 +58,19 @@ using namespace std;
 
 namespace Stockfish {
 
+  int TUNE_gt24 = 2048;
+  int TUNE_gt16 = 2048;
+  int TUNE_gt8  = 2048;
+  int TUNE_psqEg = 2048;
+  int TUNE_nnueScale = 945;
+  int TUNE_optScale = 150;
+  TUNE(SetRange(1748, 2348), TUNE_gt24);
+  TUNE(SetRange(1748, 2348), TUNE_gt16);
+  TUNE(SetRange(1748, 2348), TUNE_gt8);
+  TUNE(SetRange(1748, 2348), TUNE_psqEg);
+  TUNE(SetRange(745, 1145), TUNE_nnueScale);
+  TUNE(SetRange(0, 300), TUNE_optScale);
+
 namespace Eval {
 
   bool useNNUE;
@@ -1053,10 +1066,20 @@ Value Eval::evaluate(const Position& pos) {
   Value v;
   Value psq = pos.psq_eg_stm();
 
+  int minThresh;
+  if (pos.count<ALL_PIECES>() > 24)
+      minThresh = TUNE_gt24;
+  else if (pos.count<ALL_PIECES>() > 16)
+      minThresh = TUNE_gt16;
+  else if (pos.count<ALL_PIECES>() > 8)
+      minThresh = TUNE_gt8;
+  else
+      minThresh = TUNE_psqEg;
+
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > 2048;
+  bool useClassical = !useNNUE || abs(psq) > minThresh;
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
@@ -1072,7 +1095,7 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend optimism with nnue complexity and (semi)classical complexity
       optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-      v = (nnue * (945 + npm) + optimism * (150 + npm)) / 1024;
+      v = (nnue * (TUNE_nnueScale + npm) + optimism * (TUNE_optScale + npm)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
