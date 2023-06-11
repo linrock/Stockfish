@@ -1066,13 +1066,13 @@ Value Eval::evaluate(const Position& pos) {
 
   int minThresh;
   if (pos.count<ALL_PIECES>() > 24)
-      minThresh = TUNE_gt24;
+      minThresh = 2021;
   else if (pos.count<ALL_PIECES>() > 16)
-      minThresh = TUNE_gt16;
+      minThresh = 1981;
   else if (pos.count<ALL_PIECES>() > 8)
-      minThresh = TUNE_gt8;
+      minThresh = 1922;
   else
-      minThresh = TUNE_psqEg;
+      minThresh = 2242;
 
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
@@ -1093,7 +1093,7 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend optimism with nnue complexity and (semi)classical complexity
       optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-      v = (nnue * (945 + npm) + optimism * (150 + npm)) / 1024;
+      v = (nnue * (933 + npm) + optimism * (150 + npm)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
