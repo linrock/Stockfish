@@ -58,17 +58,6 @@ using namespace std;
 
 namespace Stockfish {
 
-  int TUNE_gt24 = 2048;
-  int TUNE_gt16 = 2048;
-  int TUNE_gt8  = 2048;
-  int TUNE_psqEg = 2048;
-  int TUNE_nnueScale = 945;
-  TUNE(SetRange(1748, 2348), TUNE_gt24);
-  TUNE(SetRange(1748, 2348), TUNE_gt16);
-  TUNE(SetRange(1748, 2348), TUNE_gt8);
-  TUNE(SetRange(1748, 2348), TUNE_psqEg);
-  TUNE(SetRange(745, 1145), TUNE_nnueScale);
-
 namespace Eval {
 
   bool useNNUE;
@@ -1066,13 +1055,13 @@ Value Eval::evaluate(const Position& pos) {
 
   int minThresh;
   if (pos.count<ALL_PIECES>() > 24)
-      minThresh = 2021;
+      minThresh = 2035;
   else if (pos.count<ALL_PIECES>() > 16)
-      minThresh = 1981;
+      minThresh = 2138;
   else if (pos.count<ALL_PIECES>() > 8)
-      minThresh = 1922;
+      minThresh = 1814;
   else
-      minThresh = 2242;
+      minThresh = 2252;
 
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
@@ -1093,7 +1082,7 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend optimism with nnue complexity and (semi)classical complexity
       optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-      v = (nnue * (933 + npm) + optimism * (150 + npm)) / 1024;
+      v = (nnue * (963 + npm) + optimism * (150 + npm)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
