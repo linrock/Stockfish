@@ -319,7 +319,9 @@ DebugInfo<2> hit[MaxDebugSlots];
 DebugInfo<2> mean[MaxDebugSlots];
 DebugInfo<3> stdev[MaxDebugSlots];
 DebugInfo<6> correl[MaxDebugSlots];
-DebugInfo<1537> activations;
+DebugInfo<1> activations;
+ofstream activations_log_file;
+size_t activations_bit = 0;
 
 }  // namespace
 
@@ -353,10 +355,37 @@ void dbg_correl_of(int64_t value1, int64_t value2, int slot) {
     correl[slot][5] += value1 * value2;
 }
 
-void dbg_activations(const uint8_t* input) {
-    for (int32_t i = 0; i < 1536; ++i)
-        activations[i] += (input[i] > 0);
-    ++activations[1536];
+void dbg_start_activations_log(const string& fname) {
+    activations_log_file.open(fname, ios::out | ios::binary);
+    char buffer[8] = {0};
+    activations_log_file.write(buffer, 8);
+    activations_bit = 0;
+    activations[0] = 0;
+}
+
+void dbg_stop_activations_log() {
+    uint64_t len = activations[0];
+    activations_log_file.seekp(0);
+    activations_log_file.write(reinterpret_cast<char*>(&len), 8);
+    activations_log_file.close();
+}
+
+void dbg_activations(const uint8_t* input, const size_t n) {
+    static atomic<uint64_t> data[2048] = { 0 };
+
+    if (!activations_log_file.is_open())
+        return;
+
+    for (size_t i = 0; i < n; ++i)
+        data[i] |= uint64_t(input[i] > 0) << activations_bit;
+    activations_bit = ++activations_bit % 64;
+
+    if (activations_bit == 0)
+    {
+        activations_log_file.write(reinterpret_cast<char*>(&data[0]), n * 8);
+        std::fill(data, data + 768, 0);
+        ++activations[0];
+    }
 }
 
 void dbg_print() {
@@ -399,14 +428,6 @@ void dbg_print() {
                       << ": Total " << n << " Coefficient " << r
                       << std::endl;
         }
-    
-    if (activations[1536])
-    {
-        std::cerr << "Activations: Total " << activations[1536] << " Hits";
-        for (int32_t i = 0; i < 1536; ++i)
-            std::cerr << " " << activations[i];
-        std::cerr << endl;
-    }
 }
 
 

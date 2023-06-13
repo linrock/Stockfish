@@ -44,7 +44,9 @@ void dbg_hit_on(bool cond, int slot = 0);
 void dbg_mean_of(int64_t value, int slot = 0);
 void dbg_stdev_of(int64_t value, int slot = 0);
 void dbg_correl_of(int64_t value1, int64_t value2, int slot = 0);
-void dbg_activations(const uint8_t* input);
+void dbg_start_activations_log(const std::string& fname);
+void dbg_stop_activations_log();
+void dbg_activations(const uint8_t* input, const size_t n);
 void dbg_print();
 
 using TimePoint = std::chrono::milliseconds::rep; // A value in milliseconds

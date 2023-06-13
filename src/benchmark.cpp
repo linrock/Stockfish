@@ -120,6 +120,7 @@ vector<string> setup_bench(const Position& current, istream& is) {
   string limit     = (is >> token) ? token : "13";
   string fenFile   = (is >> token) ? token : "default";
   string limitType = (is >> token) ? token : "depth";
+  string logFile   = (is >> token) ? token : "";
 
   go = limitType == "eval" ? "eval" : "go " + limitType + " " + limit;
 
@@ -159,6 +160,9 @@ vector<string> setup_bench(const Position& current, istream& is) {
           list.emplace_back("position fen " + fen);
           list.emplace_back(go);
       }
+
+  if (logFile != "")
+      dbg_start_activations_log(logFile);
 
   return list;
 }

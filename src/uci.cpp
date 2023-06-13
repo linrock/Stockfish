@@ -199,6 +199,7 @@ namespace {
     elapsed = now() - elapsed + 1; // Ensure positivity to avoid a 'divide by zero'
 
     dbg_print();
+    dbg_stop_activations_log();
 
     cerr << "\n==========================="
          << "\nTotal time (ms) : " << elapsed
