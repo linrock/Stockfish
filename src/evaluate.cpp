@@ -58,6 +58,13 @@ using namespace std;
 
 namespace Stockfish {
 
+  int TUNE_npmBase = 945;
+  int TUNE_optBase = 150;
+  int TUNE_damp50Slope = 38;
+  TUNE(SetRange(745, 1145), TUNE_npmBase);
+  TUNE(SetRange(0, 300), TUNE_optBase);
+  TUNE(SetRange(0, 76), TUNE_damp50Slope);
+
 namespace Eval {
 
   bool useNNUE;
@@ -1072,11 +1079,11 @@ Value Eval::evaluate(const Position& pos) {
 
       // Blend optimism with nnue complexity and (semi)classical complexity
       optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-      v = (nnue * (945 + npm) + optimism * (150 + npm)) / 1024;
+      v = (nnue * (TUNE_npmBase + npm) + optimism * (TUNE_optBase + npm)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
+  v = v * (7656 - TUNE_damp50Slope * pos.rule50_count()) / 8192;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
