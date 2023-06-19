@@ -58,12 +58,9 @@ using namespace std;
 
 namespace Stockfish {
 
-  int TUNE_psqThresh = 2048;
-  int TUNE_npmBase = 945;
-  int TUNE_optBase = 150;
-  TUNE(SetRange(1748, 2348), TUNE_psqThresh);
-  TUNE(SetRange(745, 1145), TUNE_npmBase);
-  TUNE(SetRange(0, 300), TUNE_optBase);
+constexpr   int TUNE_psqThresh = 2213;
+constexpr   int TUNE_npmBase = 967;
+constexpr   int TUNE_optBase = 130;
 
 namespace Eval {
 
