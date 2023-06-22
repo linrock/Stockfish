@@ -58,12 +58,9 @@ using namespace std;
 
 namespace Stockfish {
 
-  int TUNE_npmBase = 945;
-  int TUNE_optBase = 150;
-  int TUNE_damp50Slope = 38;
-  TUNE(SetRange(745, 1145), TUNE_npmBase);
-  TUNE(SetRange(0, 300), TUNE_optBase);
-  TUNE(SetRange(0, 76), TUNE_damp50Slope);
+constexpr   int TUNE_npmBase = 1001;
+constexpr   int TUNE_optBase = 123;
+constexpr   int TUNE_damp50Slope = 35;
 
 namespace Eval {
 
