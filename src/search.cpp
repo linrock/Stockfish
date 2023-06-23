@@ -38,6 +38,19 @@
 
 namespace Stockfish {
 
+    int TUNE_qmOrderBonusClamp = 1817;
+    int TUNE_improvementBase = 173;
+    int TUNE_nmMoveEvalOffset = 258;
+    int TUNE_futPruneCapEvalOffset = 197;
+    int TUNE_futPruneCapLmrDepthMult = 248;
+    int TUNE_futPruneParentEvalOffset = 112;
+    TUNE(SetRange(1517, 2117), TUNE_qmOrderBonusClamp);
+    TUNE(SetRange(23, 323), TUNE_improvementBase);
+    TUNE(SetRange(108, 408), TUNE_nmMoveEvalOffset);
+    TUNE(SetRange(47, 347), TUNE_futPruneCapEvalOffset);
+    TUNE(SetRange(98, 398), TUNE_futPruneCapLmrDepthMult);
+    TUNE(SetRange(0, 224), TUNE_futPruneParentEvalOffset);
+
 namespace Search {
 
   LimitsType Limits;
@@ -741,7 +754,7 @@ namespace {
     // Use static evaluation difference to improve quiet move ordering (~4 Elo)
     if (is_ok((ss-1)->currentMove) && !(ss-1)->inCheck && !priorCapture)
     {
-        int bonus = std::clamp(-18 * int((ss-1)->staticEval + ss->staticEval), -1817, 1817);
+        int bonus = std::clamp(-18 * int((ss-1)->staticEval + ss->staticEval), -TUNE_qmOrderBonusClamp, TUNE_qmOrderBonusClamp);
         thisThread->mainHistory[~us][from_to((ss-1)->currentMove)] << bonus;
     }
 
@@ -751,7 +764,7 @@ namespace {
     // margin and the improving flag are used in various pruning heuristics.
     improvement =   (ss-2)->staticEval != VALUE_NONE ? ss->staticEval - (ss-2)->staticEval
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
-                  :                                    173;
+                  :                                    TUNE_improvementBase;
     improving = improvement > 0;
 
     // Step 7. Razoring (~1 Elo).
@@ -779,7 +792,7 @@ namespace {
         && (ss-1)->statScore < 17329
         &&  eval >= beta
         &&  eval >= ss->staticEval
-        &&  ss->staticEval >= beta - 21 * depth - improvement / 13 + 258
+        &&  ss->staticEval >= beta - 21 * depth - improvement / 13 + TUNE_nmMoveEvalOffset
         && !excludedMove
         &&  pos.non_pawn_material(us)
         && (ss->ply >= thisThread->nmpMinPly))
@@ -982,11 +995,12 @@ moves_loop: // When in check, search starts here
           if (   capture
               || givesCheck)
           {
+
               // Futility pruning for captures (~2 Elo)
               if (   !givesCheck
                   && lmrDepth < 7
                   && !ss->inCheck
-                  && ss->staticEval + 197 + 248 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
+                  && ss->staticEval + TUNE_futPruneCapEvalOffset + TUNE_futPruneCapLmrDepthMult * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
                    + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 7 < alpha)
                   continue;
 
@@ -1032,7 +1046,7 @@ moves_loop: // When in check, search starts here
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
                   && lmrDepth < 12
-                  && ss->staticEval + 112 + 138 * lmrDepth <= alpha)
+                  && ss->staticEval + TUNE_futPruneParentEvalOffset + 138 * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
