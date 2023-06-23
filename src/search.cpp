@@ -741,7 +741,7 @@ namespace {
     // Use static evaluation difference to improve quiet move ordering (~4 Elo)
     if (is_ok((ss-1)->currentMove) && !(ss-1)->inCheck && !priorCapture)
     {
-        int bonus = std::clamp(-18 * int((ss-1)->staticEval + ss->staticEval), -1817, 1817);
+        int bonus = std::clamp(-18 * int((ss-1)->staticEval + ss->staticEval), -1800, 1800);
         thisThread->mainHistory[~us][from_to((ss-1)->currentMove)] << bonus;
     }
 
@@ -751,7 +751,7 @@ namespace {
     // margin and the improving flag are used in various pruning heuristics.
     improvement =   (ss-2)->staticEval != VALUE_NONE ? ss->staticEval - (ss-2)->staticEval
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
-                  :                                    173;
+                  :                                    157;
     improving = improvement > 0;
 
     // Step 7. Razoring (~1 Elo).
@@ -779,7 +779,7 @@ namespace {
         && (ss-1)->statScore < 17329
         &&  eval >= beta
         &&  eval >= ss->staticEval
-        &&  ss->staticEval >= beta - 21 * depth + 258
+        &&  ss->staticEval >= beta - 21 * depth + 251
         && !excludedMove
         &&  pos.non_pawn_material(us)
         &&  ss->ply >= thisThread->nmpMinPly
@@ -982,11 +982,12 @@ moves_loop: // When in check, search starts here
           if (   capture
               || givesCheck)
           {
+
               // Futility pruning for captures (~2 Elo)
               if (   !givesCheck
                   && lmrDepth < 7
                   && !ss->inCheck
-                  && ss->staticEval + 197 + 248 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
+                  && ss->staticEval + 216 + 256 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
                    + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 7 < alpha)
                   continue;
 
@@ -1032,7 +1033,7 @@ moves_loop: // When in check, search starts here
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
                   && lmrDepth < 12
-                  && ss->staticEval + 112 + 138 * lmrDepth <= alpha)
+                  && ss->staticEval + 147 + 138 * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
