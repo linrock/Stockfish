@@ -38,6 +38,17 @@
 
 namespace Stockfish {
 
+    int TUNE_qmOrderBonusClamp = 1817;
+    int TUNE_futPruneCapEvalOffset = 197;
+    int TUNE_futPruneCapLmrDepthMult = 248;
+    int TUNE_futPruneParentEvalOffset = 112;
+    int TUNE_futPruneParentLmrDepthMult = 138;
+    TUNE(SetRange(1517, 2117), TUNE_qmOrderBonusClamp);
+    TUNE(SetRange(0, 394), TUNE_futPruneCapEvalOffset);
+    TUNE(SetRange(0, 496), TUNE_futPruneCapLmrDepthMult);
+    TUNE(SetRange(0, 224), TUNE_futPruneParentEvalOffset);
+    TUNE(SetRange(0, 276), TUNE_futPruneParentLmrDepthMult);
+
 namespace Search {
 
   LimitsType Limits;
@@ -740,7 +751,7 @@ namespace {
     // Use static evaluation difference to improve quiet move ordering (~4 Elo)
     if (is_ok((ss-1)->currentMove) && !(ss-1)->inCheck && !priorCapture)
     {
-        int bonus = std::clamp(-18 * int((ss-1)->staticEval + ss->staticEval), -1817, 1817);
+        int bonus = std::clamp(-18 * int((ss-1)->staticEval + ss->staticEval), -TUNE_qmOrderBonusClamp, TUNE_qmOrderBonusClamp);
         thisThread->mainHistory[~us][from_to((ss-1)->currentMove)] << bonus;
     }
 
@@ -981,11 +992,12 @@ moves_loop: // When in check, search starts here
           if (   capture
               || givesCheck)
           {
+
               // Futility pruning for captures (~2 Elo)
               if (   !givesCheck
                   && lmrDepth < 7
                   && !ss->inCheck
-                  && ss->staticEval + 197 + 248 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
+                  && ss->staticEval + TUNE_futPruneCapEvalOffset + TUNE_futPruneCapLmrDepthMult * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
                    + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 7 < alpha)
                   continue;
 
@@ -1031,7 +1043,7 @@ moves_loop: // When in check, search starts here
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
                   && lmrDepth < 12
-                  && ss->staticEval + 112 + 138 * lmrDepth <= alpha)
+                  && ss->staticEval + TUNE_futPruneParentEvalOffset + TUNE_futPruneParentLmrDepthMult * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
