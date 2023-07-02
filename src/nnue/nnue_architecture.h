@@ -46,7 +46,7 @@ constexpr IndexType LayerStacks = 8;
 
 struct Network
 {
-  static constexpr int FC_0_OUTPUTS = 15;
+  static constexpr int FC_0_OUTPUTS = 31;
   static constexpr int FC_1_OUTPUTS = 32;
 
   Layers::AffineTransformSparseInput<TransformedFeatureDimensions, FC_0_OUTPUTS + 1> fc_0;
