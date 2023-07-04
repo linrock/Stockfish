@@ -58,21 +58,13 @@ using namespace std;
 
 namespace Stockfish {
 
-  Value TUNE_LazyThreshold1 = Value(3622);
-  Value TUNE_LazyThreshold2 = Value(1962);
-  TUNE(SetRange(3322, 3922), TUNE_LazyThreshold1);
-  TUNE(SetRange(1662, 2262), TUNE_LazyThreshold2);
-
-  int TUNE_psqThresh = 2048;
-  int TUNE_nnueNpmBase = 945;
-  int TUNE_nnuePcMult = 0;
-  int TUNE_optNpmBase = 150;
-  int TUNE_optPcMult = 0;
-  TUNE(SetRange(1748, 2348), TUNE_psqThresh);
-  TUNE(SetRange(745, 1145), TUNE_nnueNpmBase);
-  TUNE(SetRange(-16, 16), TUNE_nnuePcMult);
-  TUNE(SetRange(0, 300), TUNE_optNpmBase);
-  TUNE(SetRange(-16, 16), TUNE_optPcMult);
+constexpr   Value TUNE_LazyThreshold1 = Value(3610);
+constexpr   Value TUNE_LazyThreshold2 = Value(1865);
+constexpr   int TUNE_psqThresh = 2116;
+constexpr   int TUNE_nnueNpmBase = 915;
+constexpr   int TUNE_nnuePcMult = 9;
+constexpr   int TUNE_optNpmBase = 154;
+constexpr   int TUNE_optPcMult = 1;
 
 namespace Eval {
 
