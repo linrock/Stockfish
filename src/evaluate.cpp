@@ -63,8 +63,6 @@ constexpr   Value TUNE_LazyThreshold2 = Value(1865);
 constexpr   int TUNE_psqThresh = 2116;
 constexpr   int TUNE_nnueNpmBase = 915;
 constexpr   int TUNE_nnuePcMult = 9;
-constexpr   int TUNE_optNpmBase = 154;
-constexpr   int TUNE_optPcMult = 1;
 
 namespace Eval {
 
@@ -1081,7 +1079,7 @@ Value Eval::evaluate(const Position& pos) {
       // Blend optimism with nnue complexity and (semi)classical complexity
       optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
       v = (nnue     * (TUNE_nnueNpmBase + npm + TUNE_nnuePcMult * pos.count<PAWN>()) +
-           optimism * (TUNE_optNpmBase + npm + TUNE_optPcMult * pos.count<PAWN>())) / 1024;
+           optimism * (150 + npm)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
