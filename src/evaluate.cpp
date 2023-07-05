@@ -60,7 +60,6 @@ namespace Stockfish {
 
 constexpr   Value TUNE_LazyThreshold1 = Value(3610);
 constexpr   Value TUNE_LazyThreshold2 = Value(1865);
-constexpr   int TUNE_psqThresh = 2116;
 constexpr   int TUNE_nnueNpmBase = 915;
 constexpr   int TUNE_nnuePcMult = 9;
 constexpr   int TUNE_optNpmBase = 154;
@@ -1064,7 +1063,7 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || abs(psq) > TUNE_psqThresh;
+  bool useClassical = !useNNUE || abs(psq) > 2048;
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
