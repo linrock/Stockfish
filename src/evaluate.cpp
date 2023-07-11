@@ -54,6 +54,15 @@ using namespace std;
 
 namespace Stockfish {
 
+  int TUNE_nnueNpmBase = 945;
+  int TUNE_nnuePcMult = 0;
+  int TUNE_optNpmBase = 150;
+  int TUNE_optPcMult = 0;
+  TUNE(SetRange(745, 1145), TUNE_nnueNpmBase);
+  TUNE(SetRange(-16, 16), TUNE_nnuePcMult);
+  TUNE(SetRange(0, 300), TUNE_optNpmBase);
+  TUNE(SetRange(-16, 16), TUNE_optPcMult);
+
 namespace Eval {
 
   string currentEvalFileName = "None";
@@ -157,7 +166,8 @@ Value Eval::evaluate(const Position& pos) {
 
   // Blend optimism with nnue complexity and (semi)classical complexity
   optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-  v = (nnue * (945 + npm) + optimism * (150 + npm)) / 1024;
+  v = (nnue     * (TUNE_nnueNpmBase + npm + TUNE_nnuePcMult * pos.count<PAWN>()) +
+       optimism * (TUNE_optNpmBase  + npm + TUNE_optPcMult  * pos.count<PAWN>())) / 1024;
 
   // Damp down the evaluation linearly when shuffling
   v = v * (200 - pos.rule50_count()) / 214;
