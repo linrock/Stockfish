@@ -38,18 +38,12 @@
 
 namespace Stockfish {
 
-    int TUNE_qmOrderBonusClamp = 1817;
-    int TUNE_improvementBase = 173;
-    int TUNE_nmMoveEvalOffset = 258;
-    int TUNE_futPruneCapEvalOffset = 197;
-    int TUNE_futPruneCapLmrDepthMult = 248;
-    int TUNE_futPruneParentEvalOffset = 112;
-    TUNE(SetRange(1517, 2117), TUNE_qmOrderBonusClamp);
-    TUNE(SetRange(23, 323), TUNE_improvementBase);
-    TUNE(SetRange(108, 408), TUNE_nmMoveEvalOffset);
-    TUNE(SetRange(47, 347), TUNE_futPruneCapEvalOffset);
-    TUNE(SetRange(98, 398), TUNE_futPruneCapLmrDepthMult);
-    TUNE(SetRange(0, 224), TUNE_futPruneParentEvalOffset);
+constexpr     int TUNE_qmOrderBonusClamp = 1869;
+constexpr     int TUNE_improvementBase = 299;
+constexpr     int TUNE_nmMoveEvalOffset = 260;
+constexpr     int TUNE_futPruneCapEvalOffset = 116;
+constexpr     int TUNE_futPruneCapLmrDepthMult = 312;
+constexpr     int TUNE_futPruneParentEvalOffset = 158;
 
 namespace Search {
 
