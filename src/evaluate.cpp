@@ -54,16 +54,11 @@ using namespace std;
 
 namespace Stockfish {
 
-int TUNE_nnueNpmBase = 915;
-int TUNE_optNpmBase = 154;
-int TUNE_nnueScalePc = 9;
-int TUNE_optScalePc = 1;
-int TUNE_dampNum = 200;
-TUNE(SetRange(715, 1115), TUNE_nnueNpmBase);
-TUNE(SetRange(0, 300), TUNE_optNpmBase);
-TUNE(SetRange(-30, 30), TUNE_nnueScalePc);
-TUNE(SetRange(-30, 30), TUNE_optScalePc);
-TUNE(SetRange(114, 214), TUNE_dampNum);
+constexpr int TUNE_nnueNpmBase = 1064;
+constexpr int TUNE_optNpmBase = 195;
+constexpr int TUNE_nnueScalePc = 13;
+constexpr int TUNE_optScalePc = -4;
+constexpr int TUNE_dampNum = 187;
 
 namespace Eval {
 

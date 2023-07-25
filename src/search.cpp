@@ -38,15 +38,10 @@
 
 namespace Stockfish {
 
-  int TUNE_optMult = 109;
-  int TUNE_optDenomOffset = 141;
-  TUNE(SetRange(0, 218), TUNE_optMult);
-  TUNE(SetRange(0, 282), TUNE_optDenomOffset);
-
-  int TUNE_futPruneCapEvalOffset = 197;
-  TUNE(SetRange(47, 347), TUNE_futPruneCapEvalOffset);
-  int TUNE_futPruneParentEvalOffset = 112;
-  TUNE(SetRange(0, 224), TUNE_futPruneParentEvalOffset);
+constexpr   int TUNE_optMult = 128;
+constexpr   int TUNE_optDenomOffset = 157;
+constexpr   int TUNE_futPruneCapEvalOffset = 182;
+constexpr   int TUNE_futPruneParentEvalOffset = 140;
 
 namespace Search {
 
