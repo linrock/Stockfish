@@ -54,6 +54,13 @@ using namespace std;
 
 namespace Stockfish {
 
+  int TUNE_optNnueComplexityOffset = 0;
+  int TUNE_nnueNpmOffset = 915;
+  int TUNE_optNpmOffset = 154;
+  TUNE(SetRange(-500, 500), TUNE_optNnueComplexityOffset);
+  TUNE(SetRange(715, 1115), TUNE_nnueNpmOffset);
+  TUNE(SetRange(0, 308), TUNE_optNpmOffset);
+
 namespace Eval {
 
   string currentEvalFileName = "None";
@@ -153,12 +160,9 @@ Value Eval::evaluate(const Position& pos) {
   Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
   // Blend optimism with nnue complexity and (semi)classical complexity
-  // optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-  // optimism = optimism + optimism * nnueComplexity / 512;
-
-  v = (  nnue           * (915 + npm + 9 * pos.count<PAWN>())
-       + nnueComplexity * (100 + npm + 1 * pos.count<PAWN>())
-       + optimism       * (154 + npm +     pos.count<PAWN>())) / 1024;
+  optimism += optimism * (nnueComplexity + TUNE_optNnueComplexityOffset) / 512;
+  v = (  nnue     * (TUNE_nnueNpmOffset + npm + 9 * pos.count<PAWN>())
+       + optimism * (TUNE_optNpmOffset  + npm +     pos.count<PAWN>())) / 1024;
 
   // Damp down the evaluation linearly when shuffling
   v = v * (200 - pos.rule50_count()) / 214;
