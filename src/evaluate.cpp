@@ -154,10 +154,14 @@ Value Eval::evaluate(const Position& pos) {
 
   // Blend optimism with nnue complexity and (semi)classical complexity
   // optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-  // optimism = optimism + optimism * nnueComplexity / 512;
+  int mat =  100 * (pos.count<PAWN>(WHITE)   - pos.count<PAWN>(BLACK))
+           + 325 * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK))
+           + 350 * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK))
+           + 500 * (pos.count<ROOK>(WHITE)   - pos.count<ROOK>(BLACK))
+           + 900 * (pos.count<QUEEN>(WHITE)  - pos.count<QUEEN>(BLACK));
+  optimism += optimism * (nnueComplexity + abs(mat - nnue)) / 512;
 
   v = (  nnue           * (915 + npm + 9 * pos.count<PAWN>())
-       + nnueComplexity * (100 + npm + 1 * pos.count<PAWN>())
        + optimism       * (154 + npm +     pos.count<PAWN>())) / 1024;
 
   // Damp down the evaluation linearly when shuffling
