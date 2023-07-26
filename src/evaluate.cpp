@@ -54,6 +54,17 @@ using namespace std;
 
 namespace Stockfish {
 
+  int TUNE_pawnMult = 100;
+  int TUNE_knightMult = 325;
+  int TUNE_bishopMult = 350;
+  int TUNE_rookMult = 500;
+  int TUNE_queenMult = 900;
+  TUNE(SetRange(0, 200), TUNE_pawnMult);
+  TUNE(SetRange(0, 650), TUNE_knightMult);
+  TUNE(SetRange(0, 700), TUNE_bishopMult);
+  TUNE(SetRange(200, 800), TUNE_rookMult);
+  TUNE(SetRange(600, 1200), TUNE_queenMult);
+
 namespace Eval {
 
   string currentEvalFileName = "None";
@@ -154,11 +165,11 @@ Value Eval::evaluate(const Position& pos) {
 
   // Blend optimism with nnue complexity and (semi)classical complexity
   // optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-  int mat =  100 * (pos.count<PAWN>(WHITE)   - pos.count<PAWN>(BLACK))
-           + 325 * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK))
-           + 350 * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK))
-           + 500 * (pos.count<ROOK>(WHITE)   - pos.count<ROOK>(BLACK))
-           + 900 * (pos.count<QUEEN>(WHITE)  - pos.count<QUEEN>(BLACK));
+  int mat =  TUNE_pawnMult * (pos.count<PAWN>(WHITE)   - pos.count<PAWN>(BLACK))
+           + TUNE_knightMult * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK))
+           + TUNE_bishopMult * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK))
+           + TUNE_rookMult * (pos.count<ROOK>(WHITE)   - pos.count<ROOK>(BLACK))
+           + TUNE_queenMult * (pos.count<QUEEN>(WHITE)  - pos.count<QUEEN>(BLACK));
   optimism += optimism * (nnueComplexity + abs(mat - nnue)) / 512;
 
   v = (  nnue           * (915 + npm + 9 * pos.count<PAWN>())
