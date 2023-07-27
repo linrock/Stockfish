@@ -65,6 +65,11 @@ namespace Stockfish {
   TUNE(SetRange(200, 800), TUNE_rookMult);
   TUNE(SetRange(600, 1200), TUNE_queenMult);
 
+  int TUNE_nnueBase = 915;
+  int TUNE_optBase = 154;
+  TUNE(SetRange(700, 1130), TUNE_nnueBase);
+  TUNE(SetRange(0, 308), TUNE_optBase);
+
 namespace Eval {
 
   string currentEvalFileName = "None";
@@ -170,10 +175,11 @@ Value Eval::evaluate(const Position& pos) {
            + TUNE_bishopMult * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK))
            + TUNE_rookMult * (pos.count<ROOK>(WHITE)   - pos.count<ROOK>(BLACK))
            + TUNE_queenMult * (pos.count<QUEEN>(WHITE)  - pos.count<QUEEN>(BLACK));
+
   optimism += optimism * (nnueComplexity + abs(mat - nnue)) / 512;
 
-  v = (  nnue           * (915 + npm + 9 * pos.count<PAWN>())
-       + optimism       * (154 + npm +     pos.count<PAWN>())) / 1024;
+  v = (  nnue     * (TUNE_nnueBase + npm + 9 * pos.count<PAWN>())
+       + optimism * (TUNE_optBase  + npm +     pos.count<PAWN>())) / 1024;
 
   // Damp down the evaluation linearly when shuffling
   v = v * (200 - pos.rule50_count()) / 214;
