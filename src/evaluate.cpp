@@ -54,12 +54,6 @@ using namespace std;
 
 namespace Stockfish {
 
-constexpr   int TUNE_pawnMult = 71;
-constexpr   int TUNE_knightMult = 343;
-constexpr   int TUNE_bishopMult = 297;
-constexpr   int TUNE_rookMult = 513;
-constexpr   int TUNE_queenMult = 870;
-
 namespace Eval {
 
   string currentEvalFileName = "None";
@@ -158,14 +152,8 @@ Value Eval::evaluate(const Position& pos) {
 
   Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
-  // Blend optimism with nnue complexity and (semi)classical complexity
-  // optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-  int mat =  TUNE_pawnMult * (pos.count<PAWN>(WHITE)   - pos.count<PAWN>(BLACK))
-           + TUNE_knightMult * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK))
-           + TUNE_bishopMult * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK))
-           + TUNE_rookMult * (pos.count<ROOK>(WHITE)   - pos.count<ROOK>(BLACK))
-           + TUNE_queenMult * (pos.count<QUEEN>(WHITE)  - pos.count<QUEEN>(BLACK));
-  optimism += optimism * (nnueComplexity + abs(mat - nnue)) / 512;
+  // Blend optimism with nnue complexity
+  optimism += optimism * nnueComplexity / 256;
 
   v = (  nnue           * (915 + npm + 9 * pos.count<PAWN>())
        + optimism       * (154 + npm +     pos.count<PAWN>())) / 1024;
