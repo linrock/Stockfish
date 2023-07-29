@@ -38,6 +38,26 @@
 
 namespace Stockfish {
 
+  int TUNE_fpcEvalOffset = 197;
+  int TUNE_fpcLmrDepthMult = 248;
+  Value TUNE_seeDepthMult = Value(-205);
+  int TUNE_fpEvalOffset = 112;
+  int TUNE_fpDepthMult = 138;
+  int TUNE_negSeeDepthMultSq = -27;
+  int TUNE_negSeeDepthMult = 16;
+  TUNE(SetRange(0, 394), TUNE_fpcEvalOffset);
+  TUNE(SetRange(0, 496), TUNE_fpcLmrDepthMult);
+  TUNE(SetRange(-410, 0), TUNE_seeDepthMult);
+  TUNE(SetRange(0, 224), TUNE_fpEvalOffset);
+  TUNE(SetRange(0, 276), TUNE_fpDepthMult);
+  TUNE(SetRange(-54, 0), TUNE_negSeeDepthMultSq);
+  TUNE(SetRange(0, 32), TUNE_negSeeDepthMult);
+
+  int TUNE_histDenom = 7011;
+  int TUNE_chpruneDMult = -3832;
+  TUNE(SetRange(4000, 10000), TUNE_histDenom);
+  TUNE(SetRange(-7600, -1000), TUNE_chpruneDMult);
+
 namespace Search {
 
   LimitsType Limits;
@@ -1001,18 +1021,18 @@ moves_loop: // When in check, search starts here
 
               // Continuation history based pruning (~2 Elo)
               if (   lmrDepth < 6
-                  && history < -3832 * depth)
+                  && history < TUNE_chpruneDMult * depth)
                   continue;
 
               history += 2 * thisThread->mainHistory[us][from_to(move)];
 
-              lmrDepth += history / 7011;
+              lmrDepth += history / TUNE_histDenom;
               lmrDepth = std::max(lmrDepth, -2);
 
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
                   && lmrDepth < 12
-                  && ss->staticEval + 112 + 138 * lmrDepth <= alpha)
+                  && ss->staticEval + TUNE_fpEvalOffset + TUNE_fpDepthMult * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
