@@ -47,6 +47,21 @@
 
 namespace Stockfish {
 
+  int TUNE_histDenom = 5793;
+  int TUNE_fpcEvalOffset = 188;
+  int TUNE_fpcLmrDepthMult = 206;
+  int TUNE_fpEvalOffset = 115;
+  int TUNE_fpDepthMult = 122;
+  int TUNE_negSeeDepthMultSq = -27;
+  int TUNE_histDepthMult = -3232;
+  TUNE(SetRange(-6464, -1616), TUNE_histDepthMult);
+  TUNE(SetRange(2896, 11586), TUNE_histDenom);
+  TUNE(SetRange(0, 394), TUNE_fpcEvalOffset);
+  TUNE(SetRange(0, 412), TUNE_fpcLmrDepthMult);
+  TUNE(SetRange(0, 230), TUNE_fpEvalOffset);
+  TUNE(SetRange(0, 244), TUNE_fpDepthMult);
+  TUNE(SetRange(-54, 0), TUNE_negSeeDepthMultSq);
+
 namespace Search {
 
   LimitsType Limits;
@@ -1000,7 +1015,7 @@ moves_loop: // When in check, search starts here
               if (   !givesCheck
                   && lmrDepth < 7
                   && !ss->inCheck
-                  && ss->staticEval + 188 + 206 * lmrDepth + PieceValue[pos.piece_on(to_sq(move))]
+                  && ss->staticEval + TUNE_fpcEvalOffset + TUNE_fpcLmrDepthMult * lmrDepth + PieceValue[pos.piece_on(to_sq(move))]
                    + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 7 < alpha)
                   continue;
 
@@ -1016,24 +1031,24 @@ moves_loop: // When in check, search starts here
 
               // Continuation history based pruning (~2 Elo)
               if (   lmrDepth < 6
-                  && history < -3232 * depth)
+                  && history < TUNE_histDepthMult * depth)
                   continue;
 
               history += 2 * thisThread->mainHistory[us][from_to(move)];
 
-              lmrDepth += history / 5793;
+              lmrDepth += history / TUNE_histDenom;
               lmrDepth = std::max(lmrDepth, -2);
 
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
                   && lmrDepth < 13
-                  && ss->staticEval + 115 + 122 * lmrDepth <= alpha)
+                  && ss->staticEval + TUNE_fpEvalOffset + TUNE_fpDepthMult * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
 
               // Prune moves with negative SEE (~4 Elo)
-              if (!pos.see_ge(move, Value(-27 * lmrDepth * lmrDepth)))
+              if (!pos.see_ge(move, Value(TUNE_negSeeDepthMultSq * lmrDepth * lmrDepth)))
                   continue;
           }
       }
