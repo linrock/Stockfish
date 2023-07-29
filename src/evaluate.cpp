@@ -54,13 +54,9 @@ using namespace std;
 
 namespace Stockfish {
 
-  int TUNE_npMult = 0;
-  TUNE(SetRange(-500, 500), TUNE_npMult);
-
-  int TUNE_nnueBase = 915;
-  int TUNE_optBase = 154;
-  TUNE(SetRange(700, 1130), TUNE_nnueBase);
-  TUNE(SetRange(0, 308), TUNE_optBase);
+  int TUNE_npMult = -2;
+  int TUNE_nnueBase = 870;
+  int TUNE_optBase = 9;
 
 namespace Eval {
 
