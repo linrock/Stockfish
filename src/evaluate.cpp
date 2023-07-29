@@ -164,12 +164,13 @@ Value Eval::evaluate(const Position& pos) {
   Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
   // Blend optimism with nnue complexity and (semi)classical complexity
-  // optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-  int mat =  TUNE_pawnMult * (pos.count<PAWN>(WHITE)   - pos.count<PAWN>(BLACK))
-           + TUNE_knightMult * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK))
-           + TUNE_bishopMult * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK))
-           + TUNE_rookMult * (pos.count<ROOK>(WHITE)   - pos.count<ROOK>(BLACK))
-           + TUNE_queenMult * (pos.count<QUEEN>(WHITE)  - pos.count<QUEEN>(BLACK));
+  int sign = (stm == WHITE ? 1 : -1);
+  int mat =  TUNE_pawnMult * (pos.count<PAWN>(WHITE)   - pos.count<PAWN>(BLACK)) * sign
+           + TUNE_knightMult * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK)) * sign
+           + TUNE_bishopMult * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK)) * sign
+           + TUNE_rookMult * (pos.count<ROOK>(WHITE)   - pos.count<ROOK>(BLACK)) * sign
+           + TUNE_queenMult * (pos.count<QUEEN>(WHITE)  - pos.count<QUEEN>(BLACK)) * sign;
+
   optimism += optimism * (nnueComplexity + abs(mat - nnue)) / 512;
 
   v = (  nnue           * (915 + npm + 9 * pos.count<PAWN>())
