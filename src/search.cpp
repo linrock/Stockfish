@@ -38,6 +38,17 @@
 
 namespace Stockfish {
 
+    int TUNE_statScoreThresh = 17329;
+    int TUNE_nmDepthSqMult = 0;
+    int TUNE_nmDepthMult = 21;
+    int TUNE_nmEvalOffset = 258;
+    int TUNE_RDenom = 173;
+    TUNE(SetRange(15000, 20000), TUNE_statScoreThresh);
+    TUNE(SetRange(-16, 16), TUNE_nmDepthSqMult);
+    TUNE(SetRange(0, 42), TUNE_nmDepthMult);
+    TUNE(SetRange(0, 516), TUNE_nmEvalOffset);
+    TUNE(SetRange(86, 346), TUNE_RDenom);
+
 namespace Search {
 
   LimitsType Limits;
@@ -775,10 +786,12 @@ namespace {
     // Step 9. Null move search with verification search (~35 Elo)
     if (   !PvNode
         && (ss-1)->currentMove != MOVE_NULL
-        && (ss-1)->statScore < 17329
+        && (ss-1)->statScore < TUNE_statScoreThresh
         &&  eval >= beta
         &&  eval >= ss->staticEval
-        &&  ss->staticEval >= beta - 21 * depth + 258
+        &&  ss->staticEval >= beta + TUNE_nmDepthSqMult * depth * depth
+                                   - TUNE_nmDepthMult * depth
+                                   + TUNE_nmEvalOffset
         && !excludedMove
         &&  pos.non_pawn_material(us)
         &&  ss->ply >= thisThread->nmpMinPly
@@ -787,7 +800,7 @@ namespace {
         assert(eval - beta >= 0);
 
         // Null move dynamic reduction based on depth and eval
-        Depth R = std::min(int(eval - beta) / 173, 6) + depth / 3 + 4;
+        Depth R = std::min(int(eval - beta) / TUNE_RDenom, 6) + depth / 3 + 4;
 
         ss->currentMove = MOVE_NULL;
         ss->continuationHistory = &thisThread->continuationHistory[0][0][NO_PIECE][0];
