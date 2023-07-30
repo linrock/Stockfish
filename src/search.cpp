@@ -38,6 +38,13 @@
 
 namespace Stockfish {
 
+              int TUNE_lmrDMultSq = -27;
+              int TUNE_lmrDMult = 16;
+              int TUNE_seeGeOffset = 0;
+              TUNE(SetRange(-54, 0), TUNE_lmrDMultSq);
+              TUNE(SetRange(0, 32), TUNE_lmrDMult);
+              TUNE(SetRange(-2048, 2048), TUNE_seeGeOffset);
+
 namespace Search {
 
   LimitsType Limits;
@@ -1037,7 +1044,9 @@ moves_loop: // When in check, search starts here
               lmrDepth = std::max(lmrDepth, 0);
 
               // Prune moves with negative SEE (~4 Elo)
-              if (!pos.see_ge(move, Value(-27 * lmrDepth * lmrDepth - 16 * lmrDepth)))
+              if (!pos.see_ge(move, Value(  TUNE_lmrDMultSq * lmrDepth * lmrDepth
+                                          - TUNE_lmrDMult * lmrDepth
+                                          + TUNE_seeGeOffset)))
                   continue;
           }
       }
