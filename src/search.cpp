@@ -38,12 +38,9 @@
 
 namespace Stockfish {
 
-              int TUNE_lmrDMultSq = -27;
-              int TUNE_lmrDMult = 16;
-              int TUNE_seeGeOffset = 0;
-              TUNE(SetRange(-54, 0), TUNE_lmrDMultSq);
-              TUNE(SetRange(0, 32), TUNE_lmrDMult);
-              TUNE(SetRange(-32, 32), TUNE_seeGeOffset);
+constexpr               int TUNE_lmrDMultSq = -30;
+constexpr               int TUNE_lmrDMult = 19;
+constexpr               int TUNE_seeGeOffset = -30;
 
 namespace Search {
 
