@@ -45,6 +45,7 @@ namespace Stockfish {
   int TUNE_fpDepthMult = 138;
   int TUNE_negSeeDepthMultSq = -27;
   int TUNE_negSeeDepthMult = 16;
+  int TUNE_ssDenom = 306;
   TUNE(SetRange(0, 394), TUNE_fpcEvalOffset);
   TUNE(SetRange(0, 496), TUNE_fpcLmrDepthMult);
   TUNE(SetRange(-410, 0), TUNE_seeDepthMult);
@@ -52,6 +53,7 @@ namespace Stockfish {
   TUNE(SetRange(0, 276), TUNE_fpDepthMult);
   TUNE(SetRange(-54, 0), TUNE_negSeeDepthMultSq);
   TUNE(SetRange(0, 32), TUNE_negSeeDepthMult);
+  TUNE(SetRange(100, 900), TUNE_ssDenom);
 
 namespace Search {
 
@@ -782,7 +784,7 @@ namespace {
     // The depth condition is important for mate finding.
     if (   !ss->ttPv
         &&  depth < 9
-        &&  eval - futility_margin(depth, cutNode && !ss->ttHit, improving) - (ss-1)->statScore / 306 >= beta
+        &&  eval - futility_margin(depth, cutNode && !ss->ttHit, improving) - (ss-1)->statScore / TUNE_ssDenom >= beta
         &&  eval >= beta
         &&  eval < 24923) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
         return eval;
