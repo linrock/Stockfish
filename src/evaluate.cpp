@@ -165,12 +165,12 @@ Value Eval::evaluate(const Position& pos) {
 
   // Blend optimism with nnue complexity and (semi)classical complexity
   // optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-  int mat =  TUNE_pawnMult * (pos.count<PAWN>(WHITE)   - pos.count<PAWN>(BLACK))
-           + TUNE_knightMult * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK))
-           + TUNE_bishopMult * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK))
-           + TUNE_rookMult * (pos.count<ROOK>(WHITE)   - pos.count<ROOK>(BLACK))
-           + TUNE_queenMult * (pos.count<QUEEN>(WHITE)  - pos.count<QUEEN>(BLACK));
-  optimism += optimism * (nnueComplexity + abs(mat - nnue)) / 512;
+  int material =  TUNE_pawnMult * (pos.count<PAWN>(stm) - pos.count<PAWN>(~stm))
+                + TUNE_knightMult * (pos.count<KNIGHT>(stm) - pos.count<KNIGHT>(~stm))
+                + TUNE_bishopMult * (pos.count<BISHOP>(stm) - pos.count<BISHOP>(~stm))
+                + TUNE_rookMult * (pos.count<ROOK>(stm) - pos.count<ROOK>(~stm))
+                + TUNE_queenMult * (pos.count<QUEEN>(stm) - pos.count<QUEEN>(~stm));
+  optimism += optimism * (nnueComplexity + abs(material - nnue)) / 512;
 
   v = (  nnue           * (915 + npm + 9 * pos.count<PAWN>())
        + optimism       * (154 + npm +     pos.count<PAWN>())) / 1024;
