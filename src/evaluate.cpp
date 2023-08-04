@@ -54,18 +54,18 @@ using namespace std;
 
 namespace Stockfish {
 
-int TUNE_npmMult = 32;
+int TUNE_nnueNpmMult = 32;
+int TUNE_optNpmMult = 32;
 int TUNE_nnueNpmBase = 915;
 int TUNE_optNpmBase = 154;
 int TUNE_nnueScalePc = 9;
 int TUNE_optScalePc = 1;
-int TUNE_dampConst = 200;
-TUNE(SetRange(0, 64), TUNE_npmMult);
+TUNE(SetRange(0, 64), TUNE_nnueNpmMult);
+TUNE(SetRange(0, 64), TUNE_optNpmMult);
 TUNE(SetRange(715, 1115), TUNE_nnueNpmBase);
 TUNE(SetRange(0, 308), TUNE_optNpmBase);
 TUNE(SetRange(-24, 24), TUNE_nnueScalePc);
 TUNE(SetRange(-24, 24), TUNE_optScalePc);
-TUNE(SetRange(100, 300), TUNE_dampConst);
 
 namespace Eval {
 
@@ -158,7 +158,8 @@ Value Eval::evaluate(const Position& pos) {
   Value v;
 
   int nnueComplexity;
-  int npm = TUNE_npmMult * pos.non_pawn_material() / 2048;
+  int nnueNpm = TUNE_nnueNpmMult * pos.non_pawn_material() / 2048;
+  int optNpm  = TUNE_optNpmMult  * pos.non_pawn_material() / 2048;
 
   Color stm = pos.side_to_move();
   Value optimism = pos.this_thread()->optimism[stm];
@@ -174,11 +175,11 @@ Value Eval::evaluate(const Position& pos) {
   // Blend optimism with nnue complexity and (semi)classical complexity
   optimism += optimism * (nnueComplexity + abs(material - nnue)) / 512;
 
-  v = (  nnue     * (TUNE_nnueNpmBase + npm + TUNE_nnueScalePc * pos.count<PAWN>())
-       + optimism * (TUNE_optNpmBase  + npm + TUNE_optScalePc  * pos.count<PAWN>())) / 1024;
+  v = (  nnue     * (TUNE_nnueNpmBase + nnueNpm + TUNE_nnueScalePc * pos.count<PAWN>())
+       + optimism * (TUNE_optNpmBase  + optNpm  + TUNE_optScalePc  * pos.count<PAWN>())) / 1024;
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (TUNE_dampConst - pos.rule50_count()) / (TUNE_dampConst + 14);
+  v = v * (200 - pos.rule50_count()) / (214);
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
