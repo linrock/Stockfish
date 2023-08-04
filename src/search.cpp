@@ -53,10 +53,16 @@ namespace Stockfish {
   TUNE(SetRange(-54, 0), TUNE_negSeeDepthMultSq);
   TUNE(SetRange(0, 32), TUNE_negSeeDepthMult);
 
+  int TUNE_deltaDenom = 15799;
+  TUNE(SetRange(13799, 17799), TUNE_deltaDenom);
+
   int TUNE_histDenom = 7011;
   int TUNE_chpruneDMult = -3832;
   TUNE(SetRange(4000, 10000), TUNE_histDenom);
   TUNE(SetRange(-7600, -1000), TUNE_chpruneDMult);
+
+  int TUNE_fpEvalMax = 24923;
+  TUNE(SetRange(22923, 26923), TUNE_fpEvalMax);
 
 namespace Search {
 
@@ -368,7 +374,7 @@ void Thread::search() {
 
           // Reset aspiration window starting size
           Value prev = rootMoves[pvIdx].averageScore;
-          delta = Value(10) + int(prev) * prev / 15799;
+          delta = Value(10) + int(prev) * prev / TUNE_deltaDenom;
           alpha = std::max(prev - delta,-VALUE_INFINITE);
           beta  = std::min(prev + delta, VALUE_INFINITE);
 
@@ -789,7 +795,7 @@ namespace {
         &&  depth < 9
         &&  eval - futility_margin(depth, cutNode && !ss->ttHit, improving) - (ss-1)->statScore / 306 >= beta
         &&  eval >= beta
-        &&  eval < 24923) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
+        &&  eval < TUNE_fpEvalMax) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
         return eval;
 
     // Step 9. Null move search with verification search (~35 Elo)
