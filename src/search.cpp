@@ -38,16 +38,11 @@
 
 namespace Stockfish {
 
-    int TUNE_statScoreThresh = 17329;
-    int TUNE_nmDepthSqMult = 0;
-    int TUNE_nmDepthMult = 21;
-    int TUNE_nmEvalOffset = 258;
-    int TUNE_RDenom = 173;
-    TUNE(SetRange(15000, 20000), TUNE_statScoreThresh);
-    TUNE(SetRange(-16, 16), TUNE_nmDepthSqMult);
-    TUNE(SetRange(0, 42), TUNE_nmDepthMult);
-    TUNE(SetRange(0, 516), TUNE_nmEvalOffset);
-    TUNE(SetRange(86, 346), TUNE_RDenom);
+constexpr     int TUNE_statScoreThresh = 17025;
+constexpr     int TUNE_nmDepthSqMult = -2;
+constexpr     int TUNE_nmDepthMult = 35;
+constexpr     int TUNE_nmEvalOffset = 242;
+constexpr     int TUNE_RDenom = 165;
 
 namespace Search {
 
