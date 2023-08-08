@@ -38,31 +38,15 @@
 
 namespace Stockfish {
 
-  int TUNE_fpcEvalOffset = 197;
-  int TUNE_fpcLmrDepthMult = 248;
-  Value TUNE_seeDepthMult = Value(-205);
-  int TUNE_fpEvalOffset = 112;
-  int TUNE_fpDepthMult = 138;
-  int TUNE_negSeeDepthMultSq = -27;
-  int TUNE_negSeeDepthMult = 16;
-  TUNE(SetRange(0, 394), TUNE_fpcEvalOffset);
-  TUNE(SetRange(0, 496), TUNE_fpcLmrDepthMult);
-  TUNE(SetRange(-410, 0), TUNE_seeDepthMult);
-  TUNE(SetRange(0, 224), TUNE_fpEvalOffset);
-  TUNE(SetRange(0, 276), TUNE_fpDepthMult);
-  TUNE(SetRange(-54, 0), TUNE_negSeeDepthMultSq);
-  TUNE(SetRange(0, 32), TUNE_negSeeDepthMult);
-
-  int TUNE_deltaDenom = 15799;
-  TUNE(SetRange(13799, 17799), TUNE_deltaDenom);
-
-  int TUNE_histDenom = 7011;
-  int TUNE_chpruneDMult = -3832;
-  TUNE(SetRange(4000, 10000), TUNE_histDenom);
-  TUNE(SetRange(-7600, -1000), TUNE_chpruneDMult);
-
-  int TUNE_fpEvalMax = 24923;
-  TUNE(SetRange(22923, 26923), TUNE_fpEvalMax);
+constexpr   int TUNE_fpcEvalOffset = 209;
+constexpr   int TUNE_fpcLmrDepthMult = 254;
+constexpr   Value TUNE_seeDepthMult = Value(-233);
+constexpr   int TUNE_fpEvalOffset = 161;
+constexpr   int TUNE_fpDepthMult = 132;
+constexpr   int TUNE_deltaDenom = 15350;
+constexpr   int TUNE_histDenom = 7445;
+constexpr   int TUNE_chpruneDMult = -4072;
+constexpr   int TUNE_fpEvalMax = 24838;
 
 namespace Search {
 
