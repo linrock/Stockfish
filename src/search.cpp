@@ -38,13 +38,8 @@
 
 namespace Stockfish {
 
-constexpr   int TUNE_fpcEvalOffset = 182;
-constexpr   int TUNE_fpcLmrDepthMult = 394;
-constexpr   Value TUNE_seeDepthMult = Value(-201);
 constexpr   int TUNE_fpEvalOffset = 144;
 constexpr   int TUNE_fpDepthMult = 126;
-constexpr   int TUNE_negSeeDepthMultSq = -33;
-constexpr   int TUNE_negSeeDepthMult = 16;
 constexpr   int TUNE_histDenom = 7064;
 constexpr   int TUNE_chpruneDMult = -4170;
 
@@ -995,12 +990,12 @@ moves_loop: // When in check, search starts here
               if (   !givesCheck
                   && lmrDepth < 7
                   && !ss->inCheck
-                  && ss->staticEval + 197 + 248 * lmrDepth + PieceValue[pos.piece_on(to_sq(move))]
+                  && ss->staticEval + 182 + 394 * lmrDepth + PieceValue[pos.piece_on(to_sq(move))]
                    + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 7 < alpha)
                   continue;
 
               // SEE based pruning for captures and checks (~11 Elo)
-              if (!pos.see_ge(move, Value(-205) * depth))
+              if (!pos.see_ge(move, Value(-201) * depth))
                   continue;
           }
           else
@@ -1028,7 +1023,7 @@ moves_loop: // When in check, search starts here
               lmrDepth = std::max(lmrDepth, 0);
 
               // Prune moves with negative SEE (~4 Elo)
-              if (!pos.see_ge(move, Value(-31 * lmrDepth * lmrDepth)))
+              if (!pos.see_ge(move, Value(-33 * lmrDepth * lmrDepth)))
                   continue;
           }
       }
