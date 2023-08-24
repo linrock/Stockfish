@@ -54,6 +54,21 @@ using namespace std;
 
 namespace Stockfish {
 
+  int TUNE_pawnMat = 126;
+  int TUNE_nnueNpmOffset = 915;
+  int TUNE_optNpmOffset = 154;
+  int TUNE_nnueDenom = 32768;
+  int TUNE_nnuePawnMult = 9;
+  int TUNE_optPawnMult = 1;
+  int TUNE_dampConst = 200;
+  TUNE(SetRange(0, 252), TUNE_pawnMat);
+  TUNE(SetRange(615, 1215), TUNE_nnueNpmOffset);
+  TUNE(SetRange(0, 308), TUNE_optNpmOffset);
+  TUNE(SetRange(16384, 65536), TUNE_nnueDenom);
+  TUNE(SetRange(0, 32), TUNE_nnuePawnMult);
+  TUNE(SetRange(0, 32), TUNE_optPawnMult);
+  TUNE(SetRange(100, 300), TUNE_dampConst);
+
 namespace Eval {
 
   string currentEvalFileName = "None";
@@ -153,17 +168,17 @@ Value Eval::evaluate(const Position& pos) {
   Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
   int material =  pos.non_pawn_material(stm) - pos.non_pawn_material(~stm)
-                + 126 * (pos.count<PAWN>(stm) - pos.count<PAWN>(~stm));
+                + TUNE_pawnMat * (pos.count<PAWN>(stm) - pos.count<PAWN>(~stm));
 
   // Blend optimism and eval with nnue complexity and material imbalance
   optimism += optimism * (nnueComplexity + abs(material - nnue)) / 512;
-  nnue     -= nnue     * (nnueComplexity + abs(material - nnue)) / 32768;
+  nnue     -= nnue     * (nnueComplexity + abs(material - nnue)) / TUNE_nnueDenom;
 
-  v = (  nnue     * (915 + npm + 9 * pos.count<PAWN>())
-       + optimism * (154 + npm +     pos.count<PAWN>())) / 1024;
+  v = (  nnue     * (TUNE_nnueNpmOffset + npm + TUNE_nnuePawnMult * pos.count<PAWN>())
+       + optimism * (TUNE_optNpmOffset  + npm + TUNE_optPawnMult  * pos.count<PAWN>())) / 1024;
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
+  v = v * (TUNE_dampConst - pos.rule50_count()) / (TUNE_dampConst + 14);
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
