@@ -446,7 +446,7 @@ namespace Stockfish::Tools
                     out.write(th.id(), ps);
 
                     auto p = num_processed.fetch_add(1) + 1;
-                    if (p % 10000 == 0)
+                    if (p % 100000 == 0)
                     {
                         std::cout << "Processed " << p << " positions. "
                                   << num_unique_positions << " unique ("
