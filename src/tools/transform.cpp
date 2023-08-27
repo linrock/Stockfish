@@ -408,6 +408,9 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
+        std::atomic<std::uint64_t> num_unique_positions = 0;
+
+        std::set<std::string> positions_seen;
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
@@ -423,32 +426,38 @@ namespace Stockfish::Tools
                 for(auto& ps : psv)
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
-
-                    for (int cnt = 0; cnt < params.research_count; ++cnt)
-                        Search::search(pos, params.depth, 1);
-
-                    auto [search_value, search_pv] = Search::search(pos, params.depth, 1);
-
-                    if (search_pv.empty())
-                        continue;
-
                     pos.sfen_pack(ps.sfen, false);
-                    ps.score = search_value;
-                    if (!params.keep_moves)
-                        ps.move = search_pv[0];
-                    ps.padding = 0;
 
+                    size_t i = pos.fen().find(" ");
+                    // std::cout << pos.fen().substr(0, i) << std::endl;
+                    // std::cout << pos.fen().substr(i+1, 1) << std::endl;
+                    std::string piece_orientation = pos.fen().substr(0, i) + pos.fen().substr(i+1, 1);
+                    std::cout << pos.fen() << std::endl;
+                    std::cout << piece_orientation << std::endl;
+
+                    if (positions_seen.find(piece_orientation) != positions_seen.end()) {
+                      std::cout << "Saw already: " << piece_orientation << std::endl;
+                      ps.score = 32002;
+                    } else {
+                      positions_seen.insert(piece_orientation);
+                      num_unique_positions.fetch_add(1);
+                    }
+                    ps.padding = 0;
                     out.write(th.id(), ps);
 
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 10000 == 0)
                     {
                         std::cout << "Processed " << p << " positions.\n";
+                        std::cout << "Seen " << num_unique_positions << " unique positions.\n";
                     }
                 }
             }
         });
         Threads.wait_for_workers_finished();
+
+        std::cout << "Processed " << num_processed << " positions.\n";
+        std::cout << "Seen " << num_unique_positions << " unique positions.\n";
 
         std::cout << "Finished.\n";
     }
