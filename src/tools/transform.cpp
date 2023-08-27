@@ -448,16 +448,18 @@ namespace Stockfish::Tools
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 10000 == 0)
                     {
-                        std::cout << "Processed " << p << " positions.\n";
-                        std::cout << "Seen " << num_unique_positions << " unique positions.\n";
+                        std::cout << "Processed " << p << " positions. "
+                                  << num_unique_positions << " unique ("
+                                  << (int)(100.0 * num_unique_positions / p) << "\%)\n";
                     }
                 }
             }
         });
         Threads.wait_for_workers_finished();
 
-        std::cout << "Processed " << num_processed << " positions.\n";
-        std::cout << "Seen " << num_unique_positions << " unique positions.\n";
+        std::cout << "Processed " << num_processed << " positions. "
+                  << num_unique_positions << " unique ("
+                  << (int)(100.0 * num_unique_positions / num_processed) << "\%)\n";
 
         std::cout << "Finished.\n";
     }
