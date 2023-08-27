@@ -432,11 +432,11 @@ namespace Stockfish::Tools
                     // std::cout << pos.fen().substr(0, i) << std::endl;
                     // std::cout << pos.fen().substr(i+1, 1) << std::endl;
                     std::string piece_orientation = pos.fen().substr(0, i) + pos.fen().substr(i+1, 1);
-                    std::cout << pos.fen() << std::endl;
-                    std::cout << piece_orientation << std::endl;
+                    // std::cout << pos.fen() << std::endl;
+                    // std::cout << piece_orientation << std::endl;
 
                     if (positions_seen.find(piece_orientation) != positions_seen.end()) {
-                      std::cout << "Saw already: " << piece_orientation << std::endl;
+                      // std::cout << "Saw already: " << piece_orientation << std::endl;
                       ps.score = 32002;
                     } else {
                       positions_seen.insert(piece_orientation);
