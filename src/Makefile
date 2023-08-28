@@ -55,11 +55,19 @@ PGOBENCH = $(WINE_PATH) ./$(EXE) bench
 SRCS = benchmark.cpp bitboard.cpp evaluate.cpp main.cpp \
 	misc.cpp movegen.cpp movepick.cpp position.cpp \
 	search.cpp thread.cpp timeman.cpp tt.cpp uci.cpp ucioption.cpp tune.cpp syzygy/tbprobe.cpp \
-	nnue/evaluate_nnue.cpp nnue/features/half_ka_v2_hm.cpp
+	nnue/evaluate_nnue.cpp nnue/features/half_ka_v2_hm.cpp \
+  tools/validate_training_data.cpp \
+  tools/sfen_packer.cpp \
+  tools/training_data_generator.cpp \
+  tools/training_data_generator_nonpv.cpp \
+  tools/opening_book.cpp \
+  tools/convert.cpp \
+  tools/transform.cpp \
+  tools/stats.cpp
 
 OBJS = $(notdir $(SRCS:.cpp=.o))
 
-VPATH = syzygy:nnue:nnue/features
+VPATH = syzygy:nnue:nnue/features:eval:extra:tools
 
 ### ==========================================================================
 ### Section 2. High-level Configuration
