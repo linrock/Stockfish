@@ -472,7 +472,7 @@ namespace Stockfish::Tools
         });
         Threads.wait_for_workers_finished();
 
-        std::cout << num_processed << " positions. " << num_skipped_positions << " skipped."
+        std::cout << num_processed << " positions. " << num_skipped_positions << " skipped. "
                   << num_unique_positions << " unique ("
                   << (int)(100.0 * num_unique_positions / num_processed) << "\%)\n";
 
