@@ -22,6 +22,7 @@
 #include <limits>
 #include <mutex>
 #include <optional>
+#include <unordered_set>
 
 namespace Stockfish::Tools
 {
@@ -408,9 +409,21 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
+        std::atomic<std::uint64_t> num_skipped_positions = 0;
         std::atomic<std::uint64_t> num_unique_positions = 0;
 
-        std::set<std::string> positions_seen;
+        std::unordered_set<std::string> positions_seen;
+        std::mutex positions_seen_mtx;
+
+        auto add_position_seen = [&positions_seen, &positions_seen_mtx](std::string piece_orientation) {
+            std::lock_guard<std::mutex> lock(positions_seen_mtx);
+            positions_seen.insert(piece_orientation);
+        };
+
+        auto has_seen_position = [&positions_seen, &positions_seen_mtx](std::string piece_orientation) {
+            std::lock_guard<std::mutex> lock(positions_seen_mtx);
+            return positions_seen.find(piece_orientation) != positions_seen.end();
+        };
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
@@ -435,11 +448,13 @@ namespace Stockfish::Tools
                     // std::cout << pos.fen() << std::endl;
                     // std::cout << piece_orientation << std::endl;
 
-                    if (positions_seen.find(piece_orientation) != positions_seen.end()) {
+                    if (ps.score == 32002) {
+                      num_skipped_positions.fetch_add(1);
+                    } else if (has_seen_position(piece_orientation)) {
                       // std::cout << "Saw already: " << piece_orientation << std::endl;
                       ps.score = 32002;
                     } else {
-                      positions_seen.insert(piece_orientation);
+                      add_position_seen(piece_orientation);
                       num_unique_positions.fetch_add(1);
                     }
                     ps.padding = 0;
@@ -448,7 +463,7 @@ namespace Stockfish::Tools
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 100000 == 0)
                     {
-                        std::cout << "Processed " << p << " positions. "
+                        std::cout << p << " positions. " << num_skipped_positions << " skipped. "
                                   << num_unique_positions << " unique ("
                                   << (int)(100.0 * num_unique_positions / p) << "\%)\n";
                     }
@@ -457,7 +472,7 @@ namespace Stockfish::Tools
         });
         Threads.wait_for_workers_finished();
 
-        std::cout << "Processed " << num_processed << " positions. "
+        std::cout << num_processed << " positions. " << num_skipped_positions << " skipped."
                   << num_unique_positions << " unique ("
                   << (int)(100.0 * num_unique_positions / num_processed) << "\%)\n";
 
