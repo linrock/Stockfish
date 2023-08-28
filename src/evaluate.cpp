@@ -54,16 +54,11 @@ using namespace std;
 
 namespace Stockfish {
 
-  int TUNE_npmMult = 32;
-  int TUNE_nnueNpmOffset = 915;
-  int TUNE_optNpmOffset = 154;
-  int TUNE_optMult = 2048;
-  int TUNE_nnueDecayMult = 32;
-  TUNE(SetRange(0, 64), TUNE_npmMult);
-  TUNE(SetRange(615, 1215), TUNE_nnueNpmOffset);
-  TUNE(SetRange(0, 308), TUNE_optNpmOffset);
-  TUNE(SetRange(0, 4096), TUNE_optMult);
-  TUNE(SetRange(0, 64), TUNE_nnueDecayMult);
+constexpr   int TUNE_npmMult = 22;
+constexpr   int TUNE_nnueNpmOffset = 970;
+constexpr   int TUNE_optNpmOffset = 108;
+constexpr   int TUNE_optMult = 3181;
+constexpr   int TUNE_nnueDecayMult = 40;
 
 namespace Eval {
 
