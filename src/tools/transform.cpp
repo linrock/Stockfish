@@ -461,11 +461,11 @@ namespace Stockfish::Tools
                     out.write(th.id(), ps);
 
                     auto p = num_processed.fetch_add(1) + 1;
-                    if (p % 100000 == 0)
+                    if (p % 100000 == 0 && p - num_skipped_positions > 0)
                     {
                         std::cout << p << " positions. " << num_skipped_positions << " skipped. "
                                   << num_unique_positions << " unique ("
-                                  << (int)(100.0 * num_unique_positions / p) << "\%)\n";
+                                  << (int)(100.0 * num_unique_positions / (p - num_skipped_positions)) << "\%)\n";
                     }
                 }
             }
@@ -474,7 +474,7 @@ namespace Stockfish::Tools
 
         std::cout << num_processed << " positions. " << num_skipped_positions << " skipped. "
                   << num_unique_positions << " unique ("
-                  << (int)(100.0 * num_unique_positions / num_processed) << "\%)\n";
+                  << (int)(100.0 * num_unique_positions / (num_processed - num_skipped_positions)) << "\%)\n";
 
         std::cout << "Finished.\n";
     }
