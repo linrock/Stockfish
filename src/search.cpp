@@ -38,8 +38,7 @@
 
 namespace Stockfish {
 
-          int TUNE_optNum = 109;
-          TUNE(SetRange(-91, 309), TUNE_optNum);
+constexpr          int TUNE_optNum = 109;
 
 namespace Search {
 
