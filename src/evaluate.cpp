@@ -54,12 +54,18 @@ using namespace std;
 
 namespace Stockfish {
 
-  int TUNE_npmMult = 32;
+  int TUNE_nnueNpmMult = 32;
+  int TUNE_optNpmMult = 32;
+  int TUNE_nnuePcMult = 9;
+  int TUNE_optPcMult = 1;
   int TUNE_nnueNpmOffset = 915;
   int TUNE_optNpmOffset = 154;
   int TUNE_optMult = 2048;
   int TUNE_nnueDecayMult = 32;
-  TUNE(SetRange(0, 64), TUNE_npmMult);
+  TUNE(SetRange(0, 64), TUNE_nnueNpmMult);
+  TUNE(SetRange(0, 64), TUNE_optNpmMult);
+  TUNE(SetRange(-23, 41), TUNE_nnuePcMult);
+  TUNE(SetRange(-31, 33), TUNE_optPcMult);
   TUNE(SetRange(615, 1215), TUNE_nnueNpmOffset);
   TUNE(SetRange(0, 308), TUNE_optNpmOffset);
   TUNE(SetRange(0, 4096), TUNE_optMult);
@@ -156,7 +162,8 @@ Value Eval::evaluate(const Position& pos) {
   Value v;
 
   int nnueComplexity;
-  int npm = TUNE_npmMult * pos.non_pawn_material() / 2048;
+  int nnueNpm = TUNE_nnueNpmMult * pos.non_pawn_material() / 2048;
+  int optNpm  = TUNE_optNpmMult * pos.non_pawn_material() / 2048;
 
   Color stm = pos.side_to_move();
   Value optimism = pos.this_thread()->optimism[stm];
@@ -170,8 +177,8 @@ Value Eval::evaluate(const Position& pos) {
   optimism += TUNE_optMult * optimism * (nnueComplexity + abs(material - nnue)) / 1048576;
   nnue     -= TUNE_nnueDecayMult * nnue * (nnueComplexity + abs(material - nnue)) / 1048576;
 
-  v = (  nnue     * (TUNE_nnueNpmOffset + npm + 9 * pos.count<PAWN>())
-       + optimism * (TUNE_optNpmOffset  + npm +     pos.count<PAWN>())) / 1024;
+  v = (  nnue     * (TUNE_nnueNpmOffset + nnueNpm + TUNE_nnuePcMult * pos.count<PAWN>())
+       + optimism * (TUNE_optNpmOffset  + optNpm  + TUNE_optPcMult  * pos.count<PAWN>())) / 1024;
 
   // Damp down the evaluation linearly when shuffling
   v = v * (200 - pos.rule50_count()) / 214;
