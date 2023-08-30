@@ -143,24 +143,28 @@ Value Eval::evaluate(const Position& pos) {
   assert(!pos.checkers());
 
   Value v;
-
-  int nnueComplexity;
-  int npm = pos.non_pawn_material() / 64;
-
   Color stm = pos.side_to_move();
-  Value optimism = pos.this_thread()->optimism[stm];
-
-  Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
   int material =  pos.non_pawn_material(stm) - pos.non_pawn_material(~stm)
                 + 126 * (pos.count<PAWN>(stm) - pos.count<PAWN>(~stm));
 
-  // Blend optimism and eval with nnue complexity and material imbalance
-  optimism += optimism * (nnueComplexity + abs(material - nnue)) / 512;
-  nnue     -= nnue     * (nnueComplexity + abs(material - nnue)) / 32768;
+  if (abs(material) > 1900) {
+    v = Value(material);
+  } else {
+    int nnueComplexity;
+    int npm = pos.non_pawn_material() / 64;
 
-  v = (  nnue     * (915 + npm + 9 * pos.count<PAWN>())
-       + optimism * (154 + npm +     pos.count<PAWN>())) / 1024;
+    Value optimism = pos.this_thread()->optimism[stm];
+
+    Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
+
+    // Blend optimism and eval with nnue complexity and material imbalance
+    optimism += optimism * (nnueComplexity + abs(material - nnue)) / 512;
+    nnue     -= nnue     * (nnueComplexity + abs(material - nnue)) / 32768;
+
+    v = (  nnue     * (915 + npm + 9 * pos.count<PAWN>())
+         + optimism * (154 + npm +     pos.count<PAWN>())) / 1024;
+  }
 
   // Damp down the evaluation linearly when shuffling
   v = v * (200 - pos.rule50_count()) / 214;
