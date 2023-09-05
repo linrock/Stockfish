@@ -8,7 +8,7 @@
 
 using namespace std;
 
-constexpr size_t Dimensions = 768;
+constexpr size_t Dimensions = 1024;
 
 array<uint16_t, Dimensions> greedy(array<vector<uint64_t>, Dimensions>& log) {
   size_t count[Dimensions] = { 0 };
