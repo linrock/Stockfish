@@ -383,7 +383,7 @@ void dbg_activations(const uint8_t* input, const size_t n) {
     if (activations_bit == 0)
     {
         activations_log_file.write(reinterpret_cast<char*>(&data[0]), n * 8);
-        std::fill(data, data + 768, 0);
+        std::fill(data, data + 1024, 0);
         ++activations[0];
     }
 }
