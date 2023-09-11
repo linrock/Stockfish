@@ -53,6 +53,19 @@
 
 namespace Stockfish {
 
+      int TUNE_ncOptMult = 32;
+      int TUNE_semiOptMult = 32;
+      int TUNE_ncNnueMult = 32;
+      int TUNE_semiNnueMult = 32;
+      int TUNE_nnueNpmBase = 915;
+      int TUNE_optNpmBase = 154;
+      TUNE(SetRange(0, 64), TUNE_ncOptMult);
+      TUNE(SetRange(0, 64), TUNE_semiOptMult);
+      TUNE(SetRange(0, 64), TUNE_ncNnueMult);
+      TUNE(SetRange(0, 64), TUNE_semiNnueMult);
+      TUNE(SetRange(615, 1215), TUNE_nnueNpmBase);
+      TUNE(SetRange(0, 308), TUNE_optNpmBase);
+
 namespace Eval {
 
   std::string currentEvalFileName = "None";
@@ -172,12 +185,12 @@ Value Eval::evaluate(const Position& pos) {
       Value optimism = pos.this_thread()->optimism[stm];
 
       // Blend optimism and eval with nnue complexity and material imbalance
-      optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) / 512;
-      nnue     -= nnue     * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
+      optimism += optimism * (TUNE_ncOptMult  * nnueComplexity + TUNE_semiOptMult  * abs(simpleEval - nnue)) / 16384;
+      nnue     -= nnue     * (TUNE_ncNnueMult * nnueComplexity + TUNE_semiNnueMult * abs(simpleEval - nnue)) / 1048576;
 
       int npm = pos.non_pawn_material() / 64;
-      v = (  nnue     * (915 + npm + 9 * pos.count<PAWN>())
-           + optimism * (154 + npm +     pos.count<PAWN>())) / 1024;
+      v = (  nnue     * (TUNE_nnueNpmBase + npm + 9 * pos.count<PAWN>())
+           + optimism * (TUNE_optNpmBase  + npm +     pos.count<PAWN>())) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
