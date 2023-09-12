@@ -53,18 +53,12 @@
 
 namespace Stockfish {
 
-      int TUNE_ncOptMult = 32;
-      int TUNE_semiOptMult = 32;
-      int TUNE_ncNnueMult = 32;
-      int TUNE_semiNnueMult = 32;
-      int TUNE_nnueNpmBase = 915;
-      int TUNE_optNpmBase = 154;
-      TUNE(SetRange(0, 64), TUNE_ncOptMult);
-      TUNE(SetRange(0, 64), TUNE_semiOptMult);
-      TUNE(SetRange(0, 64), TUNE_ncNnueMult);
-      TUNE(SetRange(0, 64), TUNE_semiNnueMult);
-      TUNE(SetRange(615, 1215), TUNE_nnueNpmBase);
-      TUNE(SetRange(0, 308), TUNE_optNpmBase);
+constexpr       int TUNE_ncOptMult = 26;
+constexpr       int TUNE_semiOptMult = 28;
+constexpr       int TUNE_ncNnueMult = 12;
+constexpr       int TUNE_semiNnueMult = 18;
+constexpr       int TUNE_nnueNpmBase = 956;
+constexpr       int TUNE_optNpmBase = 140;
 
 namespace Eval {
 
