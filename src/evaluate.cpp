@@ -161,7 +161,8 @@ Value Eval::evaluate(const Position& pos) {
                                  + 16 * shuffling * shuffling
                                  + abs(pos.this_thread()->bestValue)
                                  + abs(pos.this_thread()->rootSimpleEval);
-
+  if (!pos.non_pawn_material())
+      lazy = false;
   if (lazy)
       v = Value(simpleEval);
   else
