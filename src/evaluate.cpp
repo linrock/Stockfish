@@ -53,6 +53,19 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
+  int TUNE_blendOptMult = 64;
+  TUNE(SetRange(-128, 256), TUNE_blendOptMult);
+
+  int TUNE_blendNnueMult = -16;
+  TUNE(SetRange(-64, 48), TUNE_blendNnueMult);
+
+  int TUNE_nnueNpmBase = 915;
+  int TUNE_nnuePc = 9;
+  int TUNE_optNpmBase = 154;
+  TUNE(SetRange(515, 1315), TUNE_nnueNpmBase);
+  TUNE(SetRange(-23, 41), TUNE_nnuePc);
+  TUNE(SetRange(0, 308), TUNE_optNpmBase);
+
 namespace Eval {
 
 std::string currentEvalFileName = "None";
@@ -164,9 +177,10 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm) + (int(pos.key() & 7) - 3);
 
-    bool lazy = abs(simpleEval) >= RookValue + KnightValue + 16 * shuffling * shuffling
-                                     + abs(pos.this_thread()->bestValue)
-                                     + abs(pos.this_thread()->rootSimpleEval);
+    bool lazy = abs(simpleEval) >=   RookValue + KnightValue
+                                   + shuffling * shuffling
+                                   + abs(pos.this_thread()->bestValue)
+                                   + abs(pos.this_thread()->rootSimpleEval);
 
     if (lazy)
         v = Value(simpleEval);
@@ -178,11 +192,12 @@ Value Eval::evaluate(const Position& pos) {
         Value optimism = pos.this_thread()->optimism[stm];
 
         // Blend optimism and eval with nnue complexity and material imbalance
-        optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) / 512;
-        nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
+        optimism += TUNE_blendOptMult * optimism * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
+        nnue += TUNE_blendNnueMult * nnue * (nnueComplexity + abs(simpleEval - nnue)) / 524288;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        v = (  nnue     * (TUNE_nnueNpmBase + npm + TUNE_nnuePc * pos.count<PAWN>())
+             + optimism * (TUNE_optNpmBase  + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
