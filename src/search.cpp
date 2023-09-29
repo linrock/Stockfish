@@ -47,6 +47,11 @@
 
 namespace Stockfish {
 
+            int TUNE_optUsNum = 103;
+            int TUNE_optNotUsNum = -116;
+            TUNE(SetRange(3, 203), TUNE_optUsNum);
+            TUNE(SetRange(-216, -16), TUNE_optNotUsNum);
+
 namespace Search {
 
 LimitsType Limits;
@@ -372,8 +377,8 @@ void Thread::search() {
             beta      = std::min(avg + delta, VALUE_INFINITE);
 
             // Adjust optimism based on root move's averageScore (~4 Elo)
-            optimism[us]  = 103 * (avg + 33) / (std::abs(avg + 34) + 119);
-            optimism[~us] = -116 * (avg + 40) / (std::abs(avg + 12) + 123);
+            optimism[us]  = TUNE_optUsNum * (avg + 33) / (std::abs(avg + 34) + 119);
+            optimism[~us] = TUNE_optNotUsNum * (avg + 40) / (std::abs(avg + 12) + 123);
 
             // Start with a small aspiration window and, in the case of a fail
             // high/low, re-search with a bigger window until we don't fail
