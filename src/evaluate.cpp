@@ -53,7 +53,6 @@
 
 namespace Stockfish {
 
-  constexpr int TUNE_lazyOffset = -606;
   constexpr int TUNE_nnueNpmBase = 1030;
   constexpr int TUNE_nnuePc = 7;
   constexpr int TUNE_optNpmBase = 148;
@@ -165,8 +164,7 @@ Value Eval::evaluate(const Position& pos) {
   bool lazy = abs(simpleEval) >=   RookValue + KnightValue
                                  + 16 * shuffling * shuffling
                                  + abs(pos.this_thread()->bestValue)
-                                 + abs(pos.this_thread()->rootSimpleEval)
-                                 + TUNE_lazyOffset;
+                                 + abs(pos.this_thread()->rootSimpleEval);
 
   if (lazy)
       v = Value(simpleEval);
