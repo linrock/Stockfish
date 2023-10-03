@@ -53,18 +53,11 @@
 
 namespace Stockfish {
 
-  int TUNE_lazyShuf = 16;
-  TUNE(SetRange(0, 32), TUNE_lazyShuf);
-
-  int TUNE_lazyOffset;
-  TUNE(SetRange(-2048, 2048), TUNE_lazyOffset);
-
-  int TUNE_nnueNpmBase = 915;
-  int TUNE_nnuePc = 9;
-  int TUNE_optNpmBase = 154;
-  TUNE(SetRange(615, 1215), TUNE_nnueNpmBase);
-  TUNE(SetRange(0, 32), TUNE_nnuePc);
-  TUNE(SetRange(0, 308), TUNE_optNpmBase);
+  constexpr int TUNE_lazyShuf = 14;
+  constexpr int TUNE_lazyOffset = -268;
+  constexpr int TUNE_nnueNpmBase = 1020;
+  constexpr int TUNE_nnuePc = 7;
+  constexpr int TUNE_optNpmBase = 160;
 
 namespace Eval {
 
