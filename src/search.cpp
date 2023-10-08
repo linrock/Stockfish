@@ -364,7 +364,7 @@ void Thread::search() {
           beta  = std::min(prev + delta, VALUE_INFINITE);
 
           // Adjust optimism based on root move's previousScore (~4 Elo)
-          int opt = 113 * prev / (std::abs(prev) + 109);
+          int opt = 139 * prev / (std::abs(prev) + 141);
           optimism[ us] = Value(opt);
           optimism[~us] = -optimism[us];
 
