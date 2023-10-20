@@ -47,20 +47,13 @@
 
 namespace Stockfish {
 
-  int TUNE_histDenom = 5793;
-  int TUNE_fpcEvalOffset = 188;
-  int TUNE_fpcLmrDepthMult = 206;
-  int TUNE_fpEvalOffset = 115;
-  int TUNE_fpDepthMult = 122;
-  int TUNE_negSeeDepthMultSq = -27;
-  int TUNE_histDepthMult = -3232;
-  TUNE(SetRange(-6464, -1616), TUNE_histDepthMult);
-  TUNE(SetRange(2896, 11586), TUNE_histDenom);
-  TUNE(SetRange(0, 394), TUNE_fpcEvalOffset);
-  TUNE(SetRange(0, 412), TUNE_fpcLmrDepthMult);
-  TUNE(SetRange(0, 230), TUNE_fpEvalOffset);
-  TUNE(SetRange(0, 244), TUNE_fpDepthMult);
-  TUNE(SetRange(-54, 0), TUNE_negSeeDepthMultSq);
+  constexpr int TUNE_histDenom = 7540;
+  constexpr int TUNE_fpcEvalOffset = 243;
+  constexpr int TUNE_fpcLmrDepthMult = 256;
+  constexpr int TUNE_fpEvalOffset = 167;
+  constexpr int TUNE_fpDepthMult = 123;
+  constexpr int TUNE_negSeeDepthMultSq = -39;
+  constexpr int TUNE_histDepthMult = -4395;
 
 namespace Search {
 
