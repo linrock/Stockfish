@@ -51,7 +51,6 @@ namespace Stockfish {
   int TUNE_fpcEvalOffset = 188;
   int TUNE_fpcLmrDepthMult = 206;
   int TUNE_fpEvalOffset = 115;
-  int TUNE_fpDepthMult = 122;
   int TUNE_negSeeDepthMultSq = -27;
   int TUNE_histDepthMult = -3232;
   TUNE(SetRange(-6464, -1616), TUNE_histDepthMult);
@@ -59,7 +58,6 @@ namespace Stockfish {
   TUNE(SetRange(0, 394), TUNE_fpcEvalOffset);
   TUNE(SetRange(0, 412), TUNE_fpcLmrDepthMult);
   TUNE(SetRange(0, 230), TUNE_fpEvalOffset);
-  TUNE(SetRange(0, 244), TUNE_fpDepthMult);
   TUNE(SetRange(-54, 0), TUNE_negSeeDepthMultSq);
 
 namespace Search {
@@ -911,7 +909,7 @@ namespace {
                 {
                     // Save ProbCut data into transposition table
                     tte->save(posKey, value_to_tt(value, ss->ply), ss->ttPv, BOUND_LOWER, depth - 3, move, ss->staticEval);
-                    return value;
+                    return value - (probCutBeta - beta);
                 }
             }
 
@@ -1042,7 +1040,7 @@ moves_loop: // When in check, search starts here
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
                   && lmrDepth < 13
-                  && ss->staticEval + TUNE_fpEvalOffset + TUNE_fpDepthMult * lmrDepth <= alpha)
+                  && ss->staticEval + TUNE_fpEvalOffset + 122 * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
