@@ -47,6 +47,19 @@
 
 namespace Stockfish {
 
+  int TUNE_histDepthMult = -3232;
+  int TUNE_histDenom = 5793;
+  int TUNE_fpcEvalOffset = 188;
+  int TUNE_fpcLmrDepthMult = 206;
+  int TUNE_fpEvalOffset = 115;
+  int TUNE_fpHistThresh = 989;
+  TUNE(SetRange(-6464, -1616), TUNE_histDepthMult);
+  TUNE(SetRange(2896, 11586), TUNE_histDenom);
+  TUNE(SetRange(0, 394), TUNE_fpcEvalOffset);
+  TUNE(SetRange(0, 412), TUNE_fpcLmrDepthMult);
+  TUNE(SetRange(0, 230), TUNE_fpEvalOffset);
+  TUNE(SetRange(389, 1589), TUNE_fpHistThresh);
+
 namespace Search {
 
 LimitsType Limits;
@@ -778,7 +791,8 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
                - (ss - 1)->statScore / 321
              >= beta
         && eval >= beta && eval < 29462  // smaller than TB wins
-        && !(!ttCapture && ttMove))
+        && !(!ttCapture && ttMove)
+        && thisThread->mainHistory[us][from_to(ttMove)] < TUNE_fpHistThresh)
         return eval;
 
     // Step 9. Null move search with verification search (~35 Elo)
@@ -973,7 +987,7 @@ moves_loop:  // When in check, search starts here
             {
                 // Futility pruning for captures (~2 Elo)
                 if (!givesCheck && lmrDepth < 7 && !ss->inCheck
-                    && ss->staticEval + 188 + 206 * lmrDepth + PieceValue[pos.piece_on(to_sq(move))]
+                    && ss->staticEval + TUNE_fpcEvalOffset + TUNE_fpcLmrDepthMult * lmrDepth + PieceValue[pos.piece_on(to_sq(move))]
                            + captureHistory[movedPiece][to_sq(move)]
                                            [type_of(pos.piece_on(to_sq(move)))]
                                / 7
@@ -991,16 +1005,16 @@ moves_loop:  // When in check, search starts here
                             + (*contHist[3])[movedPiece][to_sq(move)];
 
                 // Continuation history based pruning (~2 Elo)
-                if (lmrDepth < 6 && history < -3232 * depth)
+                if (lmrDepth < 6 && history < TUNE_histDepthMult * depth)
                     continue;
 
                 history += 2 * thisThread->mainHistory[us][from_to(move)];
 
-                lmrDepth += history / 5793;
+                lmrDepth += history / TUNE_histDenom;
                 lmrDepth = std::max(lmrDepth, -2);
 
                 // Futility pruning: parent node (~13 Elo)
-                if (!ss->inCheck && lmrDepth < 13 && ss->staticEval + 115 + 122 * lmrDepth <= alpha)
+                if (!ss->inCheck && lmrDepth < 13 && ss->staticEval + TUNE_fpEvalOffset + 122 * lmrDepth <= alpha)
                     continue;
 
                 lmrDepth = std::max(lmrDepth, 0);
