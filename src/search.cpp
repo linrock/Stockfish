@@ -47,6 +47,11 @@
 
 namespace Stockfish {
 
+          int TUNE_optNum = 113;
+          int TUNE_optDenom = 109;
+          TUNE(SetRange(0, 226), TUNE_optNum);
+          TUNE(SetRange(9, 199), TUNE_optDenom);
+
 namespace Search {
 
 LimitsType Limits;
@@ -369,7 +374,7 @@ void Thread::search() {
             beta      = std::min(avg + delta, VALUE_INFINITE);
 
             // Adjust optimism based on root move's averageScore (~4 Elo)
-            int opt       = 113 * avg / (std::abs(avg) + 109);
+            int opt       = TUNE_optNum * avg / (std::abs(avg) + TUNE_optDenom);
             optimism[us]  = Value(opt);
             optimism[~us] = -optimism[us];
 
