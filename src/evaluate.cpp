@@ -164,9 +164,10 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm) + (int(pos.key() & 7) - 3);
 
-    bool lazy = abs(simpleEval) >= RookValue + KnightValue + 16 * shuffling * shuffling
+    bool lazy = abs(simpleEval) >= RookValue + KnightValue + 24 * shuffling * shuffling
                                      + abs(pos.this_thread()->bestValue)
-                                     + abs(pos.this_thread()->rootSimpleEval);
+                                     + abs(pos.this_thread()->rootSimpleEval)
+                                     - 404;
 
     if (lazy)
         v = Value(simpleEval);
@@ -182,7 +183,7 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        v       = (nnue * (1024 + npm + 8 * pos.count<PAWN>()) + optimism * (128 + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
