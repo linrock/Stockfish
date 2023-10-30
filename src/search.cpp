@@ -49,6 +49,15 @@ namespace Stockfish {
 
 namespace Search {
 
+int TUNE_futPruneCapEvalOffset = 239;
+TUNE(SetRange(0, 478), TUNE_futPruneCapEvalOffset);
+
+int TUNE_futPruneParEvalOffset = 77;
+TUNE(SetRange(0, 154), TUNE_futPruneParEvalOffset);
+
+int TUNE_futBaseEvalOffset = 200;
+TUNE(SetRange(0, 400), TUNE_futBaseEvalOffset);
+
 LimitsType Limits;
 }
 
@@ -988,7 +997,7 @@ moves_loop:  // When in check, search starts here
                 {
                     Piece capturedPiece = pos.piece_on(to_sq(move));
                     int   futilityEval =
-                      ss->staticEval + 239 + 291 * lmrDepth + PieceValue[capturedPiece]
+                      ss->staticEval + TUNE_futPruneCapEvalOffset + 291 * lmrDepth + PieceValue[capturedPiece]
                       + captureHistory[movedPiece][to_sq(move)][type_of(capturedPiece)] / 7;
                     if (futilityEval < alpha)
                         continue;
@@ -1015,7 +1024,7 @@ moves_loop:  // When in check, search starts here
                 lmrDepth = std::max(lmrDepth, -1);
 
                 // Futility pruning: parent node (~13 Elo)
-                if (!ss->inCheck && lmrDepth < 13 && ss->staticEval + 77 + 124 * lmrDepth <= alpha)
+                if (!ss->inCheck && lmrDepth < 13 && ss->staticEval + TUNE_futPruneParEvalOffset + 124 * lmrDepth <= alpha)
                     continue;
 
                 lmrDepth = std::max(lmrDepth, 0);
@@ -1466,7 +1475,7 @@ Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth) {
         if (bestValue > alpha)
             alpha = bestValue;
 
-        futilityBase = ss->staticEval + 200;
+        futilityBase = ss->staticEval + TUNE_futBaseEvalOffset;
     }
 
     const PieceToHistory* contHist[] = {(ss - 1)->continuationHistory,
