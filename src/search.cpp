@@ -785,7 +785,9 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
                - (ss - 1)->statScore / 321
              >= beta
         && eval >= beta && eval < 29462  // smaller than TB wins
-        && (!ttMove || ttCapture))
+        && !(  !ttCapture
+             && ttMove
+             && thisThread->mainHistory[us][from_to(ttMove)] < 426))
         return eval;
 
     // Step 9. Null move search with verification search (~35 Elo)
@@ -988,7 +990,7 @@ moves_loop:  // When in check, search starts here
                 {
                     Piece capturedPiece = pos.piece_on(to_sq(move));
                     int   futilityEval =
-                      ss->staticEval + 239 + 291 * lmrDepth + PieceValue[capturedPiece]
+                      ss->staticEval + 66 + 246 * lmrDepth + PieceValue[capturedPiece]
                       + captureHistory[movedPiece][to_sq(move)][type_of(capturedPiece)] / 7;
                     if (futilityEval < alpha)
                         continue;
@@ -1006,16 +1008,16 @@ moves_loop:  // When in check, search starts here
                             + thisThread->pawnHistory[pawn_structure(pos)][movedPiece][to_sq(move)];
 
                 // Continuation history based pruning (~2 Elo)
-                if (lmrDepth < 6 && history < -3645 * depth)
+                if (lmrDepth < 6 && history < -3523 * depth)
                     continue;
 
                 history += 2 * thisThread->mainHistory[us][from_to(move)];
 
-                lmrDepth += history / 7836;
+                lmrDepth += history / 6455;
                 lmrDepth = std::max(lmrDepth, -1);
 
                 // Futility pruning: parent node (~13 Elo)
-                if (!ss->inCheck && lmrDepth < 13 && ss->staticEval + 77 + 124 * lmrDepth <= alpha)
+                if (!ss->inCheck && lmrDepth < 13 && ss->staticEval + 115 + 124 * lmrDepth <= alpha)
                     continue;
 
                 lmrDepth = std::max(lmrDepth, 0);
@@ -1466,7 +1468,7 @@ Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth) {
         if (bestValue > alpha)
             alpha = bestValue;
 
-        futilityBase = ss->staticEval + 200;
+        futilityBase = ss->staticEval + 195;
     }
 
     const PieceToHistory* contHist[] = {(ss - 1)->continuationHistory,
