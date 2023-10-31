@@ -47,6 +47,26 @@
 
 namespace Stockfish {
 
+int TUNE_deltaDenom = 15335;
+int TUNE_optUsNum = 103;
+int TUNE_optUsNumAvgOffset = 33;
+int TUNE_optNotUsNum = 116;
+int TUNE_optNotUsNumAvgOffset = 40;
+int TUNE_optUsDenomAvgOffset = 34;
+int TUNE_optUsDenomOffset = 119;
+int TUNE_optNotUsDenomAvgOffset = 12;
+int TUNE_optNotUsDenomOffset = 123;
+
+TUNE(SetRange(7667, 30670), TUNE_deltaDenom);
+TUNE(SetRange(0, 206), TUNE_optUsNum);
+TUNE(SetRange(0, 66), TUNE_optUsNumAvgOffset);
+TUNE(SetRange(0, 232), TUNE_optNotUsNum);
+TUNE(SetRange(0, 80), TUNE_optNotUsNumAvgOffset);
+TUNE(SetRange(0, 68), TUNE_optUsDenomAvgOffset);
+TUNE(SetRange(0, 238), TUNE_optUsDenomOffset);
+TUNE(SetRange(0, 24), TUNE_optNotUsDenomAvgOffset);
+TUNE(SetRange(0, 246), TUNE_optNotUsDenomOffset);
+
 namespace Search {
 
 LimitsType Limits;
@@ -364,13 +384,15 @@ void Thread::search() {
 
             // Reset aspiration window starting size
             Value avg = rootMoves[pvIdx].averageScore;
-            delta     = Value(10) + int(avg) * avg / 15335;
+            delta     = Value(10) + int(avg) * avg / TUNE_deltaDenom;
             alpha     = std::max(avg - delta, -VALUE_INFINITE);
             beta      = std::min(avg + delta, VALUE_INFINITE);
 
             // Adjust optimism based on root move's averageScore (~4 Elo)
-            optimism[us]  = 103 * (avg + 33) / (std::abs(avg + 34) + 119);
-            optimism[~us] = -116 * (avg + 40) / (std::abs(avg + 12) + 123);
+            optimism[us]  = TUNE_optUsNum * (avg + TUNE_optUsNumAvgOffset) /
+              (std::abs(avg + TUNE_optUsDenomAvgOffset) + TUNE_optUsDenomOffset);
+            optimism[~us] = -TUNE_optNotUsNum * (avg + TUNE_optNotUsNumAvgOffset) /
+              (std::abs(avg + TUNE_optNotUsDenomAvgOffset) + TUNE_optNotUsDenomOffset);
 
             // Start with a small aspiration window and, in the case of a fail
             // high/low, re-search with a bigger window until we don't fail
