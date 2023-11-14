@@ -47,6 +47,19 @@
 
 namespace Stockfish {
 
+int TUNE_sbDepthMult = 364;
+int TUNE_sbDepthOffset = 438;
+int TUNE_sbDepthMin = 1501;
+int TUNE_smDepthMult = 452;
+int TUNE_smDepthOffset = 452;
+int TUNE_smDepthMin = 1478;
+TUNE(SetRange(164, 564), TUNE_sbDepthMult);
+TUNE(SetRange(238, 638), TUNE_sbDepthOffset);
+TUNE(SetRange(1201, 1801), TUNE_sbDepthMin);
+TUNE(SetRange(252, 652), TUNE_smDepthMult);
+TUNE(SetRange(252, 652), TUNE_smDepthOffset);
+TUNE(SetRange(1178, 1778), TUNE_smDepthMin);
+
 namespace Search {
 
 LimitsType Limits;
@@ -94,10 +107,14 @@ constexpr int futility_move_count(bool improving, Depth depth) {
 }
 
 // History and stats update bonus, based on depth
-int stat_bonus(Depth d) { return std::min(364 * d - 438, 1501); }
+int stat_bonus(Depth d) {
+  return std::min(TUNE_sbDepthMult * d - TUNE_sbDepthOffset, TUNE_sbDepthMin);
+}
 
 // History and stats update malus, based on depth
-int stat_malus(Depth d) { return std::min(452 * d - 452, 1478); }
+int stat_malus(Depth d) {
+  return std::min(TUNE_smDepthMult * d - TUNE_smDepthOffset, TUNE_smDepthMin);
+}
 
 // Add a small random component to draw evaluations to avoid 3-fold blindness
 Value value_draw(const Thread* thisThread) {
