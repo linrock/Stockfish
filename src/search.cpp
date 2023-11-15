@@ -47,12 +47,12 @@
 
 namespace Stockfish {
 
-int TUNE_sbDepthMult = 364;
-int TUNE_sbDepthOffset = 438;
-int TUNE_sbDepthMin = 1501;
-int TUNE_smDepthMult = 452;
-int TUNE_smDepthOffset = 452;
-int TUNE_smDepthMin = 1478;
+int TUNE_sbDepthMult = 413;
+int TUNE_sbDepthOffset = 514;
+int TUNE_sbDepthMin = 1672;
+int TUNE_smDepthMult = 566;
+int TUNE_smDepthOffset = 387;
+int TUNE_smDepthMin = 1282;
 TUNE(SetRange(164, 564), TUNE_sbDepthMult);
 TUNE(SetRange(238, 638), TUNE_sbDepthOffset);
 TUNE(SetRange(1201, 1801), TUNE_sbDepthMin);
