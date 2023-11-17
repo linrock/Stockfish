@@ -53,22 +53,13 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
-  int TUNE_blendOptMult = 64;
-  int TUNE_blendNnueMult = 16;
-  TUNE(SetRange(0, 256), TUNE_blendOptMult);
-  TUNE(SetRange(0, 256), TUNE_blendNnueMult);
-
-  int TUNE_nnueNpmMult = 16;
-  int TUNE_optNpmMult = 16;
-  TUNE(SetRange(0, 64), TUNE_nnueNpmMult);
-  TUNE(SetRange(0, 64), TUNE_optNpmMult);
-
-  int TUNE_nnueNpmBase = 915;
-  int TUNE_nnuePc = 9;
-  int TUNE_optNpmBase = 154;
-  TUNE(SetRange(515, 1315), TUNE_nnueNpmBase);
-  TUNE(SetRange(-23, 41), TUNE_nnuePc);
-  TUNE(SetRange(0, 308), TUNE_optNpmBase);
+  constexpr int TUNE_blendOptMult = 69;
+  constexpr int TUNE_blendNnueMult = 1;
+  constexpr int TUNE_nnueNpmMult = 15;
+  constexpr int TUNE_optNpmMult = 20;
+  constexpr int TUNE_nnueNpmBase = 992;
+  constexpr int TUNE_nnuePc = 9;
+  constexpr int TUNE_optNpmBase = 74;
 
 namespace Eval {
 
