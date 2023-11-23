@@ -47,23 +47,14 @@
 
 namespace Stockfish {
 
-int TUNE_sbDepthMult = 364;
-int TUNE_sbDepthOffset = 438;
-int TUNE_sbDepthMin = 1501;
-int TUNE_smDepthMult = 452;
-int TUNE_smDepthOffset = 452;
-int TUNE_smDepthMin = 1478;
-TUNE(SetRange(164, 564), TUNE_sbDepthMult);
-TUNE(SetRange(238, 638), TUNE_sbDepthOffset);
-TUNE(SetRange(1201, 1801), TUNE_sbDepthMin);
-TUNE(SetRange(252, 652), TUNE_smDepthMult);
-TUNE(SetRange(252, 652), TUNE_smDepthOffset);
-TUNE(SetRange(1178, 1778), TUNE_smDepthMin);
-
-        int TUNE_ssDenomOffset = 10216;
-        int TUNE_ssDenomDepthMult = 3855;
-        TUNE(SetRange(5108, 20432), TUNE_ssDenomOffset);
-        TUNE(SetRange(1927, 7710), TUNE_ssDenomDepthMult);
+constexpr int TUNE_sbDepthMult = 407;
+constexpr int TUNE_sbDepthOffset = 425;
+constexpr int TUNE_sbDepthMin = 1582;
+constexpr int TUNE_smDepthMult = 535;
+constexpr int TUNE_smDepthOffset = 410;
+constexpr int TUNE_smDepthMin = 1435;
+constexpr int TUNE_ssDenomOffset = 10375;
+constexpr int TUNE_ssDenomDepthMult = 4622;
     
 namespace Search {
 
