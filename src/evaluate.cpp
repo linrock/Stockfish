@@ -53,6 +53,21 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
+    int TUNE_nnueNpmBase = 915;
+    int TUNE_nnuePc = 9;
+    int TUNE_optNpmBase = 154;
+    TUNE(SetRange(615, 1215), TUNE_nnueNpmBase);
+    TUNE(SetRange(-23, 41), TUNE_nnuePc);
+    TUNE(SetRange(0, 308), TUNE_optNpmBase);
+
+    int TUNE_ncMult = 32;
+    int TUNE_seMult = 32;
+    TUNE(SetRange(0, 64), TUNE_ncMult);
+    TUNE(SetRange(0, 64), TUNE_seMult);
+
+    int TUNE_shufDenom = 214;
+    TUNE(SetRange(200, 400), TUNE_shufDenom);
+
 namespace Eval {
 
 std::string currentEvalFileName = "None";
@@ -164,29 +179,21 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm) + (int(pos.key() & 7) - 3);
 
-    bool lazy = abs(simpleEval) >= RookValue + KnightValue + 16 * shuffling * shuffling
-                                     + abs(pos.this_thread()->bestValue)
-                                     + abs(pos.this_thread()->rootSimpleEval);
-
-    if (lazy)
-        v = Value(simpleEval);
-    else
-    {
         int   nnueComplexity;
         Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
         Value optimism = pos.this_thread()->optimism[stm];
+        int complexity = TUNE_ncMult * nnueComplexity + TUNE_seMult * abs(simpleEval - nnue);
 
         // Blend optimism and eval with nnue complexity and material imbalance
-        optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) / 512;
-        nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
+        optimism += optimism * complexity / 16384;
+        nnue -= nnue * complexity / 1048576;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
-    }
+        v       = (nnue * (TUNE_nnueNpmBase + npm + TUNE_nnuePc * pos.count<PAWN>()) + optimism * (TUNE_optNpmBase + npm)) / 1024;
 
     // Damp down the evaluation linearly when shuffling
-    v = v * (200 - shuffling) / 214;
+    v = v * (200 - shuffling) / TUNE_shufDenom;
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
