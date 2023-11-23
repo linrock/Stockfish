@@ -53,6 +53,17 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
+    int TUNE_lazyOffset = 0;
+    int TUNE_nnueNpmBase = 915;
+    int TUNE_nnuePc = 9;
+    int TUNE_optNpmBase = 154;
+    int TUNE_shufDenom = 214;
+    TUNE(SetRange(-1024, 1024), TUNE_lazyOffset);
+    TUNE(SetRange(615, 1215), TUNE_nnueNpmBase);
+    TUNE(SetRange(-23, 41), TUNE_nnuePc);
+    TUNE(SetRange(0, 308), TUNE_optNpmBase);
+    TUNE(SetRange(201, 400), TUNE_shufDenom);
+
 namespace Eval {
 
 std::string currentEvalFileName = "None";
@@ -164,9 +175,10 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm) + (int(pos.key() & 7) - 3);
 
-    bool lazy = abs(simpleEval) >= RookValue + KnightValue + 16 * shuffling * shuffling
+    bool lazy = abs(simpleEval) >= RookValue + KnightValue
                                      + abs(pos.this_thread()->bestValue)
-                                     + abs(pos.this_thread()->rootSimpleEval);
+                                     + abs(pos.this_thread()->rootSimpleEval)
+                                     + TUNE_lazyOffset;
 
     if (lazy)
         v = Value(simpleEval);
@@ -182,11 +194,11 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        v       = (nnue * (TUNE_nnueNpmBase + npm + TUNE_nnuePc * pos.count<PAWN>()) + optimism * (TUNE_optNpmBase + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
-    v = v * (200 - shuffling) / 214;
+    v = v * (200 - shuffling) / TUNE_shufDenom;
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
