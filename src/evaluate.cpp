@@ -53,6 +53,19 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
+    int TUNE_ncMult = 32;
+    TUNE(SetRange(0, 64), TUNE_ncMult);
+
+    int TUNE_optDenom = 16384;
+    int TUNE_nnueDenom = 1048576;
+    TUNE(SetRange(8192, 32768), TUNE_optDenom);
+    TUNE(SetRange(524288, 2097152), TUNE_nnueDenom);
+
+    int TUNE_nnueNpmBase = 915;
+    int TUNE_optNpmBase = 154;
+    TUNE(SetRange(615, 1215), TUNE_nnueNpmBase);
+    TUNE(SetRange(0, 308), TUNE_optNpmBase);
+
 namespace Eval {
 
 std::string currentEvalFileName = "None";
@@ -176,13 +189,14 @@ Value Eval::evaluate(const Position& pos) {
         Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
         Value optimism = pos.this_thread()->optimism[stm];
+        int complexity = TUNE_ncMult * nnueComplexity + (64 - TUNE_ncMult) * abs(simpleEval - nnue);
 
         // Blend optimism and eval with nnue complexity and material imbalance
-        optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) / 512;
-        nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
+        optimism += optimism * complexity / TUNE_optDenom;
+        nnue -= nnue * complexity / TUNE_nnueDenom;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        v       = (nnue * (TUNE_nnueNpmBase + npm + 9 * pos.count<PAWN>()) + optimism * (TUNE_optNpmBase + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
