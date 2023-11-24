@@ -166,7 +166,8 @@ Value Eval::evaluate(const Position& pos) {
 
     bool lazy = abs(simpleEval) >= RookValue + KnightValue + 16 * shuffling * shuffling
                                      + abs(pos.this_thread()->bestValue)
-                                     + abs(pos.this_thread()->rootSimpleEval);
+                                     + abs(pos.this_thread()->rootSimpleEval)
+                                     - 529;
 
     if (lazy)
         v = Value(simpleEval);
@@ -182,11 +183,11 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        v       = (nnue * (1164 + npm + 12 * pos.count<PAWN>()) + optimism * (202 + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
-    v = v * (200 - shuffling) / 214;
+    v = v * (200 - shuffling) / 267;
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
