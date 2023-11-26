@@ -53,6 +53,24 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
+int TUNE_pawnValue = 208, TUNE_knightValue = 781, TUNE_bishopValue = 825, TUNE_rookValue = 1276, TUNE_queenValue = 2538;
+TUNE(TUNE_pawnValue, TUNE_knightValue, TUNE_bishopValue, TUNE_rookValue, TUNE_queenValue);
+Value PawnValue = Value(TUNE_pawnValue),
+      KnightValue = Value(TUNE_knightValue),
+      BishopValue = Value(TUNE_bishopValue),
+      RookValue = Value(TUNE_rookValue),
+      QueenValue = Value(TUNE_queenValue);
+
+Value PieceValue[PIECE_NB] = {
+  VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO,
+  VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO};
+
+    int TUNE_npmBase = 915;
+    TUNE(SetRange(615, 1215), TUNE_npmBase);
+
+    int TUNE_optBase = 154;
+    TUNE(SetRange(0, 308), TUNE_optBase);
+
 namespace Eval {
 
 std::string currentEvalFileName = "None";
@@ -164,7 +182,7 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm) + (int(pos.key() & 7) - 3);
 
-    bool lazy = abs(simpleEval) >= RookValue + KnightValue + 16 * shuffling * shuffling
+    bool lazy = abs(simpleEval) >= 1276 + 781 + 16 * shuffling * shuffling
                                      + abs(pos.this_thread()->bestValue)
                                      + abs(pos.this_thread()->rootSimpleEval);
 
@@ -182,7 +200,8 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        v       = (nnue * (TUNE_npmBase + npm + 9 * pos.count<PAWN>()) +
+                   optimism * (TUNE_optBase + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
