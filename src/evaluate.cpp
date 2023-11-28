@@ -53,8 +53,7 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
-int TUNE_pawnValue = 208, TUNE_knightValue = 781, TUNE_bishopValue = 825, TUNE_rookValue = 1276, TUNE_queenValue = 2538;
-TUNE(TUNE_pawnValue, TUNE_knightValue, TUNE_bishopValue, TUNE_rookValue, TUNE_queenValue);
+constexpr int TUNE_pawnValue = 228, TUNE_knightValue = 1086, TUNE_bishopValue = 471, TUNE_rookValue = 1543, TUNE_queenValue = 2388;
 Value PawnValue = Value(TUNE_pawnValue),
       KnightValue = Value(TUNE_knightValue),
       BishopValue = Value(TUNE_bishopValue),
@@ -65,11 +64,8 @@ Value PieceValue[PIECE_NB] = {
   VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO,
   VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO};
 
-    int TUNE_npmBase = 915;
-    TUNE(SetRange(615, 1215), TUNE_npmBase);
-
-    int TUNE_optBase = 154;
-    TUNE(SetRange(0, 308), TUNE_optBase);
+    constexpr int TUNE_npmBase = 920;
+    constexpr int TUNE_optBase = 166;
 
 namespace Eval {
 
