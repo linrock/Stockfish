@@ -53,17 +53,11 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
-  int TUNE_shufMult = 16;
-  TUNE(SetRange(-16, 48), TUNE_shufMult);
-  int TUNE_lazyOffset = 0;
-  TUNE(SetRange(-2048, 2048), TUNE_lazyOffset);
-
-  int TUNE_nnueNpmBase = 915;
-  int TUNE_nnuePc = 9;
-  int TUNE_optNpmBase = 154;
-  TUNE(SetRange(515, 1315), TUNE_nnueNpmBase);
-  TUNE(SetRange(-23, 41), TUNE_nnuePc);
-  TUNE(SetRange(0, 308), TUNE_optNpmBase);
+  constexpr int TUNE_shufMult = 20;
+  constexpr int TUNE_lazyOffset = 100;
+  constexpr int TUNE_nnueNpmBase = 958;
+  constexpr int TUNE_nnuePc = 5;
+  constexpr int TUNE_optNpmBase = 124;
 
 namespace Eval {
 
