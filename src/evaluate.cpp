@@ -53,6 +53,13 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
+    int TUNE_dampNum = 4000;
+    int TUNE_dampShufMult = 20;
+    int TUNE_dampDenom = 4280;
+    TUNE(SetRange(0, 8000), TUNE_dampNum);
+    TUNE(SetRange(0, 40), TUNE_dampShufMult);
+    TUNE(SetRange(2140, 8560), TUNE_dampDenom);
+
 namespace Eval {
 
 std::string currentEvalFileName = "None";
@@ -186,7 +193,7 @@ Value Eval::evaluate(const Position& pos) {
     }
 
     // Damp down the evaluation linearly when shuffling
-    v = v * (200 - shuffling) / 214;
+    v = v * (TUNE_dampNum - TUNE_dampShufMult * shuffling) / TUNE_dampDenom;
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
