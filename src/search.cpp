@@ -711,11 +711,15 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
     // Step 6. Static evaluation of the position
     if (ss->inCheck)
     {
-        // Skip early pruning when in check
-        ss->staticEval = eval = VALUE_NONE;
-        if ((ss->staticEval = eval = tte->eval()) == VALUE_NONE)
-            ss->staticEval = eval = evaluate(pos);
+        // ss->staticEval = eval = VALUE_NONE;
+        ss->staticEval = eval = evaluate(pos);
+
+        // if ((ss->staticEval = eval = tte->eval()) == VALUE_NONE)
+        //     ss->staticEval = eval = evaluate(pos);
+
         improving             = false;
+
+        // Skip early pruning when in check
         goto moves_loop;
     }
     else if (excludedMove)
