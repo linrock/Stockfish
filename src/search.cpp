@@ -580,8 +580,8 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
         // Step 2. Check for aborted search and immediate draw
         if (Threads.stop.load(std::memory_order_relaxed) || pos.is_draw(ss->ply)
             || ss->ply >= MAX_PLY)
-            return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos)
-                                                        : value_draw(pos.this_thread());
+            return (ss->ply >= MAX_PLY) ? evaluate(pos)
+                                        : value_draw(pos.this_thread());
 
         // Step 3. Mate distance pruning. Even if we mate at the next move our score
         // would be at best mate_in(ss->ply + 1), but if alpha is already bigger because
@@ -715,6 +715,8 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
     {
         // Skip early pruning when in check
         ss->staticEval = eval = VALUE_NONE;
+        if ((ss->staticEval = eval = tte->eval()) == VALUE_NONE)
+            ss->staticEval = eval = evaluate(pos);
         improving             = false;
         goto moves_loop;
     }
@@ -746,7 +748,8 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
     }
 
     // Use static evaluation difference to improve quiet move ordering (~4 Elo)
-    if (is_ok((ss - 1)->currentMove) && !(ss - 1)->inCheck && !priorCapture)
+    // if (is_ok((ss - 1)->currentMove) && !(ss - 1)->inCheck && !priorCapture)
+    if (is_ok((ss - 1)->currentMove) && !priorCapture)
     {
         int bonus = std::clamp(-13 * int((ss - 1)->staticEval + ss->staticEval), -1652, 1546);
         thisThread->mainHistory[~us][from_to((ss - 1)->currentMove)] << bonus;
@@ -1448,10 +1451,11 @@ Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth) {
         return ttValue;
 
     // Step 4. Static evaluation of the position
-    if (ss->inCheck)
-        bestValue = futilityBase = -VALUE_INFINITE;
-    else
-    {
+
+    // if (ss->inCheck)
+    //     bestValue = futilityBase = -VALUE_INFINITE;
+    // else
+    // {
         if (ss->ttHit)
         {
             // Never assume anything about values stored in TT
@@ -1482,7 +1486,7 @@ Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth) {
             alpha = bestValue;
 
         futilityBase = ss->staticEval + 182;
-    }
+    // }
 
     const PieceToHistory* contHist[] = {(ss - 1)->continuationHistory,
                                         (ss - 2)->continuationHistory};
@@ -1606,7 +1610,9 @@ Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth) {
     // Step 9. Check for mate
     // All legal moves have been searched. A special case: if we're in check
     // and no legal moves were found, it is checkmate.
-    if (ss->inCheck && bestValue == -VALUE_INFINITE)
+
+    // if (ss->inCheck && bestValue == -VALUE_INFINITE)
+    if (ss->inCheck && !moveCount)
     {
         assert(!MoveList<LEGAL>(pos).size());
 
