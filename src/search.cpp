@@ -712,10 +712,8 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
     if (ss->inCheck)
     {
         // ss->staticEval = eval = VALUE_NONE;
-        ss->staticEval = eval = evaluate(pos);
-
-        // if ((ss->staticEval = eval = tte->eval()) == VALUE_NONE)
-        //     ss->staticEval = eval = evaluate(pos);
+        if ((ss->staticEval = eval = tte->eval()) == VALUE_NONE)
+            ss->staticEval = eval = evaluate(pos);
 
         improving             = false;
 
