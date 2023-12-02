@@ -580,8 +580,10 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
         // Step 2. Check for aborted search and immediate draw
         if (Threads.stop.load(std::memory_order_relaxed) || pos.is_draw(ss->ply)
             || ss->ply >= MAX_PLY)
-            return (ss->ply >= MAX_PLY) ? evaluate(pos)
-                                        : value_draw(pos.this_thread());
+            return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos)
+                                                        : value_draw(pos.this_thread());
+            // return (ss->ply >= MAX_PLY) ? evaluate(pos)
+            //                             : value_draw(pos.this_thread());
 
         // Step 3. Mate distance pruning. Even if we mate at the next move our score
         // would be at best mate_in(ss->ply + 1), but if alpha is already bigger because
@@ -712,10 +714,8 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
     if (ss->inCheck)
     {
         // ss->staticEval = eval = VALUE_NONE;
-        ss->staticEval = eval = evaluate(pos);
-
-        // if ((ss->staticEval = eval = tte->eval()) == VALUE_NONE)
-        //     ss->staticEval = eval = evaluate(pos);
+        if ((ss->staticEval = eval = tte->eval()) == VALUE_NONE)
+            ss->staticEval = eval = evaluate(pos);
 
         improving             = false;
 
@@ -1429,8 +1429,8 @@ Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth) {
 
     // Step 2. Check for an immediate draw or maximum ply reached
     if (pos.is_draw(ss->ply) || ss->ply >= MAX_PLY)
-        return (ss->ply >= MAX_PLY) ? evaluate(pos) : VALUE_DRAW;
-        // return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos) : VALUE_DRAW;
+        return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos) : VALUE_DRAW;
+        // return (ss->ply >= MAX_PLY) ? evaluate(pos) : VALUE_DRAW;
 
     assert(0 <= ss->ply && ss->ply < MAX_PLY);
 
