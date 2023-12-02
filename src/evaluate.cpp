@@ -168,7 +168,7 @@ Value Eval::evaluate(const Position& pos) {
                                      + abs(pos.this_thread()->bestValue)
                                      + abs(pos.this_thread()->rootSimpleEval);
 
-    if (lazy && !pos.checkers())
+    if (lazy)
         v = Value(simpleEval);
     else
     {
