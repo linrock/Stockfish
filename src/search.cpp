@@ -769,8 +769,6 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
               : (ss - 4)->staticEval != VALUE_NONE ? ss->staticEval > (ss - 4)->staticEval
                                                    : true;
 
-    improving = ss->staticEval > (ss - 2)->staticEval;
-
     // Step 7. Razoring (~1 Elo)
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
     // return a fail low.
