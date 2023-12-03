@@ -38,7 +38,7 @@ namespace Stockfish::Eval::NNUE {
 using FeatureSet = Features::HalfKAv2_hm;
 
 // Number of input feature dimensions after conversion
-constexpr IndexType TransformedFeatureDimensions = 2560;
+constexpr IndexType TransformedFeatureDimensions = 256;
 constexpr IndexType PSQTBuckets                  = 8;
 constexpr IndexType LayerStacks                  = 8;
 
