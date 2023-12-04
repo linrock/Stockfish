@@ -174,9 +174,10 @@ static bool write_parameters(std::ostream& stream, bool small) {
 }
 
 void hint_common_parent_position(const Position& pos) {
+    int shuffling = pos.rule50_count();
+    int simpleEval = pos.simple_eval() + (int(pos.key() & 7) - 3);
 
-    int simpleEval = pos.simple_eval();
-    if (abs(simpleEval) < 2000)
+    if (abs(simpleEval) < 2057 + 16 * shuffling * shuffling) // RookValue + KnightValue
         featureTransformerBig->hint_common_access(pos);
     else
         featureTransformerSmall->hint_common_access(pos);
