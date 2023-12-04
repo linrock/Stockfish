@@ -177,7 +177,8 @@ void hint_common_parent_position(const Position& pos) {
     int shuffling = pos.rule50_count();
     int simpleEval = pos.simple_eval() + (int(pos.key() & 7) - 3);
 
-    if (abs(simpleEval) < 2057 + 16 * shuffling * shuffling) // RookValue + KnightValue
+    // 2057 = RookValue + KnightValue
+    if (abs(simpleEval) < (2057 + 16 * shuffling * shuffling) * 105 / 100)
         featureTransformerBig->hint_common_access(pos);
     else
         featureTransformerSmall->hint_common_access(pos);
