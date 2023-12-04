@@ -173,10 +173,15 @@ static bool write_parameters(std::ostream& stream, bool small) {
     return bool(stream);
 }
 
-void hint_common_parent_position(const Position& pos) {
+void hint_common_parent_position(const Position& pos, const Value& bestValue, const Value& rootSimpleEval) {
+    int shuffling = pos.rule50_count();
+    int simpleEval = pos.simple_eval() + (int(pos.key() & 7) - 3);
+    int lazyThreshold = RookValue + KnightValue + 16 * shuffling * shuffling
+                                  + abs(bestValue)
+                                  + abs(rootSimpleEval);
+    bool lazy = abs(simpleEval) > lazyThreshold * 105 / 100;
 
-    int simpleEval = pos.simple_eval();
-    if (abs(simpleEval) < 2500)
+    if (lazy)
         featureTransformerBig->hint_common_access(pos);
     else
         featureTransformerSmall->hint_common_access(pos);

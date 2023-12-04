@@ -72,6 +72,7 @@ std::string trace(Position& pos);
 template<bool Small>
 Value evaluate(const Position& pos, bool adjusted = false, int* complexity = nullptr);
 void  hint_common_parent_position(const Position& pos);
+void  hint_common_parent_position(const Position& pos, const Value& bestValue, const Value& rootSimpleEval);
 
 bool load_eval(const std::string name, std::istream& stream, bool small);
 bool save_eval(std::ostream& stream, bool small);

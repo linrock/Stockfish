@@ -720,7 +720,11 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
     {
         // Providing the hint that this node's accumulator will be used often
         // brings significant Elo gain (~13 Elo).
-        Eval::NNUE::hint_common_parent_position(pos);
+        Eval::NNUE::hint_common_parent_position(
+          pos,
+          thisThread->bestValue,
+          thisThread->rootSimpleEval
+        );
         eval = ss->staticEval;
     }
     else if (ss->ttHit)
@@ -730,7 +734,11 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
         if (eval == VALUE_NONE)
             ss->staticEval = eval = evaluate(pos);
         else if (PvNode)
-            Eval::NNUE::hint_common_parent_position(pos);
+            Eval::NNUE::hint_common_parent_position(
+              pos,
+              thisThread->bestValue,
+              thisThread->rootSimpleEval
+            );
 
         // ttValue can be used as a better position evaluation (~7 Elo)
         if (ttValue != VALUE_NONE && (tte->bound() & (ttValue > eval ? BOUND_LOWER : BOUND_UPPER)))
@@ -890,7 +898,11 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
                 }
             }
 
-        Eval::NNUE::hint_common_parent_position(pos);
+        Eval::NNUE::hint_common_parent_position(
+          pos,
+          thisThread->bestValue,
+          thisThread->rootSimpleEval
+        );
     }
 
 moves_loop:  // When in check, search starts here
