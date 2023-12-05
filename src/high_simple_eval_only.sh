@@ -14,7 +14,7 @@ setoption name Use NNUE value false
 setoption name Threads value 1
 setoption name Hash value 1024
 isready
-transform simple_eval_only \
+transform high_simple_eval \
   input_file ${input_binpack} \
   output_file ${input_binpack}.high-simple-eval.binpack
 quit"
