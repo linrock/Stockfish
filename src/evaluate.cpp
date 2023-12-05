@@ -169,36 +169,30 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval() + (int(pos.key() & 7) - 3);
 
-    int lazyThreshold = RookValue + KnightValue + 16 * shuffling * shuffling
-                                  + abs(pos.this_thread()->bestValue)
-                                  + abs(pos.this_thread()->rootSimpleEval);
+    // int lazyThreshold = RookValue + KnightValue + 16 * shuffling * shuffling
+    //                               + abs(pos.this_thread()->bestValue)
+    //                               + abs(pos.this_thread()->rootSimpleEval);
+    int lazyThreshold = 1800;
 
-    bool lazy = abs(simpleEval) > lazyThreshold * 105 / 100;
+    int accBias = pos.state()->accumulatorBig.computed[0]
+                + pos.state()->accumulatorBig.computed[1]
+                - pos.state()->accumulatorSmall.computed[0]
+                - pos.state()->accumulatorSmall.computed[1];
 
-    if (lazy)
-        v = Value(simpleEval);
-    else
-    {
-        int accBias = pos.state()->accumulatorBig.computed[0]
-                    + pos.state()->accumulatorBig.computed[1]
-                    - pos.state()->accumulatorSmall.computed[0]
-                    - pos.state()->accumulatorSmall.computed[1];
+    int  nnueComplexity;
+    bool smallNet = abs(simpleEval) > lazyThreshold * (90 + accBias) / 100;
 
-        int  nnueComplexity;
-        bool smallNet = abs(simpleEval) > lazyThreshold * (90 + accBias) / 100;
+    Value nnue = smallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
+                          : NNUE::evaluate<false>(pos, true, &nnueComplexity);
 
-        Value nnue = smallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
-                              : NNUE::evaluate<false>(pos, true, &nnueComplexity);
+    Value optimism = pos.this_thread()->optimism[stm];
 
-        Value optimism = pos.this_thread()->optimism[stm];
+    // Blend optimism and eval with nnue complexity and material imbalance
+    optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) / 512;
+    nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
-        // Blend optimism and eval with nnue complexity and material imbalance
-        optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) / 512;
-        nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
-
-        int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
-    }
+    int npm = pos.non_pawn_material() / 64;
+    v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
 
     // Damp down the evaluation linearly when shuffling
     v = v * (200 - shuffling) / 214;
