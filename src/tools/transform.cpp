@@ -628,8 +628,11 @@ namespace Stockfish::Tools
                     pos.sfen_pack(ps.sfen, false);
 
                     int absSimpleEval = abs(
-                        PawnValueEg * (pos.count<PAWN>(WHITE) - pos.count<PAWN>(BLACK))
-                        + (pos.non_pawn_material(WHITE) - pos.non_pawn_material(BLACK))
+                        208 * (pos.count<PAWN>(WHITE) - pos.count<PAWN>(BLACK)) +
+                        781 * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK)) +
+                        825 * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK)) +
+                        1276 * (pos.count<ROOK>(WHITE) - pos.count<ROOK>(BLACK)) +
+                        2538 * (pos.count<QUEEN>(WHITE) - pos.count<QUEEN>(BLACK))
                     );
                     if (absSimpleEval > 2000) {
                         ps.padding = 0;
