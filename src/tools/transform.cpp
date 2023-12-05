@@ -629,78 +629,16 @@ namespace Stockfish::Tools
                 for(auto& ps : psv)
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
-                    bool should_skip_position = false;
-                    if (pos.checkers()) {
-                        // Skip if in check
-                        if (debug_print) {
-                            sync_cout << "[debug] " << pos.fen() << sync_endl
-                                      << "[debug] Position is in check" << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_position_in_check.fetch_add(1);
-                        should_skip_position = true;
-                    } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
-                        // Skip if the provided move is already a capture or promotion
-                        if (debug_print) {
-                            sync_cout << "[debug] " << pos.fen() << sync_endl
-                                      << "[debug] Provided move is capture or promo: "
-                                      << UCI::move((Stockfish::Move)ps.move, false)
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_move_already_is_capture.fetch_add(1);
-                        should_skip_position = true;
-		    } else if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
-                        num_standard_startpos.fetch_add(1);
-                        should_skip_position = true;
-                    } else {
-                        auto [search_val, pvs] = Search::search(pos, 6, 2);
-                        if (!pvs.empty() && th.rootMoves.size() > 0) {
-                            auto best_move = th.rootMoves[0].pv[0];
-                            bool more_than_one_valid_move = th.rootMoves.size() > 1;
-                            if (debug_print) {
-                                sync_cout << "[debug] " << pos.fen() << sync_endl;
-                                sync_cout << "[debug] Main PV move:    "
-                                          << UCI::move(best_move, false) << " "
-                                          << th.rootMoves[0].score << " " << sync_endl;
-                                if (more_than_one_valid_move) {
-                                    sync_cout << "[debug] 2nd PV move:     "
-                                              << UCI::move(th.rootMoves[1].pv[0], false) << " "
-                                              << th.rootMoves[1].score << " " << sync_endl;
-                                } else {
-                                    sync_cout << "[debug] The only valid move" << sync_endl;
-                                }
-                            }
-                            if (pos.capture_or_promotion(best_move)) {
-                                // skip if multipv 1st line bestmove is a capture or promo
-                                if (debug_print) {
-                                    sync_cout << "[debug] Move is capture or promo: " << UCI::move(best_move, false)
-                                              << sync_endl
-                                              << "[debug] 1st best move at depth 6 multipv 2" << sync_endl
-                                              << "[debug]" << sync_endl;
-                                }
-                                num_capture_or_promo_skipped_multipv_cap0.fetch_add(1);
-                                should_skip_position = true;
-                            } else if (more_than_one_valid_move && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
-                                // skip if multipv 2nd line bestmove is a capture or promo
-                                if (debug_print) {
-                                    sync_cout << "[debug] Move is capture or promo: " << UCI::move(best_move, false)
-                                              << sync_endl
-                                              << "[debug] 2nd best move at depth 6 multipv 2" << sync_endl
-                                              << "[debug]" << sync_endl;
-                                }
-                                num_capture_or_promo_skipped_multipv_cap1.fetch_add(1);
-                                should_skip_position = true;
-                            }
-			}
-                    }
                     pos.sfen_pack(ps.sfen, false);
-                    // nnue-pytorch training data loader skips positions with score VALUE_NONE
-                    if (should_skip_position)
-                        ps.score = 32002; // VALUE_NONE
-                    ps.padding = 0;
 
-                    out.write(th.id(), ps);
+                    int absSimpleEval = abs(
+                        PawnValueEg * (pos.count<PAWN>(WHITE) - pos.count<PAWN>(BLACK))
+                        + (pos.non_pawn_material(WHITE) - pos.non_pawn_material(BLACK))
+                    );
+                    if (absSimpleEval > 2000) {
+                        ps.padding = 0;
+                        out.write(th.id(), ps);
+                    }
 
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 10000 == 0) {
@@ -1170,7 +1108,7 @@ namespace Stockfish::Tools
         const std::map<std::string, CommandFunc> subcommands = {
             { "nudged_static", &nudged_static },
             { "rescore", &rescore },
-            { "filter_335a9b2d8a80", &filter_335a9b2d8a80 },
+            { "simple_eval_only", &filter_335a9b2d8a80 },
             { "minimize_binpack", &minimize_binpack }
         };
 
