@@ -608,11 +608,7 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
-        std::atomic<std::uint64_t> num_standard_startpos = 0;
-        std::atomic<std::uint64_t> num_position_in_check = 0;
-        std::atomic<std::uint64_t> num_move_already_is_capture = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap0 = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap1 = 0;
+        std::atomic<std::uint64_t> num_high_simple_eval = 0;
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
@@ -638,23 +634,13 @@ namespace Stockfish::Tools
                     if (absSimpleEval > 2000) {
                         ps.padding = 0;
                         out.write(th.id(), ps);
+                        auto se = num_high_simple_eval.fetch_add(1) + 1;
                     }
 
                     auto p = num_processed.fetch_add(1) + 1;
-                    if (p % 10000 == 0) {
-                        auto c = num_position_in_check.load();
-                        auto a = num_move_already_is_capture.load();
-                        auto s = num_standard_startpos.load();
-                        auto multipv_cap0 = num_capture_or_promo_skipped_multipv_cap0.load();
-                        auto multipv_cap1 = num_capture_or_promo_skipped_multipv_cap1.load();
-                        sync_cout << "Processed " << p << " positions. Skipped " << (c + a + s + multipv_cap0 + multipv_cap1) << " positions."
-                                  << sync_endl
-                                  << "  Static filter: " << (a + c + s)
-                                  << " (capture or promo: " << a << ", in check: " << c << ", startpos: " << s << ")"
-                                  << sync_endl
-                                  << "  MultiPV filter: " << (multipv_cap0 + multipv_cap1)
-                                  << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ")"
-                                  << " depth 6 multipv 2" << sync_endl;
+                    if (p % 100000 == 0) {
+                        auto se = num_high_simple_eval.load();
+                        sync_cout << "Processed " << p << " positions. Only " << se << " high-simple-eval positions." << sync_endl;
                     }
                 }
             }
@@ -1108,7 +1094,7 @@ namespace Stockfish::Tools
         const std::map<std::string, CommandFunc> subcommands = {
             { "nudged_static", &nudged_static },
             { "rescore", &rescore },
-            { "simple_eval_only", &filter_335a9b2d8a80 },
+            { "high_simple_eval", &filter_335a9b2d8a80 },
             { "minimize_binpack", &minimize_binpack }
         };
 
