@@ -53,12 +53,12 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
-    int TUNE_dampNum = 4000;
-    int TUNE_dampShufMult = 20;
-    int TUNE_dampDenom = 4280;
-    TUNE(SetRange(0, 8000), TUNE_dampNum);
-    TUNE(SetRange(0, 40), TUNE_dampShufMult);
-    TUNE(SetRange(2140, 8560), TUNE_dampDenom);
+    int TUNE_dampNum = 5602;
+    int TUNE_dampShufMult = 21;
+    int TUNE_dampDenom = 6248;
+    TUNE(SetRange(0, 11204), TUNE_dampNum);
+    TUNE(SetRange(0, 42), TUNE_dampShufMult);
+    TUNE(SetRange(3124, 12496), TUNE_dampDenom);
 
 namespace Eval {
 
