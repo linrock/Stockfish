@@ -169,9 +169,8 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval() + (int(pos.key() & 7) - 3);
 
-    int   lazyThreshold = 1800;
-
-    bool smallNet = abs(simpleEval) > lazyThreshold;
+    int   lazyThreshold = 1500;
+    bool  smallNet = abs(simpleEval) > lazyThreshold;
 
     int   nnueComplexity;
     Value nnue = smallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
