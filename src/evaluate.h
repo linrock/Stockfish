@@ -39,7 +39,7 @@ extern std::string currentEvalFileName[2];
 // for the build process (profile-build and fishtest) to work. Do not change the
 // name of the macro, as it is used in the Makefile.
 #define EvalFileDefaultNameBig   "nn-0000000000a0.nnue"
-#define EvalFileDefaultNameSmall "nn-363be2a1011f.nnue"
+#define EvalFileDefaultNameSmall "nn-cab34908e684.nnue" // S2 ep499 perm leela-v2 + 87G hse
 
 namespace NNUE {
 
