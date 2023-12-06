@@ -173,8 +173,8 @@ Value Eval::evaluate(const Position& pos) {
                                   + abs(pos.this_thread()->bestValue)
                                   + abs(pos.this_thread()->rootSimpleEval);
 
-    // bool lazy = abs(simpleEval) > lazyThreshold * 110 / 100;
-    bool lazy = abs(simpleEval) > lazyThreshold + 250;
+    // bool lazy = abs(simpleEval) > lazyThreshold + 250;
+    bool lazy = abs(simpleEval) > lazyThreshold * 105 / 100;
 
     if (lazy)
         v = Value(simpleEval);
@@ -186,7 +186,7 @@ Value Eval::evaluate(const Position& pos) {
                     - pos.state()->accumulatorSmall.computed[1];
 
         int  nnueComplexity;
-        bool smallNet = abs(simpleEval) > lazyThreshold * (90 + accBias) / 100;
+        bool smallNet = abs(simpleEval) > lazyThreshold * (80 + accBias) / 100;
 
         Value nnue = smallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
                               : NNUE::evaluate<false>(pos, true, &nnueComplexity);
