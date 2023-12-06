@@ -186,7 +186,7 @@ Value Eval::evaluate(const Position& pos) {
                     - pos.state()->accumulatorSmall.computed[1];
 
         int  nnueComplexity;
-        bool smallNet = abs(simpleEval) > lazyThreshold * (80 + accBias) / 100;
+        bool smallNet = abs(simpleEval) > lazyThreshold * (75 + accBias) / 100;
 
         Value nnue = smallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
                               : NNUE::evaluate<false>(pos, true, &nnueComplexity);
