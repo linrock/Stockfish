@@ -173,7 +173,8 @@ Value Eval::evaluate(const Position& pos) {
                                   + abs(pos.this_thread()->bestValue)
                                   + abs(pos.this_thread()->rootSimpleEval);
 
-    bool lazy = abs(simpleEval) > lazyThreshold * 110 / 100;
+    // bool lazy = abs(simpleEval) > lazyThreshold * 110 / 100;
+    bool lazy = abs(simpleEval) > lazyThreshold + 250;
 
     if (lazy)
         v = Value(simpleEval);
