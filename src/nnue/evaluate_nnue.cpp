@@ -174,12 +174,19 @@ static bool write_parameters(std::ostream& stream, bool small) {
 }
 
 void hint_common_parent_position(const Position& pos) {
+    int simpleEval = pos.simple_eval() + (int(pos.key() & 7) - 3);
 
-    int simpleEval = pos.simple_eval();
-    if (abs(simpleEval) < 2500)
-        featureTransformerBig->hint_common_access(pos);
-    else
+    int accBias = pos.state()->accumulatorBig.computed[0]
+                + pos.state()->accumulatorBig.computed[1]
+                - pos.state()->accumulatorSmall.computed[0]
+                - pos.state()->accumulatorSmall.computed[1];
+
+    bool smallNet = abs(simpleEval) > TUNE_lazyThreshold * (TUNE_lazyThreshold2 + TUNE_accBiasMult * accBias) / 1000;
+
+    if (abs(simpleEval) > smallNet)
         featureTransformerSmall->hint_common_access(pos);
+    else
+        featureTransformerBig->hint_common_access(pos);
 }
 
 // Evaluation function. Perform differential calculation.
