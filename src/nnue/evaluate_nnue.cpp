@@ -175,7 +175,7 @@ static bool write_parameters(std::ostream& stream, bool small) {
 
 void hint_common_parent_position(const Position& pos) {
     int simpleEval    = pos.simple_eval() + (int(pos.key() & 7) - 3);
-    int lazyThreshold = 1500;
+    int lazyThreshold = 1750;
 
     if (abs(simpleEval) > lazyThreshold)
         featureTransformerSmall->hint_common_access(pos);
