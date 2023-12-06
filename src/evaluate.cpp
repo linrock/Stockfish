@@ -60,7 +60,7 @@ namespace Stockfish {
 namespace Eval {
 
 std::string currentEvalFileName[2] = {"None", "None"};
-const std::string EvFiles[2]       = {"EvalFileBig", "EvalFileSmall"};
+const std::string EvFiles[2]       = {"EvalFileBig", "EvalFile"};
 const std::string EvFileNames[2]   = {EvalFileDefaultNameBig, EvalFileDefaultNameSmall};
 
 // Tries to load a NNUE network at startup time, or when the engine
@@ -167,25 +167,19 @@ Value Eval::evaluate(const Position& pos) {
     Value v;
     Color stm        = pos.side_to_move();
     int   shuffling  = pos.rule50_count();
-    int   simpleEval = pos.simple_eval() + (int(pos.key() & 7) - 3);
+    int   simpleEval = pos.simple_eval();
 
-    int lazyThreshold = RookValue + KnightValue + 16 * shuffling * shuffling
-                                  + abs(pos.this_thread()->bestValue)
-                                  + abs(pos.this_thread()->rootSimpleEval);
+    int lazyThresholdSimpleEval = 2300;
+    int lazyThresholdSmallNet = 1500;
 
-    bool lazy = abs(simpleEval) > lazyThreshold * 105 / 100;
-
+    bool lazy = abs(simpleEval) > lazyThresholdSimpleEval;
     if (lazy)
         v = Value(simpleEval);
     else
     {
-        int accBias = pos.state()->accumulatorBig.computed[0]
-                    + pos.state()->accumulatorBig.computed[1]
-                    - pos.state()->accumulatorSmall.computed[0]
-                    - pos.state()->accumulatorSmall.computed[1];
+        bool smallNet = abs(simpleEval) > lazyThresholdSmallNet;
 
         int  nnueComplexity;
-        bool smallNet = abs(simpleEval) > lazyThreshold * (90 + accBias) / 100;
 
         Value nnue = smallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
                               : NNUE::evaluate<false>(pos, true, &nnueComplexity);
