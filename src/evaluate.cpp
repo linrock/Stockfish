@@ -169,9 +169,7 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval() + (int(pos.key() & 7) - 3);
 
-    int lazyThreshold = RookValue + KnightValue + 16 * shuffling * shuffling
-                                  + abs(pos.this_thread()->bestValue)
-                                  + abs(pos.this_thread()->rootSimpleEval);
+    int lazyThreshold = 1500;
 
     // bool lazy = abs(simpleEval) > lazyThreshold;
     bool smallNet = abs(simpleEval) > lazyThreshold;
