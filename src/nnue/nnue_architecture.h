@@ -38,13 +38,13 @@ namespace Stockfish::Eval::NNUE {
 using FeatureSet = Features::HalfKAv2_hm;
 
 // Number of input feature dimensions after conversion
-constexpr IndexType TransformedFeatureDimensions = 2560;
+constexpr IndexType TransformedFeatureDimensions = 128;
 constexpr IndexType PSQTBuckets                  = 8;
 constexpr IndexType LayerStacks                  = 8;
 
 struct Network {
     static constexpr int FC_0_OUTPUTS = 15;
-    static constexpr int FC_1_OUTPUTS = 32;
+    static constexpr int FC_1_OUTPUTS = 16;
 
     Layers::AffineTransformSparseInput<TransformedFeatureDimensions, FC_0_OUTPUTS + 1> fc_0;
     Layers::SqrClippedReLU<FC_0_OUTPUTS + 1>                                           ac_sqr_0;
