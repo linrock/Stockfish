@@ -169,20 +169,17 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval();
 
-    int lazyThresholdSimpleEval = 2300;
-    int lazyThresholdSmallNet = 1500;
+    bool lazy = abs(simpleEval) > 2600;
 
-    bool lazy = abs(simpleEval) > lazyThresholdSimpleEval;
     if (lazy)
         v = Value(simpleEval);
     else
     {
-        bool smallNet = abs(simpleEval) > lazyThresholdSmallNet;
-
+        int  useSmallNet = pos.use_small_net();
         int  nnueComplexity;
 
-        Value nnue = smallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
-                              : NNUE::evaluate<false>(pos, true, &nnueComplexity);
+        Value nnue = useSmallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
+                                 : NNUE::evaluate<false>(pos, true, &nnueComplexity);
 
         Value optimism = pos.this_thread()->optimism[stm];
 
@@ -191,7 +188,12 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        if (useSmallNet) {
+            v       = (nnue * (800 + npm + 9 * pos.count<PAWN>()) + optimism * (165 + npm)) / 1024;
+        }
+        else {
+            v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        }
     }
 
     // Damp down the evaluation linearly when shuffling

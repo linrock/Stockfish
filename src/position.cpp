@@ -1297,4 +1297,8 @@ bool Position::pos_is_ok() const {
     return true;
 }
 
+bool Position::use_small_net() const {
+  return abs(simple_eval()) > 1150;
+}
+
 }  // namespace Stockfish
