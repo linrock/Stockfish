@@ -40,8 +40,8 @@ extern std::string currentEvalFileName[2];
 // name of the macro, as it is used in the Makefile.
 #define EvalFileDefaultNameBig   "nn-0000000000a0.nnue"
 
-// L1-256 S4 ep759 perm leela-v2-106G-hse
-#define EvalFileDefaultNameSmall "nn-3097f2343a4d.nnue"
+// 256-15-16 S3 leela-v2 hse-1k-101G ep599 perm 100k
+#define EvalFileDefaultNameSmall "nn-fa971775dd5a.nnue"
 
 namespace NNUE {
 
