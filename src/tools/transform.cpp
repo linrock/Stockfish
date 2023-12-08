@@ -608,6 +608,7 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
+        std::atomic<std::uint64_t> num_skipped = 0;
         std::atomic<std::uint64_t> num_high_simple_eval = 0;
 
         Threads.execute_with_workers([&](auto& th){
@@ -627,6 +628,11 @@ namespace Stockfish::Tools
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
                     pos.sfen_pack(ps.sfen, false);
 
+                    if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
+                      num_skipped.fetch_add(1) + 1;
+                      continue;
+                    }
+
                     int absSimpleEval = abs(
                         208 * (pos.count<PAWN>(WHITE) - pos.count<PAWN>(BLACK)) +
                         781 * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK)) +
@@ -634,16 +640,17 @@ namespace Stockfish::Tools
                         1276 * (pos.count<ROOK>(WHITE) - pos.count<ROOK>(BLACK)) +
                         2538 * (pos.count<QUEEN>(WHITE) - pos.count<QUEEN>(BLACK))
                     );
-                    if (absSimpleEval > 2000) {
+                    if (absSimpleEval > 1000) {
                         ps.padding = 0;
                         out.write(th.id(), ps);
-                        auto se = num_high_simple_eval.fetch_add(1) + 1;
+                        num_high_simple_eval.fetch_add(1) + 1;
                     }
 
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 100000 == 0) {
+                        auto sk = num_skipped.load();
                         auto se = num_high_simple_eval.load();
-                        sync_cout << "Processed " << p << " positions. Only " << se << " high-simple-eval positions." << sync_endl;
+                        sync_cout << p << " positions, skipped: " << sk << ", simple eval > 1k: " << se << sync_endl;
                     }
                 }
             }
