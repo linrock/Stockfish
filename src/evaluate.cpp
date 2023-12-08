@@ -164,7 +164,7 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm) + (int(pos.key() & 7) - 3);
 
-    bool lazy = abs(simpleEval) >= 1000;
+    bool lazy = abs(simpleEval) >= 1500;
 
     if (lazy)
         v = Value(simpleEval);
