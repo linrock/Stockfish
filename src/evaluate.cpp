@@ -169,8 +169,8 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval();
 
-    int lazyThresholdSimpleEval = 2300;
-    int lazyThresholdSmallNet = 1500;
+    int lazyThresholdSimpleEval = 2375;
+    int lazyThresholdSmallNet = 1800;
 
     bool lazy = abs(simpleEval) > lazyThresholdSimpleEval;
     if (lazy)
@@ -191,7 +191,7 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        v       = (nnue * (887 + npm + 9 * pos.count<PAWN>()) + optimism * (96 + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
