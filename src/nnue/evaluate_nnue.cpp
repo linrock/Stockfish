@@ -176,7 +176,7 @@ static bool write_parameters(std::ostream& stream, bool small) {
 void hint_common_parent_position(const Position& pos) {
 
     int simpleEval = pos.simple_eval();
-    if (abs(simpleEval) > 1700)
+    if (abs(simpleEval) > 1500)
         featureTransformerSmall->hint_common_access(pos);
     else
         featureTransformerBig->hint_common_access(pos);
