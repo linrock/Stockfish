@@ -44,6 +44,9 @@ using std::string;
 
 namespace Stockfish {
 
+int TUNE_smallNetThresh = 1500;
+TUNE(SetRange(1000, 2000), TUNE_smallNetThresh);
+
 namespace Zobrist {
 
 Key psq[PIECE_NB][SQUARE_NB];
@@ -1295,6 +1298,10 @@ bool Position::pos_is_ok() const {
         }
 
     return true;
+}
+
+bool Position::use_small_net() const {
+  return abs(simple_eval()) > TUNE_smallNetThresh;
 }
 
 }  // namespace Stockfish
