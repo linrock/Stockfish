@@ -633,16 +633,16 @@ namespace Stockfish::Tools
 
                     // count # skipped based on reason
 
-		    bool should_skip = false;
+                    bool should_skip = false;
 
                     if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
                         num_skipped_cap_promo.fetch_add(1) + 1;
-			should_skip = true;
+                        should_skip = true;
                     }
 
                     if (pos.checkers()) {
                         num_skipped_in_check.fetch_add(1) + 1;
-			should_skip = true;
+                        should_skip = true;
                     }
 
                     int absSimpleEval = abs(
@@ -652,21 +652,22 @@ namespace Stockfish::Tools
                         1276 * (pos.count<ROOK>(WHITE) - pos.count<ROOK>(BLACK)) +
                         2538 * (pos.count<QUEEN>(WHITE) - pos.count<QUEEN>(BLACK))
                     );
-                    if (absSimpleEval > 2500) {
+                    int pieceCount = pos.count<ALL_PIECES>();
+                    if (pieceCount < 16 && absSimpleEval > 2500) {
                         num_skipped_se_too_high.fetch_add(1) + 1;
-			should_skip = true;
+                        should_skip = true;
                     }
-                    if (absSimpleEval < 1000) {
+                    if ((pieceCount >= 16 && absSimpleEval < 750) || absSimpleEval < 1000) {
                         num_skipped_se_too_low.fetch_add(1) + 1;
-			should_skip = true;
+                        should_skip = true;
                     }
 
-                    // 1000 < simple eval < 2500
-		    if (!should_skip) {
-			    ps.padding = 0;
-			    out.write(th.id(), ps);
-			    num_saved.fetch_add(1) + 1;
-		    }
+                    if (!should_skip) {
+                        ps.padding = 0;
+                        out.write(th.id(), ps);
+                        num_saved.fetch_add(1) + 1;
+                    }
+
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 100000 == 0) {
                         auto skc = num_skipped_cap_promo.load();
@@ -676,10 +677,10 @@ namespace Stockfish::Tools
 
                         auto ns = num_saved.load();
                         sync_cout << p << " positions, kept: " << ns << " (" << int(100.0 * ns / p) << "%)" << sync_endl
-                                  << "  skipped cap/promo:  " << skc << sync_endl
-                                  << "  skipped in check:   " << ski << sync_endl
-                                  << "  skipped SE > 2500:  " << skth << sync_endl
-                                  << "  skipped SE < 1000:  " << sktl << sync_endl;
+                                  << "  skipped cap/promo:    " << skc << sync_endl
+                                  << "  skipped in check:     " << ski << sync_endl
+                                  << "  skipped SE too high:  " << skth << sync_endl
+                                  << "  skipped SE too low:   " << sktl << sync_endl;
                         ;
                     }
                 }
