@@ -633,14 +633,16 @@ namespace Stockfish::Tools
 
                     // count # skipped based on reason
 
+		    bool should_skip = false;
+
                     if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
-                      num_skipped_cap_promo.fetch_add(1) + 1;
-                      continue;
+                        num_skipped_cap_promo.fetch_add(1) + 1;
+			should_skip = true;
                     }
 
                     if (pos.checkers()) {
                         num_skipped_in_check.fetch_add(1) + 1;
-                        continue;
+			should_skip = true;
                     }
 
                     int absSimpleEval = abs(
@@ -652,18 +654,19 @@ namespace Stockfish::Tools
                     );
                     if (absSimpleEval > 2500) {
                         num_skipped_se_too_high.fetch_add(1) + 1;
-                        continue;
+			should_skip = true;
                     }
                     if (absSimpleEval < 1000) {
                         num_skipped_se_too_low.fetch_add(1) + 1;
-                        continue;
+			should_skip = true;
                     }
 
                     // 1000 < simple eval < 2500
-                    ps.padding = 0;
-                    out.write(th.id(), ps);
-                    num_saved.fetch_add(1) + 1;
-
+		    if (!should_skip) {
+			    ps.padding = 0;
+			    out.write(th.id(), ps);
+			    num_saved.fetch_add(1) + 1;
+		    }
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 100000 == 0) {
                         auto skc = num_skipped_cap_promo.load();
