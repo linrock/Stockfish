@@ -168,7 +168,7 @@ Value Eval::evaluate(const Position& pos) {
                                      + abs(pos.this_thread()->bestValue)
                                      + abs(pos.this_thread()->rootSimpleEval);
 
-    if (lazy)
+    if (lazy && pos.count<ALL_PIECES>() <= 24)
         v = Value(simpleEval);
     else
     {
