@@ -656,12 +656,21 @@ namespace Stockfish::Tools
                             1276 * (pos.count<ROOK>(WHITE) - pos.count<ROOK>(BLACK)) +
                             2538 * (pos.count<QUEEN>(WHITE) - pos.count<QUEEN>(BLACK))
                         );
-                        if (pieceCount < 16 && absSimpleEval > 2540) {
-                            num_skipped_se_too_high.fetch_add(1) + 1;
-                            should_skip = true;
-                        } else if ((pieceCount >= 16 && absSimpleEval < 750) || absSimpleEval < 1000) {
-                            num_skipped_se_too_low.fetch_add(1) + 1;
-                            should_skip = true;
+                        if (pieceCount >= 16) {
+                            // filter out fewer positions when piece count is high
+                            if (absSimpleEval < 750) {
+                                num_skipped_se_too_low.fetch_add(1) + 1;
+                                should_skip = true;
+                            }
+                        } else {
+                            // filter out more positions when piece count is low
+                            if (absSimpleEval > 3000) {
+                                num_skipped_se_too_high.fetch_add(1) + 1;
+                                should_skip = true;
+                            } else if (absSimpleEval < 1000) {
+                                num_skipped_se_too_low.fetch_add(1) + 1;
+                                should_skip = true;
+                            }
                         }
                     }
 
