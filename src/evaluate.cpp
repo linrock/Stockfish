@@ -57,6 +57,14 @@ const unsigned int         gEmbeddedNNUESmallSize    = 1;
 
 namespace Stockfish {
 
+    int TUNE_lazyThresholdSimpleEval = 2300;
+    TUNE(SetRange(1600, 3000), TUNE_lazyThresholdSimpleEval);
+
+    int TUNE_smallNetNnueBase = 915;
+    int TUNE_smallNetOptBase = 154;
+    TUNE(SetRange(615, 1215), TUNE_smallNetNnueBase);
+    TUNE(SetRange(0, 308), TUNE_smallNetOptBase);
+
 namespace Eval {
 
 std::string currentEvalFileName[2] = {"None", "None"};
@@ -169,20 +177,17 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval();
 
-    int lazyThresholdSimpleEval = 2300;
-    int lazyThresholdSmallNet = 1100;
+    bool lazy = abs(simpleEval) > TUNE_lazyThresholdSimpleEval;
 
-    bool lazy = abs(simpleEval) > lazyThresholdSimpleEval;
     if (lazy)
         v = Value(simpleEval);
     else
     {
-        bool smallNet = abs(simpleEval) > lazyThresholdSmallNet;
-
+        int  useSmallNet = pos.use_small_net();
         int  nnueComplexity;
 
-        Value nnue = smallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
-                              : NNUE::evaluate<false>(pos, true, &nnueComplexity);
+        Value nnue = useSmallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
+                                 : NNUE::evaluate<false>(pos, true, &nnueComplexity);
 
         Value optimism = pos.this_thread()->optimism[stm];
 
@@ -191,7 +196,13 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        if (useSmallNet) {
+            v       = (  nnue * (TUNE_smallNetNnueBase + npm + 9 * pos.count<PAWN>())
+                       + optimism * (TUNE_smallNetOptBase + npm)) / 1024;
+        }
+        else {
+            v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        }
     }
 
     // Damp down the evaluation linearly when shuffling

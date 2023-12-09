@@ -175,6 +175,7 @@ class Position {
     Value   non_pawn_material(Color c) const;
     Value   non_pawn_material() const;
     Value   simple_eval() const;
+    bool    use_small_net() const;
 
     // Position consistency check, for debugging
     bool pos_is_ok() const;
