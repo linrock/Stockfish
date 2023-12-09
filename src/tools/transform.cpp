@@ -608,8 +608,11 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
-        std::atomic<std::uint64_t> num_skipped = 0;
-        std::atomic<std::uint64_t> num_high_simple_eval = 0;
+        std::atomic<std::uint64_t> num_skipped_cap_promo = 0;
+        std::atomic<std::uint64_t> num_skipped_in_check = 0;
+        std::atomic<std::uint64_t> num_skipped_se_too_high = 0;
+        std::atomic<std::uint64_t> num_skipped_se_too_low = 0;
+        std::atomic<std::uint64_t> num_saved = 0;
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
@@ -628,9 +631,16 @@ namespace Stockfish::Tools
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
                     pos.sfen_pack(ps.sfen, false);
 
+                    // count # skipped based on reason
+
                     if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
-                      num_skipped.fetch_add(1) + 1;
+                      num_skipped_cap_promo.fetch_add(1) + 1;
                       continue;
+                    }
+
+                    if (pos.checkers()) {
+                        num_skipped_in_check.fetch_add(1) + 1;
+                        continue;
                     }
 
                     int absSimpleEval = abs(
@@ -640,17 +650,34 @@ namespace Stockfish::Tools
                         1276 * (pos.count<ROOK>(WHITE) - pos.count<ROOK>(BLACK)) +
                         2538 * (pos.count<QUEEN>(WHITE) - pos.count<QUEEN>(BLACK))
                     );
-                    if (absSimpleEval > 1000) {
-                        ps.padding = 0;
-                        out.write(th.id(), ps);
-                        num_high_simple_eval.fetch_add(1) + 1;
+                    if (absSimpleEval > 2500) {
+                        num_skipped_se_too_high.fetch_add(1) + 1;
+                        continue;
                     }
+                    if (absSimpleEval < 1000) {
+                        num_skipped_se_too_low.fetch_add(1) + 1;
+                        continue;
+                    }
+
+                    // 1000 < simple eval < 2500
+                    ps.padding = 0;
+                    out.write(th.id(), ps);
+                    num_saved.fetch_add(1) + 1;
 
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 100000 == 0) {
-                        auto sk = num_skipped.load();
-                        auto se = num_high_simple_eval.load();
-                        sync_cout << p << " positions, skipped: " << sk << ", simple eval > 1k: " << se << sync_endl;
+                        auto skc = num_skipped_cap_promo.load();
+                        auto ski = num_skipped_in_check.load();
+                        auto skth = num_skipped_se_too_high.load();
+                        auto sktl = num_skipped_se_too_low.load();
+
+                        auto ns = num_saved.load();
+                        sync_cout << p << " positions, kept: " << ns << " (" << int(100.0 * ns / p) << "%)" << sync_endl
+                                  << "  skipped cap/promo:  " << skc << sync_endl
+                                  << "  skipped in check:   " << ski << sync_endl
+                                  << "  skipped SE > 2500:  " << skth << sync_endl
+                                  << "  skipped SE < 1000:  " << sktl << sync_endl;
+                        ;
                     }
                 }
             }
