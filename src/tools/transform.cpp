@@ -612,6 +612,7 @@ namespace Stockfish::Tools
         std::atomic<std::uint64_t> num_skipped_in_check = 0;
         std::atomic<std::uint64_t> num_skipped_se_too_high = 0;
         std::atomic<std::uint64_t> num_skipped_se_too_low = 0;
+        std::atomic<std::uint64_t> num_skipped_3p = 0;
         std::atomic<std::uint64_t> num_saved = 0;
 
         Threads.execute_with_workers([&](auto& th){
@@ -634,32 +635,34 @@ namespace Stockfish::Tools
                     // count # skipped based on reason
 
                     bool should_skip = false;
+                    int pieceCount = pos.count<ALL_PIECES>();
 
                     if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
                         num_skipped_cap_promo.fetch_add(1) + 1;
                         should_skip = true;
-                    }
-
-                    if (pos.checkers()) {
+                    } else if (pos.checkers()) {
                         num_skipped_in_check.fetch_add(1) + 1;
                         should_skip = true;
+                    } else if (pieceCount <= 3) {
+                        num_skipped_3p.fetch_add(1) + 1;
+                        should_skip = true;
                     }
 
-                    int absSimpleEval = abs(
-                        208 * (pos.count<PAWN>(WHITE) - pos.count<PAWN>(BLACK)) +
-                        781 * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK)) +
-                        825 * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK)) +
-                        1276 * (pos.count<ROOK>(WHITE) - pos.count<ROOK>(BLACK)) +
-                        2538 * (pos.count<QUEEN>(WHITE) - pos.count<QUEEN>(BLACK))
-                    );
-                    int pieceCount = pos.count<ALL_PIECES>();
-                    if (pieceCount < 16 && absSimpleEval > 2500) {
-                        num_skipped_se_too_high.fetch_add(1) + 1;
-                        should_skip = true;
-                    }
-                    if ((pieceCount >= 16 && absSimpleEval < 750) || absSimpleEval < 1000) {
-                        num_skipped_se_too_low.fetch_add(1) + 1;
-                        should_skip = true;
+                    if (!should_skip) {
+                        int absSimpleEval = abs(
+                            208 * (pos.count<PAWN>(WHITE) - pos.count<PAWN>(BLACK)) +
+                            781 * (pos.count<KNIGHT>(WHITE) - pos.count<KNIGHT>(BLACK)) +
+                            825 * (pos.count<BISHOP>(WHITE) - pos.count<BISHOP>(BLACK)) +
+                            1276 * (pos.count<ROOK>(WHITE) - pos.count<ROOK>(BLACK)) +
+                            2538 * (pos.count<QUEEN>(WHITE) - pos.count<QUEEN>(BLACK))
+                        );
+                        if (pieceCount < 16 && absSimpleEval > 2540) {
+                            num_skipped_se_too_high.fetch_add(1) + 1;
+                            should_skip = true;
+                        } else if ((pieceCount >= 16 && absSimpleEval < 750) || absSimpleEval < 1000) {
+                            num_skipped_se_too_low.fetch_add(1) + 1;
+                            should_skip = true;
+                        }
                     }
 
                     if (!should_skip) {
@@ -672,6 +675,7 @@ namespace Stockfish::Tools
                     if (p % 100000 == 0) {
                         auto skc = num_skipped_cap_promo.load();
                         auto ski = num_skipped_in_check.load();
+                        auto sk3p = num_skipped_3p.load();
                         auto skth = num_skipped_se_too_high.load();
                         auto sktl = num_skipped_se_too_low.load();
 
@@ -679,6 +683,7 @@ namespace Stockfish::Tools
                         sync_cout << p << " positions, kept: " << ns << " (" << int(100.0 * ns / p) << "%)" << sync_endl
                                   << "  skipped cap/promo:    " << skc << sync_endl
                                   << "  skipped in check:     " << ski << sync_endl
+                                  << "  skipped 3 pieces:     " << sk3p << sync_endl
                                   << "  skipped SE too high:  " << skth << sync_endl
                                   << "  skipped SE too low:   " << sktl << sync_endl;
                         ;
