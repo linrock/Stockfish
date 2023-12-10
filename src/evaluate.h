@@ -41,7 +41,7 @@ extern std::string currentEvalFileName[2];
 #define EvalFileDefaultNameBig   "nn-0000000000a0.nnue"
 
 // S1 ep399 perm hse-only v2
-#define EvalFileDefaultNameSmall "nn-0daad224c461.nnue"
+#define EvalFileDefaultNameSmall "nn-0e11f4e146ad.nnue"
 
 namespace NNUE {
 
