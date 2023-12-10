@@ -57,9 +57,6 @@ const unsigned int         gEmbeddedNNUESmallSize    = 1;
 
 namespace Stockfish {
 
-    int TUNE_lazyThresholdSimpleEval = 2300;
-    TUNE(SetRange(1600, 3000), TUNE_lazyThresholdSimpleEval);
-
     int TUNE_smallNetNnueBase = 915;
     int TUNE_smallNetOptBase = 154;
     TUNE(SetRange(615, 1215), TUNE_smallNetNnueBase);
@@ -177,7 +174,7 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval();
 
-    bool lazy = abs(simpleEval) > TUNE_lazyThresholdSimpleEval;
+    bool lazy = abs(simpleEval) > 2600;
 
     if (lazy)
         v = Value(simpleEval);
@@ -197,8 +194,7 @@ Value Eval::evaluate(const Position& pos) {
 
         int npm = pos.non_pawn_material() / 64;
         if (useSmallNet) {
-            v       = (  nnue * (TUNE_smallNetNnueBase + npm + 9 * pos.count<PAWN>())
-                       + optimism * (TUNE_smallNetOptBase + npm)) / 1024;
+            v       = (nnue * (800 + npm + 9 * pos.count<PAWN>()) + optimism * (165 + npm)) / 1024;
         }
         else {
             v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
