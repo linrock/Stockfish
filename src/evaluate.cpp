@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
+#include <initializer_list>
 #include <iomanip>
 #include <iostream>
 #include <sstream>

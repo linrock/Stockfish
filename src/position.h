@@ -20,6 +20,7 @@
 #define POSITION_H_INCLUDED
 
 #include <cassert>
+#include <cstdint>
 #include <deque>
 #include <iosfwd>
 #include <memory>
