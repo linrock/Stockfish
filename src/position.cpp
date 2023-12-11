@@ -44,6 +44,9 @@ using std::string;
 
 namespace Stockfish {
 
+    int TUNE_lazyThresholdSmallNet   = 1100;
+    TUNE(SetRange(600, 1600), TUNE_lazyThresholdSmallNet);
+
 namespace Zobrist {
 
 Key psq[PIECE_NB][SQUARE_NB];
@@ -293,6 +296,10 @@ Position& Position::set(const string& fenStr, bool isChess960, StateInfo* si, Th
     assert(pos_is_ok());
 
     return *this;
+}
+
+bool Position::use_small_net() const {
+    return abs(simple_eval()) > TUNE_lazyThresholdSmallNet;
 }
 
 

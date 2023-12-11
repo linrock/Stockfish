@@ -58,6 +58,13 @@ const unsigned int         gEmbeddedNNUESmallSize    = 1;
 
 namespace Stockfish {
 
+    int TUNE_lazyThresholdSimpleEval = 2300;
+    int TUNE_bigNnueBase = 915;
+    int TUNE_smallNnueBase = 915;
+    TUNE(SetRange(1800, 2800), TUNE_lazyThresholdSimpleEval);
+    TUNE(SetRange(615, 1215), TUNE_bigNnueBase);
+    TUNE(SetRange(615, 1215), TUNE_smallNnueBase);
+
 namespace Eval {
 
 std::string       currentEvalFileName[2] = {"None", "None"};
@@ -170,15 +177,13 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval();
 
-    int lazyThresholdSimpleEval = 2300;
-    int lazyThresholdSmallNet   = 1100;
+    bool lazy = abs(simpleEval) > TUNE_lazyThresholdSimpleEval;
 
-    bool lazy = abs(simpleEval) > lazyThresholdSimpleEval;
     if (lazy)
         v = Value(simpleEval);
     else
     {
-        bool smallNet = abs(simpleEval) > lazyThresholdSmallNet;
+        bool smallNet = pos.use_small_net();
 
         int nnueComplexity;
 
@@ -192,7 +197,9 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        v       = (  nnue * ((smallNet ? TUNE_smallNnueBase : TUNE_bigNnueBase)
+                            + npm + 9 * pos.count<PAWN>())
+                   + optimism * (154 + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
