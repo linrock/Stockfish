@@ -53,9 +53,6 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
-  int TUNE_lazyOffset = 0;
-  TUNE(SetRange(-2048, 2048), TUNE_lazyOffset);
-
   int TUNE_nnueNpmBase = 915;
   int TUNE_nnuePc = 9;
   int TUNE_optNpmBase = 154;
@@ -177,8 +174,7 @@ Value Eval::evaluate(const Position& pos) {
     bool lazy = abs(simpleEval) >=   RookValue + KnightValue
                                    + 16 * shuffling * shuffling
                                    + abs(pos.this_thread()->bestValue)
-                                   + abs(pos.this_thread()->rootSimpleEval)
-                                   + TUNE_lazyOffset;
+                                   + abs(pos.this_thread()->rootSimpleEval);
 
     if (lazy)
         v = Value(simpleEval);
