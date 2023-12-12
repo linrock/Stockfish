@@ -57,11 +57,11 @@ const unsigned int         gEmbeddedNNUESmallSize    = 1;
 
 namespace Stockfish {
 
-  int TUNE_nnueNpmBase = 915;
-  int TUNE_nnuePc = 9;
+  int TUNE_smallNpmBase = 915;
+  int TUNE_bigNpmBase = 915;
   int TUNE_optNpmBase = 154;
-  TUNE(SetRange(515, 1315), TUNE_nnueNpmBase);
-  TUNE(SetRange(-23, 41), TUNE_nnuePc);
+  TUNE(SetRange(515, 1315), TUNE_smallNpmBase);
+  TUNE(SetRange(515, 1315), TUNE_bigNpmBase);
   TUNE(SetRange(0, 308), TUNE_optNpmBase);
 
 namespace Eval {
@@ -198,7 +198,7 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v = (  nnue     * (TUNE_nnueNpmBase + npm + TUNE_nnuePc * pos.count<PAWN>())
+        v = (  nnue     * ((smallNet ? TUNE_smallNpmBase : TUNE_bigNpmBase) + npm + 9 * pos.count<PAWN>())
              + optimism * (TUNE_optNpmBase  + npm)) / 1024;
     }
 
