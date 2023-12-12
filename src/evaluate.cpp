@@ -60,7 +60,7 @@ namespace Stockfish {
 namespace Eval {
 
 std::string currentEvalFileName[2] = {"None", "None"};
-const std::string EvFiles[2]       = {"EvalFileBig", "EvalFile"};
+const std::string EvFiles[2]       = {"EvalFile", "EvalFileSmall"};
 const std::string EvFileNames[2]   = {EvalFileDefaultNameBig, EvalFileDefaultNameSmall};
 
 // Tries to load a NNUE network at startup time, or when the engine
