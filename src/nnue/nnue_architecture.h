@@ -44,7 +44,7 @@ constexpr int       L3Big                             = 32;
 
 constexpr IndexType TransformedFeatureDimensionsSmall = 256;
 constexpr int       L2Small                           = 15;
-constexpr int       L3Small                           = 32;
+constexpr int       L3Small                           = 16;
 
 constexpr IndexType PSQTBuckets                       = 8;
 constexpr IndexType LayerStacks                       = 8;
