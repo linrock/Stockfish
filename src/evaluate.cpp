@@ -170,7 +170,7 @@ Value Eval::evaluate(const Position& pos) {
     int   simpleEval = pos.simple_eval();
 
     int lazyThresholdSimpleEval = 2550;
-    int lazyThresholdSmallNet = 800;
+    int lazyThresholdSmallNet = 900;
 
     bool lazy = abs(simpleEval) > lazyThresholdSimpleEval;
     if (lazy)
