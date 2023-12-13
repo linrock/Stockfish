@@ -169,7 +169,7 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval();
 
-    int lazyThresholdSimpleEval = 2550;
+    int lazyThresholdSimpleEval = 2800;
     int lazyThresholdSmallNet = 1050;
 
     bool lazy = abs(simpleEval) > lazyThresholdSimpleEval;
