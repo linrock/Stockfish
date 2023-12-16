@@ -57,11 +57,11 @@ const unsigned int         gEmbeddedNNUESmallSize    = 1;
 
 namespace Stockfish {
 
+  int TUNE_lazyThresholdSimpleEval = 2550;
   int TUNE_nnueNpmBase = 915;
-  int TUNE_nnuePc = 9;
   int TUNE_optNpmBase = 154;
+  TUNE(SetRange(2100, 3000), TUNE_lazyThresholdSimpleEval);
   TUNE(SetRange(515, 1315), TUNE_nnueNpmBase);
-  TUNE(SetRange(-23, 41), TUNE_nnuePc);
   TUNE(SetRange(0, 308), TUNE_optNpmBase);
 
 namespace Eval {
@@ -176,20 +176,15 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval();
 
-    int lazyThresholdSimpleEval = 2550;
-    int lazyThresholdSmallNet = 1050;
-
-    bool lazy = abs(simpleEval) > lazyThresholdSimpleEval;
+    bool lazy = abs(simpleEval) > TUNE_lazyThresholdSimpleEval;
     if (lazy)
         v = Value(simpleEval);
     else
     {
-        bool smallNet = abs(simpleEval) > lazyThresholdSmallNet;
-
         int  nnueComplexity;
 
-        Value nnue = smallNet ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
-                              : NNUE::evaluate<false>(pos, true, &nnueComplexity);
+        Value nnue = pos.use_small_net() ? NNUE::evaluate<true>(pos, true, &nnueComplexity)
+                                         : NNUE::evaluate<false>(pos, true, &nnueComplexity);
 
         Value optimism = pos.this_thread()->optimism[stm];
 
@@ -198,7 +193,7 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v = (  nnue     * (TUNE_nnueNpmBase + npm + TUNE_nnuePc * pos.count<PAWN>())
+        v = (  nnue     * (TUNE_nnueNpmBase + npm + 9 * pos.count<PAWN>())
              + optimism * (TUNE_optNpmBase  + npm)) / 1024;
     }
 
