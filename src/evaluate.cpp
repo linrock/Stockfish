@@ -191,7 +191,7 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (920 + npm + 5 * pos.count<PAWN>()) + optimism * (128 + npm)) / 1024;
+        v       = (nnue * (1011 + npm + 2 * pos.count<PAWN>()) + optimism * (109 + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
