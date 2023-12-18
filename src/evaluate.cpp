@@ -57,12 +57,9 @@ const unsigned int         gEmbeddedNNUESmallSize    = 1;
 
 namespace Stockfish {
 
-  int TUNE_lazyThresholdSimpleEval = 2550;
-  int TUNE_nnueNpmBase = 915;
-  int TUNE_optNpmBase = 154;
-  TUNE(SetRange(2100, 3000), TUNE_lazyThresholdSimpleEval);
-  TUNE(SetRange(515, 1315), TUNE_nnueNpmBase);
-  TUNE(SetRange(0, 308), TUNE_optNpmBase);
+  constexpr int TUNE_lazyThresholdSimpleEval = 2528;
+  constexpr int TUNE_nnueNpmBase = 945;
+  constexpr int TUNE_optNpmBase = 181;
 
 namespace Eval {
 

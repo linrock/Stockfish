@@ -44,8 +44,7 @@ using std::string;
 
 namespace Stockfish {
 
-int TUNE_lazyThresholdSmallNet = 1050;
-TUNE(SetRange(600, 1500), TUNE_lazyThresholdSmallNet);
+constexpr int TUNE_lazyThresholdSmallNet = 1168;
 
 namespace Zobrist {
 
