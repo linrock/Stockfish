@@ -174,15 +174,6 @@ enum Value : int {
     VALUE_TB                 = VALUE_MATE_IN_MAX_PLY - 1,
     VALUE_TB_WIN_IN_MAX_PLY  = VALUE_TB - MAX_PLY,
     VALUE_TB_LOSS_IN_MAX_PLY = -VALUE_TB_WIN_IN_MAX_PLY,
-
-    // In the code, we make the assumption that these values
-    // are such that non_pawn_material() can be used to uniquely
-    // identify the material on the board.
-    PawnValue   = 208,
-    KnightValue = 781,
-    BishopValue = 825,
-    RookValue   = 1276,
-    QueenValue  = 2538,
 };
 
 // clang-format off
@@ -200,9 +191,10 @@ enum Piece {
 };
 // clang-format on
 
-constexpr Value PieceValue[PIECE_NB] = {
-  VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO,
-  VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO};
+extern Value PawnValue, KnightValue, BishopValue, RookValue, QueenValue;
+
+extern Value PieceValue[PIECE_NB];
+// clang-format on
 
 using Depth = int;
 
