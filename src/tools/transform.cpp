@@ -657,17 +657,18 @@ namespace Stockfish::Tools
                             2538 * (pos.count<QUEEN>(WHITE) - pos.count<QUEEN>(BLACK))
                         );
                         if (pieceCount >= 16) {
+                            // there are much fewer high simple eval positions in the early game
                             // filter out fewer positions when piece count is high
-                            if (absSimpleEval < 500) {
+                            if (absSimpleEval < 700) {
                                 num_skipped_se_too_low.fetch_add(1) + 1;
                                 should_skip = true;
                             }
                         } else {
                             // filter out more positions when piece count is low
-                            if (absSimpleEval > 3000) {
-                                num_skipped_se_too_high.fetch_add(1) + 1;
+                            if (absSimpleEval < 750) {
+                                num_skipped_se_too_low.fetch_add(1) + 1;
                                 should_skip = true;
-                            } else if (absSimpleEval < 750) {
+                            } else if (absSimpleEval < 900 && pieceCount == 4) {
                                 num_skipped_se_too_low.fetch_add(1) + 1;
                                 should_skip = true;
                             }
