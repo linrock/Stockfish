@@ -170,7 +170,7 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = pos.simple_eval();
 
-    int lazyThresholdSimpleEval = 2700;
+    int lazyThresholdSimpleEval = 2550;
     int lazyThresholdSmallNet = 1050;
 
     bool lazy = abs(simpleEval) > lazyThresholdSimpleEval;
@@ -178,7 +178,9 @@ Value Eval::evaluate(const Position& pos) {
         v = Value(simpleEval);
     else
     {
-        bool smallNet = abs(simpleEval) > lazyThresholdSmallNet;
+        bool smallNet = abs(simpleEval) > lazyThresholdSmallNet
+                                          + std::abs(pos.this_thread()->bestValue)
+                                          + std::abs(pos.this_thread()->rootSimpleEval);
 
         int  nnueComplexity;
 
