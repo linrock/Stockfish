@@ -985,7 +985,7 @@ moves_loop:  // When in check, search starts here
                 {
                     Piece capturedPiece = pos.piece_on(to_sq(move));
                     int   futilityEval =
-                      ss->staticEval + 238 + 305 * lmrDepth + PieceValue[capturedPiece]
+                      ss->staticEval + 238 + 305 * lmrDepth + pos.piece_value(capturedPiece)
                       + captureHistory[movedPiece][to_sq(move)][type_of(capturedPiece)] / 7;
                     if (futilityEval < alpha)
                         continue;
@@ -1527,7 +1527,7 @@ Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth) {
                 if (moveCount > 2)
                     continue;
 
-                futilityValue = futilityBase + PieceValue[pos.piece_on(to_sq(move))];
+                futilityValue = futilityBase + pos.piece_value(pos.piece_on(to_sq(move)));
 
                 // If static eval + value of piece we are going to capture is much lower
                 // than alpha we can prune this move.
@@ -1809,7 +1809,7 @@ Move Skill::pick_best(size_t multiPV) {
 
     // RootMoves are already sorted by score in descending order
     Value  topScore = rootMoves[0].score;
-    int    delta    = std::min(topScore - rootMoves[multiPV - 1].score, PawnValue);
+    int    delta    = std::min(topScore - rootMoves[multiPV - 1].score, Value(208));
     int    maxScore = -VALUE_INFINITE;
     double weakness = 120 - 2 * level;
 

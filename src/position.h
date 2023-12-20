@@ -160,6 +160,8 @@ class Position {
     int     rule50_count() const;
     Value   non_pawn_material(Color c) const;
     Value   non_pawn_material() const;
+    Value   pawn_value() const;
+    Value   piece_value(int p) const;
 
     // Position consistency check, for debugging
     bool pos_is_ok() const;

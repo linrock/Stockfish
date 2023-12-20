@@ -44,6 +44,15 @@ using std::string;
 
 namespace Stockfish {
 
+int v7 = 208, v8 = 781, v9 = 825, v10 = 1276, v11 = 2538;
+TUNE(v7, v8, v9, v10, v11);
+Value PawnValue = Value(v7), KnightValue = Value(v8), BishopValue = Value(v9),
+      RookValue = Value(v10), QueenValue = Value(v11);
+
+Value PieceValue[PIECE_NB] = {
+  VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO,
+  VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO};
+
 namespace Zobrist {
 
 Key psq[PIECE_NB][SQUARE_NB];
@@ -354,7 +363,7 @@ void Position::set_state() const {
             st->pawnKey ^= Zobrist::psq[pc][s];
 
         else if (type_of(pc) != KING)
-            st->nonPawnMaterial[color_of(pc)] += PieceValue[pc];
+            st->nonPawnMaterial[color_of(pc)] += piece_value(pc);
     }
 
     if (st->epSquare != SQ_NONE)
@@ -734,7 +743,7 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
             st->pawnKey ^= Zobrist::psq[captured][capsq];
         }
         else
-            st->nonPawnMaterial[them] -= PieceValue[captured];
+            st->nonPawnMaterial[them] -= piece_value(captured);
 
         dp.dirty_num = 2;  // 1 piece moved, 1 piece captured
         dp.piece[1]  = captured;
@@ -815,7 +824,7 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
               Zobrist::psq[promotion][pieceCount[promotion] - 1] ^ Zobrist::psq[pc][pieceCount[pc]];
 
             // Update material
-            st->nonPawnMaterial[us] += PieceValue[promotion];
+            st->nonPawnMaterial[us] += piece_value(promotion);
         }
 
         // Update pawn hash key
@@ -1039,11 +1048,11 @@ bool Position::see_ge(Move m, Value threshold) const {
 
     Square from = from_sq(m), to = to_sq(m);
 
-    int swap = PieceValue[piece_on(to)] - threshold;
+    int swap = piece_value(piece_on(to)) - threshold;
     if (swap < 0)
         return false;
 
-    swap = PieceValue[piece_on(from)] - swap;
+    swap = piece_value(piece_on(from)) - swap;
     if (swap <= 0)
         return true;
 
@@ -1291,6 +1300,14 @@ bool Position::pos_is_ok() const {
         }
 
     return true;
+}
+
+Value Position::piece_value(int p) const {
+  return PieceValue[p];
+}
+
+Value Position::pawn_value() const {
+  return PawnValue;
 }
 
 }  // namespace Stockfish
