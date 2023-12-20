@@ -45,7 +45,12 @@ using std::string;
 namespace Stockfish {
 
 int v7 = 208, v8 = 781, v9 = 825, v10 = 1276, v11 = 2538;
-TUNE(v7, v8, v9, v10, v11);
+TUNE(SetRange(108, 308), v7);
+TUNE(SetRange(581, 981), v8);
+TUNE(SetRange(625, 1025), v9);
+TUNE(SetRange(1076, 1476), v10);
+TUNE(SetRange(2338, 2738), v11);
+
 Value PawnValue = Value(v7), KnightValue = Value(v8), BishopValue = Value(v9),
       RookValue = Value(v10), QueenValue = Value(v11);
 
