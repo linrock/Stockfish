@@ -44,15 +44,15 @@ using std::string;
 
 namespace Stockfish {
 
-int v7 = 208, v8 = 781, v9 = 825, v10 = 1276, v11 = 2538;
-TUNE(SetRange(108, 308), v7);
-TUNE(SetRange(581, 981), v8);
-TUNE(SetRange(625, 1025), v9);
-TUNE(SetRange(1076, 1476), v10);
-TUNE(SetRange(2338, 2738), v11);
+int vPawn = 208, vKnight = 781, vBishop = 825, vRook = 1276, vQueen = 2538;
+TUNE(SetRange(108, 308), vPawn);
+TUNE(SetRange(581, 981), vKnight);
+TUNE(SetRange(625, 1025), vBishop);
+TUNE(SetRange(1076, 1476), vRook);
+TUNE(SetRange(2338, 2738), vQueen);
 
-Value PawnValue = Value(v7), KnightValue = Value(v8), BishopValue = Value(v9),
-      RookValue = Value(v10), QueenValue = Value(v11);
+Value PawnValue = Value(vPawn), KnightValue = Value(vKnight), BishopValue = Value(vBishop),
+      RookValue = Value(vRook), QueenValue = Value(vQueen);
 
 Value PieceValue[PIECE_NB] = {
   VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO,
