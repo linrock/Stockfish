@@ -38,7 +38,7 @@ extern std::string currentEvalFileName[2];
 // The default net name MUST follow the format nn-[SHA256 first 12 digits].nnue
 // for the build process (profile-build and fishtest) to work. Do not change the
 // name of the macro, as it is used in the Makefile.
-#define EvalFileDefaultNameBig   "nn-bb1a57bea577.nnue"
+#define EvalFileDefaultNameBig   "nn-dcc486f2a81f.nnue"
 #define EvalFileDefaultNameSmall "nn-fa57bea57555.nnue"
 
 namespace NNUE {
