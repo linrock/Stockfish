@@ -968,8 +968,8 @@ namespace Stockfish::Tools
 
                 // If a position already present in the data would have been discarded anyway
                 // due to the move then we can set the score to something that takes less space.
-                if (discarded_during_training_based_on_move(e))
-                    intermediate_entries.back().score = 0;
+                // if (discarded_during_training_based_on_move(e))
+                //     intermediate_entries.back().score = 0;
 
                 const auto pi = num_positions_intermediate.fetch_add(1) + 1;
                 if (pi % 10000 == 0)
