@@ -158,7 +158,7 @@ Value Eval::simple_eval(const Position& pos, Color c) {
 // of the position from the point of view of the side to move.
 Value Eval::evaluate(const Position& pos) {
 
-    assert(!pos.checkers());
+    // assert(!pos.checkers());
 
     Value v;
     Color stm        = pos.side_to_move();
@@ -169,7 +169,7 @@ Value Eval::evaluate(const Position& pos) {
                                           + std::abs(pos.this_thread()->bestValue)
                                           + std::abs(pos.this_thread()->rootSimpleEval);
 
-    if (lazy)
+    if (lazy && !pos.checkers())
         v = Value(simpleEval);
     else
     {
