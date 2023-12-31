@@ -768,7 +768,7 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
                   unadjustedStaticEval);
     }
 
-    // Use static evaluation difference to improve quiet move ordering (~9 Elo)
+    // Use static evaluation difference to improve quiet move ordering (~4 Elo)
     if (is_ok((ss - 1)->currentMove) && !(ss - 1)->inCheck && !priorCapture)
     {
         int bonus = std::clamp(-13 * int((ss - 1)->staticEval + ss->staticEval), -1652, 1546);
@@ -1223,7 +1223,6 @@ moves_loop:  // When in check, search starts here
                 if (newDepth > d)
                     value = -search<NonPV>(pos, ss + 1, -(alpha + 1), -alpha, newDepth, !cutNode);
 
-                // Post LMR continuation history updates (~1 Elo)
                 int bonus = value <= alpha ? -stat_malus(newDepth)
                           : value >= beta  ? stat_bonus(newDepth)
                                            : 0;
@@ -1239,7 +1238,7 @@ moves_loop:  // When in check, search starts here
             if (!ttMove)
                 r += 2;
 
-            // Note that if expected reduction is high, we reduce search depth by 1 here (~9 Elo)
+            // Note that if expected reduction is high, we reduce search depth by 1 here
             value = -search<NonPV>(pos, ss + 1, -(alpha + 1), -alpha, newDepth - (r > 3), !cutNode);
         }
 
@@ -1696,7 +1695,8 @@ Value value_to_tt(Value v, int ply) {
 // from the transposition table (which refers to the plies to mate/be mated from
 // current position) to "plies to mate/be mated (TB win/loss) from the root".
 // However, to avoid potentially false mate or TB scores related to the 50 moves rule
-// and the graph history interaction, we return the highest non-TB score instead.
+// and the graph history interaction, we return highest non-TB score instead.
+
 Value value_from_tt(Value v, int ply, int r50c) {
 
     if (v == VALUE_NONE)
