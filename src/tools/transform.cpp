@@ -779,7 +779,7 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
-        std::atomic<std::uint64_t> num_removed = 0;
+        std::atomic<std::uint64_t> num_kept = 0;
 
         Threads.execute_with_workers([&](auto& th){
             Position& pos = th.rootPos;
@@ -797,16 +797,18 @@ namespace Stockfish::Tools
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
                     bool should_skip_position = false;
-                    if (ps.score == 32002) { // VALUE_NONE
-                      num_removed.fetch_add(1);
-                    } else {
+                    if (pos.checkers() && ps.score != 32002) { // VALUE_NONE
+                      if (ps.score == 0) {
+                        ps.score = 1;
+                      }
                       pos.sfen_pack(ps.sfen, false);
                       ps.padding = 0;
                       out.write(th.id(), ps);
+                      auto p = num_kept.fetch_add(1) + 1;
                     }
                     auto p = num_processed.fetch_add(1) + 1;
-                    if (p % 10000 == 0) {
-                        sync_cout << "Processed " << p << " positions. Removed " << num_removed.load() << " positions."
+                    if (p % 100000 == 0) {
+                        sync_cout << "Processed " << p << " positions. Kept " << num_kept.load() << " positions."
                                   << sync_endl;
                     }
                 }
@@ -854,7 +856,7 @@ namespace Stockfish::Tools
             }
         }
 
-        std::cout << "Performing transform unminify with parameters:\n";
+        std::cout << "Performing transform keep_in_check with parameters:\n";
         std::cout << "input_file          : " << params.input_filename << '\n';
         std::cout << "output_file         : " << params.output_filename << '\n';
         std::cout << "debug_print         : " << params.debug_print << '\n';
@@ -1263,7 +1265,7 @@ namespace Stockfish::Tools
             { "rescore", &rescore },
             { "filter_335a9b2d8a80", &filter_335a9b2d8a80 },
             { "minimize_binpack", &minimize_binpack },
-            { "unminify", &unminify }
+            { "keep_in_check", &unminify }
         };
 
         Eval::NNUE::init();
