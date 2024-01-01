@@ -47,6 +47,15 @@
 
 namespace Stockfish {
 
+  int TUNE_optDenom = 109;
+  TUNE(SetRange(0, 218), TUNE_optDenom);
+
+  int TUNE_bonusMult = 64;
+  TUNE(SetRange(0, 128), TUNE_bonusMult);
+
+  int TUNE_bonusDiv = 64;
+  TUNE(SetRange(0, 128), TUNE_bonusDiv);
+
 namespace Search {
 
 LimitsType Limits;
@@ -377,7 +386,7 @@ void Thread::search() {
             beta      = std::min(avg + delta, VALUE_INFINITE);
 
             // Adjust optimism based on root move's averageScore (~4 Elo)
-            optimism[us]  = 121 * avg / (std::abs(avg) + 109);
+            optimism[us]  = 121 * avg / (std::abs(avg) + TUNE_optDenom);
             optimism[~us] = -optimism[us];
 
             // Start with a small aspiration window and, in the case of a fail
@@ -772,7 +781,8 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
     if (is_ok((ss - 1)->currentMove) && !(ss - 1)->inCheck && !priorCapture)
     {
         int bonus = std::clamp(-13 * int((ss - 1)->staticEval + ss->staticEval), -1652, 1546);
-        bonus     = bonus > 0 ? 2 * bonus : bonus / 2;
+        bonus     = bonus > 0 ? (TUNE_bonusMult * bonus / 32 )
+                              : (TUNE_bonusDiv  * bonus / 128);
         thisThread->mainHistory[~us][from_to((ss - 1)->currentMove)] << bonus;
         if (type_of(pos.piece_on(prevSq)) != PAWN && type_of((ss - 1)->currentMove) != PROMOTION)
             thisThread->pawnHistory[pawn_structure_index(pos)][pos.piece_on(prevSq)][prevSq]

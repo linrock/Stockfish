@@ -54,6 +54,12 @@ const unsigned int         gEmbeddedNNUESize    = 1;
 
 namespace Stockfish {
 
+    int TUNE_npmBase = 915;
+    TUNE(SetRange(615, 1215), TUNE_npmBase);
+
+    int TUNE_optNpmOffset = 154;
+    TUNE(SetRange(0, 308), TUNE_optNpmOffset);
+
 namespace Eval {
 
 std::string currentEvalFileName = "None";
@@ -183,7 +189,8 @@ Value Eval::evaluate(const Position& pos) {
         nnue -= nnue * (nnueComplexity + std::abs(simpleEval - nnue)) / 32768;
 
         int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        v       = (  nnue * (TUNE_npmBase + npm + 9 * pos.count<PAWN>())
+                   + optimism * (TUNE_optNpmOffset + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
