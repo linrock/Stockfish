@@ -47,14 +47,9 @@
 
 namespace Stockfish {
 
-  int TUNE_optDenom = 109;
-  TUNE(SetRange(0, 218), TUNE_optDenom);
-
-  int TUNE_bonusMult = 64;
-  TUNE(SetRange(0, 128), TUNE_bonusMult);
-
-  int TUNE_bonusDiv = 64;
-  TUNE(SetRange(0, 128), TUNE_bonusDiv);
+  constexpr int TUNE_optDenom = 110;
+  constexpr int TUNE_bonusMult = 103;
+  constexpr int TUNE_bonusDiv = 97;
 
 namespace Search {
 
