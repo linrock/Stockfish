@@ -190,7 +190,7 @@ Value Eval::evaluate(const Position& pos) {
         v = simpleEval;
     else
     {
-        bool smallNet = std::abs(simpleEval) > 1050;
+        bool smallNet = std::abs(simpleEval) > 1100;
 
         int nnueComplexity;
 
