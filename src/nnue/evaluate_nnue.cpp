@@ -186,6 +186,19 @@ void hint_common_parent_position(const Position& pos) {
         featureTransformerBig->hint_common_access(pos, false);
 }
 
+constexpr int bucketNo[33] = {
+    0,
+    0, 0, 0, 0, 0, 0,  // 1, 2, 3, 4, 5, 6
+    0, 0, 0, 0,        // 7, 8, 9, 10
+    1, 1, 1,
+    2, 2, 2,
+    3, 3, 3,
+    4, 4, 4,
+    5, 5, 5,
+    6, 6, 6,
+    7, 7, 7, 7
+};
+
 // Evaluation function. Perform differential calculation.
 template<NetSize Net_Size>
 Value evaluate(const Position& pos, bool adjusted, int* complexity, bool psqtOnly) {
@@ -213,7 +226,12 @@ Value evaluate(const Position& pos, bool adjusted, int* complexity, bool psqtOnl
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
-    const int  bucket = (pos.count<ALL_PIECES>() - 1) / 4;
+    int bucket;
+    if (Net_Size == Small) {
+      bucket     = int(bucketNo[pos.count<ALL_PIECES>()]);
+    } else {
+      bucket     = (pos.count<ALL_PIECES>() - 1) / 4;
+    }
     const auto psqt =
       Net_Size == Small
         ? featureTransformerSmall->transform(pos, transformedFeatures, bucket, psqtOnly)
