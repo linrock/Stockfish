@@ -46,6 +46,11 @@
 
 namespace Stockfish {
 
+            int TUNE_optNum = 134;
+            int TUNE_optDenom = 97;
+            TUNE(SetRange(67, 268), TUNE_optNum);
+            TUNE(SetRange(48, 194), TUNE_optDenom);
+
 namespace TB = Tablebases;
 
 using Eval::evaluate;
@@ -303,7 +308,7 @@ void Search::Worker::iterative_deepening() {
             beta      = std::min(avg + delta, VALUE_INFINITE);
 
             // Adjust optimism based on root move's averageScore (~4 Elo)
-            optimism[us]  = 134 * avg / (std::abs(avg) + 97);
+            optimism[us]  = TUNE_optNum * avg / (std::abs(avg) + TUNE_optDenom);
             optimism[~us] = -optimism[us];
 
             // Start with a small aspiration window and, in the case of a fail

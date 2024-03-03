@@ -61,6 +61,11 @@ const unsigned int         gEmbeddedNNUESmallSize    = 1;
 
 namespace Stockfish {
 
+    int TUNE_nnueOffset = 915;
+    int TUNE_optOffset = 154;
+    TUNE(SetRange(515, 1315), TUNE_nnueOffset);
+    TUNE(SetRange(77, 308), TUNE_optOffset);
+
 namespace Eval {
 
 
@@ -205,7 +210,8 @@ Value Eval::evaluate(const Position& pos, int optimism) {
     nnue -= nnue * (nnueComplexity + std::abs(simpleEval - nnue)) / 32768;
 
     int npm = pos.non_pawn_material() / 64;
-    int v   = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+    int v   = (nnue * (TUNE_nnueOffset + npm + 9 * pos.count<PAWN>())
+                                       + optimism * (TUNE_optOffset + npm)) / 1024;
 
     // Damp down the evaluation linearly when shuffling
     int shuffling = pos.rule50_count();
