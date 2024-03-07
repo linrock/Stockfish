@@ -990,7 +990,7 @@ namespace Stockfish::Tools
                 // Remove chains of always skipped positions that are larger than starting a chain again.
 
                 auto is_skipped = [&](const binpack::TrainingDataEntry& e) {
-                    return e.score == VALUE_NONE || discarded_during_training_based_on_move(e);
+                    return e.score == VALUE_NONE; // || discarded_during_training_based_on_move(e);
                 };
 
                 for (size_t i = 0; i < intermediate_entries.size();)
