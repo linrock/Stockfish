@@ -209,7 +209,19 @@ Value Network<Arch, Transformer>::evaluate(const Position& pos,
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
-    const int  bucket = (pos.count<ALL_PIECES>() - 1) / 4;
+    constexpr int bucketNo[33] = {
+        0,
+        0, 0, 0, 0, 0, 0, 0   //  1   2   3   4   5   6   7
+        1, 1, 1, 1,           //  8   9  10  11
+        2, 2, 2, 2,           // 12  13  14  15
+        3, 3, 3,              // 16  17  18
+        4, 4, 4,              // 19  20  21
+        5, 5, 5,              // 22  23  24
+        6, 6, 6, 6            // 25  26  27  28
+        7, 7, 7, 7            // 29  30  31  32
+    };
+
+    const int  bucket = bucketNo[pos.count<ALL_PIECES>()];
     const auto psqt   = featureTransformer->transform(pos, transformedFeatures, bucket, psqtOnly);
     const auto positional = !psqtOnly ? (network[bucket]->propagate(transformedFeatures)) : 0;
 
