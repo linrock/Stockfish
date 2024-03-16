@@ -150,6 +150,64 @@ Search::Worker::Worker(SharedState&                    sharedState,
 
 void Search::Worker::start_searching() {
 
+    
+/*std::cout << "  int nb"<< "[" << 8 << "] = {";
+for (size_t j=0; j < 8; ++j)
+  {
+        std::cout << networks.big.network[j]->fc_2.biases[0];
+         if (j < 7) std::cout << ", ";
+  }
+std::cout << "}; " << std::endl;*/
+
+    
+ std::cout << "  int nbnw"<< "[" << 264 << "] = {";
+for (size_t j=0; j < 8; ++j)
+  {
+    if (j>0)
+	{
+		std::cout << ", " << std::endl;
+	};
+     size_t ndim=1;
+     for (size_t i=0; i < ndim; ++i)
+     {
+            std::cout << int(networks.big.network[j]->fc_2.biases[i]);
+         if (i < ndim - 1) std::cout << ", ";
+     }
+     std::cout << ", " << std::endl;
+     ndim=32;
+     for (size_t i=0; i < ndim; ++i)
+     {
+         std::cout << int(networks.big.network[j]->fc_2.weights[i]);
+         if (i < ndim - 1) std::cout << ", ";
+     }
+  }
+std::cout << "}; " << std::endl;
+
+
+    /*
+// Output by network
+for (size_t j=0; j < 8; ++j)
+  {
+     std::cout << " // network " << j << std::endl;
+     size_t ndim=1;
+     std::cout << "  int netbiases_" << j << "[" << ndim << "] = {";
+     for (size_t i=0; i < ndim; ++i)
+     {
+         std::cout << int(Stockfish::Eval::NNUE::network[j]->biases[i]);
+         if (i < ndim - 1) std::cout << ", ";
+     }
+     std::cout << "}; " << std::endl;
+     ndim=32;
+     std::cout << "  int netweights_" << j << "[" << ndim << "] = {";
+     for (size_t i=0; i < ndim; ++i)
+     {
+         std::cout << int(Stockfish::Eval::NNUE::network[j]->weights[i]);
+         if (i < ndim - 1) std::cout << ", ";
+     }
+     std::cout << "}; " << std::endl;
+  }
+*/
+
     // Non-main threads go directly to iterative_deepening()
     if (!is_mainthread())
     {
