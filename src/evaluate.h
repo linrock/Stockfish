@@ -29,13 +29,13 @@ class Position;
 
 namespace Eval {
 
-constexpr inline int SmallNetThreshold = 1050, PsqtOnlyThreshold = 2500;
+constexpr inline int SmallNetThreshold = 1337, PsqtOnlyThreshold = 2500;
 
 // The default net name MUST follow the format nn-[SHA256 first 12 digits].nnue
 // for the build process (profile-build and fishtest) to work. Do not change the
 // name of the macro or the location where this macro is defined, as it is used
 // in the Makefile/Fishtest.
-#define EvalFileDefaultNameBig "nn-1ceb1ade0001.nnue"
+#define EvalFileDefaultNameBig "nn-fe11b1ade500.nnue"
 #define EvalFileDefaultNameSmall "nn-baff1ede1f90.nnue"
 
 namespace NNUE {
