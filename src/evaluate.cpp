@@ -55,8 +55,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
     int  nnueComplexity;
     int  v;
 
-    Value nnue = smallNet ? networks.small.evaluate(pos, true, &nnueComplexity, psqtOnly)
-                          : networks.big.evaluate(pos, true, &nnueComplexity, false);
+    Value nnue = smallNet ? networks.small.evaluate(pos, true, &nnueComplexity, psqtOnly, false)
+                          : networks.big.evaluate(pos, true, &nnueComplexity, false, true);
 
     const auto adjustEval = [&](int optDiv, int nnueDiv, int pawnCountConstant, int pawnCountMul,
                                 int npmConstant, int evalDiv, int shufflingConstant,
