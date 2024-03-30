@@ -608,9 +608,7 @@ namespace Stockfish::Tools
         limits.depth = 0;
 
         std::atomic<std::uint64_t> num_processed = 0;
-        std::atomic<std::uint64_t> num_skipped_cap_promo = 0;
         std::atomic<std::uint64_t> num_skipped_in_check = 0;
-        std::atomic<std::uint64_t> num_skipped_se_too_high = 0;
         std::atomic<std::uint64_t> num_skipped_se_too_low = 0;
         std::atomic<std::uint64_t> num_skipped_3p = 0;
         std::atomic<std::uint64_t> num_saved = 0;
@@ -637,10 +635,7 @@ namespace Stockfish::Tools
                     bool should_skip = false;
                     int pieceCount = pos.count<ALL_PIECES>();
 
-                    if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
-                        num_skipped_cap_promo.fetch_add(1) + 1;
-                        should_skip = true;
-                    } else if (pos.checkers()) {
+                    if (pos.checkers()) {
                         num_skipped_in_check.fetch_add(1) + 1;
                         should_skip = true;
                     } else if (pieceCount <= 3) {
@@ -656,22 +651,9 @@ namespace Stockfish::Tools
                             1276 * (pos.count<ROOK>(WHITE) - pos.count<ROOK>(BLACK)) +
                             2538 * (pos.count<QUEEN>(WHITE) - pos.count<QUEEN>(BLACK))
                         );
-                        if (pieceCount >= 16) {
-                            // there are much fewer high simple eval positions in the early game
-                            // filter out fewer positions when piece count is high
-                            if (absSimpleEval < 700) {
-                                num_skipped_se_too_low.fetch_add(1) + 1;
-                                should_skip = true;
-                            }
-                        } else {
-                            // filter out more positions when piece count is low
-                            if (absSimpleEval < 750) {
-                                num_skipped_se_too_low.fetch_add(1) + 1;
-                                should_skip = true;
-                            } else if (absSimpleEval < 900 && pieceCount == 4) {
-                                num_skipped_se_too_low.fetch_add(1) + 1;
-                                should_skip = true;
-                            }
+                        if (absSimpleEval < 500) {
+                            num_skipped_se_too_low.fetch_add(1) + 1;
+                            should_skip = true;
                         }
                     }
 
@@ -683,18 +665,14 @@ namespace Stockfish::Tools
 
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 100000 == 0) {
-                        auto skc = num_skipped_cap_promo.load();
                         auto ski = num_skipped_in_check.load();
                         auto sk3p = num_skipped_3p.load();
-                        auto skth = num_skipped_se_too_high.load();
                         auto sktl = num_skipped_se_too_low.load();
 
                         auto ns = num_saved.load();
                         sync_cout << p << " positions, kept: " << ns << " (" << int(100.0 * ns / p) << "%)" << sync_endl
-                                  << "  skipped cap/promo:    " << skc << sync_endl
                                   << "  skipped in check:     " << ski << sync_endl
                                   << "  skipped 3 pieces:     " << sk3p << sync_endl
-                                  << "  skipped SE too high:  " << skth << sync_endl
                                   << "  skipped SE too low:   " << sktl << sync_endl;
                         ;
                     }
