@@ -49,6 +49,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
 
     assert(!pos.checkers());
 
+    if (pos.count<ALL_PIECES>() == 2) {
+      return 0;
+    }
+
     int  simpleEval = simple_eval(pos, pos.side_to_move());
     bool smallNet   = std::abs(simpleEval) > SmallNetThreshold;
     bool psqtOnly   = std::abs(simpleEval) > PsqtOnlyThreshold;
