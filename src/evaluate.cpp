@@ -55,12 +55,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
     int  nnueComplexity;
     int  v;
 
-    int accBias = pos.state()->accumulatorBig.computed[0]
-                + pos.state()->accumulatorBig.computed[1]
-                - pos.state()->accumulatorSmall.computed[0]
-                - pos.state()->accumulatorSmall.computed[1];
-    if (accBias <= 0 && pos.count<ALL_PIECES>() == 3) {
-      smallNet = true;
+    if (!smallNet && pos.count<ALL_PIECES>() <= 3) {
+      int accBias = pos.state()->accumulatorBig.computed[0]
+                  + pos.state()->accumulatorBig.computed[1]
+                  - pos.state()->accumulatorSmall.computed[0]
+                  - pos.state()->accumulatorSmall.computed[1];
+      if (accBias <= 0) {
+        smallNet = true;
+      }
     }
 
     Value nnue = smallNet ? networks.small.evaluate(pos, true, &nnueComplexity, psqtOnly)
@@ -93,6 +95,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 
+    // if (pos.count<ALL_PIECES>() == 2) {
+    //   sync_cout << "2 pieces eval:" << sync_endl;
+    //   sync_cout << v << sync_endl;
+    // }
     return v;
 }
 
