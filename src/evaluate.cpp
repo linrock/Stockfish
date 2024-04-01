@@ -56,9 +56,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
     int  v;
 
     if (!smallNet && pos.count<ALL_PIECES>() <= 4) {
-      if (!pos.state()->accumulatorBig.computed[0] && !pos.state()->accumulatorBig.computed[1]) {
-        smallNet = true;
-      }
+      smallNet = true;
     }
 
     Value nnue = smallNet ? networks.small.evaluate(pos, true, &nnueComplexity, psqtOnly)
