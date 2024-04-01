@@ -49,17 +49,12 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
 
     assert(!pos.checkers());
 
+    int  pieceCount = pos.count<ALL_PIECES>();
     int  simpleEval = simple_eval(pos, pos.side_to_move());
-    bool smallNet   = std::abs(simpleEval) > SmallNetThreshold;
+    bool smallNet   = std::abs(simpleEval) > SmallNetThreshold || (pieceCount <= 5 && std::abs(simpleEval) > 500);
     bool psqtOnly   = std::abs(simpleEval) > PsqtOnlyThreshold;
     int  nnueComplexity;
     int  v;
-
-    if (!smallNet && pos.count<ALL_PIECES>() <= 5) {
-      if (!pos.state()->accumulatorBig.computed[0] && !pos.state()->accumulatorBig.computed[1]) {
-        smallNet = true;
-      }
-    }
 
     Value nnue = smallNet ? networks.small.evaluate(pos, true, &nnueComplexity, psqtOnly)
                           : networks.big.evaluate(pos, true, &nnueComplexity, false);
