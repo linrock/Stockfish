@@ -55,8 +55,13 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
     int  nnueComplexity;
     int  v;
 
-    if (!smallNet && pos.count<ALL_PIECES>() <= 4) {
-      if (!pos.state()->accumulatorBig.computed[0] && !pos.state()->accumulatorBig.computed[1]) {
+    int pieceCount = pos.count<ALL_PIECES>();
+    if (!smallNet && (pieceCount == 3 || pieceCount == 4)) {
+      int accBias = pos.state()->accumulatorBig.computed[0]
+                  + pos.state()->accumulatorBig.computed[1]
+                  - pos.state()->accumulatorSmall.computed[0]
+                  - pos.state()->accumulatorSmall.computed[1];
+      if (accBias <= 0) {
         smallNet = true;
       }
     }
