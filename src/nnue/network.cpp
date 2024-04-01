@@ -184,12 +184,24 @@ bool Network<Arch, Transformer>::save(const std::optional<std::string>& filename
     return saved;
 }
 
+constexpr int PsqtBucketNum[33] = {
+    0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0,    //  2   3   4   5   6   7   8   9  10
+    1, 1, 1,
+    2, 2, 2,
+    3, 3, 3,
+    4, 4, 4,
+    5, 5, 5,
+    6, 6, 6,
+    7, 7, 7, 7                    //  29  30  31  32
+};
 
 template<typename Arch, typename Transformer>
 Value Network<Arch, Transformer>::evaluate(const Position& pos,
                                            bool            adjusted,
                                            int*            complexity,
-                                           bool            psqtOnly) const {
+                                           bool            psqtOnly,
+                                           bool            psqtUnevenBuckets) const {
     // We manually align the arrays on the stack because with gcc < 9.3
     // overaligning stack variables with alignas() doesn't work correctly.
 
@@ -209,7 +221,8 @@ Value Network<Arch, Transformer>::evaluate(const Position& pos,
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
-    const int  bucket = (pos.count<ALL_PIECES>() - 1) / 4;
+    // const int  bucket = (pos.count<ALL_PIECES>() - 1) / 4;
+    const int  bucket = psqtUnevenBuckets ? PsqtBucketNum[pos.count<ALL_PIECES>()] : (pos.count<ALL_PIECES>() - 1) / 4;;
     const auto psqt   = featureTransformer->transform(pos, transformedFeatures, bucket, psqtOnly);
     const auto positional = !psqtOnly ? (network[bucket]->propagate(transformedFeatures)) : 0;
 

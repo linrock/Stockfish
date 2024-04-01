@@ -55,7 +55,8 @@ class Network {
     Value evaluate(const Position& pos,
                    bool            adjusted   = false,
                    int*            complexity = nullptr,
-                   bool            psqtOnly   = false) const;
+                   bool            psqtOnly   = false,
+                   bool            psqtUnevenBuckets = false) const;
 
 
     void hint_common_access(const Position& pos, bool psqtOnl) const;
