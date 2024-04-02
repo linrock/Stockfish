@@ -45,7 +45,7 @@ constexpr std::string_view PieceToChar(" PNBRQK  pnbrqk");
 void hint_common_parent_position(const Position& pos, const Networks& networks) {
     int pieceCount    = pos.count<ALL_PIECES>();
     int simpleEvalAbs = std::abs(simple_eval(pos, pos.side_to_move()));
-    if (simpleEvalAbs > Eval::SmallNetThreshold || (pieceCount <= 5 && simpleEvalAbs > 500))
+    if ((simpleEvalAbs > Eval::SmallNetThreshold) || pieceCount <= 5)
         networks.small.hint_common_access(pos, simpleEvalAbs > Eval::PsqtOnlyThreshold);
     else
         networks.big.hint_common_access(pos, false);
