@@ -36,7 +36,7 @@ constexpr inline int SmallNetThreshold = 1165, PsqtOnlyThreshold = 2500;
 // name of the macro or the location where this macro is defined, as it is used
 // in the Makefile/Fishtest.
 #define EvalFileDefaultNameBig "nn-ae6a388e4a1a.nnue"
-#define EvalFileDefaultNameSmall "nn-6e181d16b2cf.nnue"
+#define EvalFileDefaultNameSmall "nn-1e6bc5bd8da5.nnue"
 
 namespace NNUE {
 struct Networks;
