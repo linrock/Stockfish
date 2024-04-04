@@ -39,8 +39,8 @@ using FeatureSet = Features::HalfKAv2_hm;
 
 // Number of input feature dimensions after conversion
 constexpr IndexType TransformedFeatureDimensions = 128;
-constexpr IndexType PSQTBuckets                  = 1;
-constexpr IndexType LayerStacks                  = 1;
+constexpr IndexType PSQTBuckets                  = 2;
+constexpr IndexType LayerStacks                  = 2;
 
 struct Network {
     static constexpr int FC_0_OUTPUTS = 15;
