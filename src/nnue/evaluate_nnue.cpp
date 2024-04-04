@@ -175,7 +175,7 @@ Value evaluate(const Position& pos, bool adjusted, int* complexity) {
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
-    const int  bucket     = (pos.count<ALL_PIECES>() - 1) / 2;
+    const int  bucket     = 0;
     const auto psqt       = featureTransformer->transform(pos, transformedFeatures, bucket);
     const auto positional = network[bucket]->propagate(transformedFeatures);
 
@@ -217,7 +217,7 @@ static NnueEvalTrace trace_evaluate(const Position& pos) {
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
     NnueEvalTrace t{};
-    t.correctBucket = (pos.count<ALL_PIECES>() - 1) / 2;
+    t.correctBucket = 0;
     for (IndexType bucket = 0; bucket < LayerStacks; ++bucket)
     {
         const auto materialist = featureTransformer->transform(pos, transformedFeatures, bucket);
