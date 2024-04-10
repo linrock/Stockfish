@@ -154,6 +154,18 @@ void hint_common_parent_position(const Position& pos) {
     featureTransformer->hint_common_access(pos);
 }
 
+constexpr int PsqtBucketIdx[33] = {
+    0, 0, 0,
+    0, 0, 0, 0, 0, 0,  //  3   4   5   6   7   8
+    1, 1, 1,           //  9  10  11
+    2, 2, 2,
+    3, 3, 3,
+    4, 4, 4,
+    5, 5, 5,
+    6, 6, 6,
+    7, 7, 7, 7, 7, 7   /// 27 28 29 30 31 32
+};
+
 // Evaluation function. Perform differential calculation.
 Value evaluate(const Position& pos, bool adjusted, int* complexity) {
 
@@ -175,7 +187,7 @@ Value evaluate(const Position& pos, bool adjusted, int* complexity) {
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
-    const int  bucket     = (pos.count<ALL_PIECES>() - 1) / 4;
+    const int  bucket     = PsqtBucketIdx[pos.count<ALL_PIECES>()];
     const auto psqt       = featureTransformer->transform(pos, transformedFeatures, bucket);
     const auto positional = network[bucket]->propagate(transformedFeatures);
 
