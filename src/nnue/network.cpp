@@ -185,6 +185,19 @@ bool Network<Arch, Transformer>::save(const std::optional<std::string>& filename
 }
 
 
+constexpr int PsqtBucketIdx[33] = {
+    0, 0, 0,
+    0, 0, 0, 0, 0, 0,  //  3   4   5   6   7   8
+    1, 1, 1,           //  9  10  11
+    2, 2, 2,
+    3, 3, 3,
+    4, 4, 4,
+    5, 5, 5,
+    6, 6, 6,
+    7, 7, 7, 7, 7, 7   /// 27 28 29 30 31 32
+};
+
+
 template<typename Arch, typename Transformer>
 Value Network<Arch, Transformer>::evaluate(const Position& pos,
                                            bool            adjusted,
@@ -209,7 +222,9 @@ Value Network<Arch, Transformer>::evaluate(const Position& pos,
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
-    const int  bucket = (pos.count<ALL_PIECES>() - 1) / 4;
+    const int bucket = (Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsSmall) ?
+                         PsqtBucketIdx[pos.count<ALL_PIECES>()] :
+                         (pos.count<ALL_PIECES>() - 1) / 4;
     const auto psqt   = featureTransformer->transform(pos, transformedFeatures, bucket, psqtOnly);
     const auto positional = !psqtOnly ? (network[bucket]->propagate(transformedFeatures)) : 0;
 
