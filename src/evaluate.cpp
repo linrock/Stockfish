@@ -62,7 +62,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Value nnue = smallNet ? networks.small.evaluate(pos, &caches.small, true, &nnueComplexity)
                           : networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
 
-    if (smallNet && (nnue * simpleEval < 0 || abs(nnue) < 350))
+    if (smallNet && (nnue * simpleEval < 0 || abs(nnue) < 500))
         nnue = networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
 
     const auto adjustEval = [&](int nnueDiv, int pawnCountConstant, int pawnCountMul,
