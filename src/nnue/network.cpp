@@ -194,7 +194,7 @@ Value Network<Arch, Transformer>::evaluate(const Position&                      
     // overaligning stack variables with alignas() doesn't work correctly.
 
     constexpr uint64_t alignment = CacheLineSize;
-    constexpr int      delta     = 32;
+    constexpr int      delta     = 16;
 
 #if defined(ALIGNAS_ON_STACK_VARIABLES_BROKEN)
     TransformedFeatureType
