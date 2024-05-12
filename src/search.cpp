@@ -150,7 +150,7 @@ Search::Worker::Worker(SharedState&                    sharedState,
 
 void Search::Worker::start_searching() {
 
-
+    std::cout << "int ow[256] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
         for (size_t i = 0; i < 32; ++i)
@@ -159,8 +159,10 @@ void Search::Worker::start_searching() {
             std::cout << ", ";
         }
     }
-    std::cout << std::endl;
+    std::cout << "};" << std::endl << std::endl;
 
+
+    std::cout << "int ob[8] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
         for (size_t i = 0; i < 1; ++i)
@@ -169,9 +171,10 @@ void Search::Worker::start_searching() {
             std::cout << ", ";
         }
     }
+    std::cout << "};" << std::endl << std::endl;
 
-    std::cout << std::endl;
 
+    std::cout << "int twob[256] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
         for (size_t i = 0; i < 32; ++i)
@@ -180,9 +183,10 @@ void Search::Worker::start_searching() {
             std::cout << ", ";
         }
     }
+    std::cout << "};" << std::endl << std::endl;
 
-    std::cout << std::endl;
 
+    std::cout << "int oneb[128] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
         for (size_t i = 0; i < 16; ++i)
@@ -191,6 +195,7 @@ void Search::Worker::start_searching() {
             std::cout << ", ";
         }
     }
+    std::cout << "};" << std::endl << std::endl;
 
 
     // Non-main threads go directly to iterative_deepening()
