@@ -55,7 +55,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     assert(!pos.checkers());
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
-    bool smallNet   = std::abs(simpleEval) > SmallNetThreshold + (pos.count<ALL_PIECES>() - 16) * 20;
+    bool smallNet   = std::abs(simpleEval) > SmallNetThreshold + (pos.count<ALL_PIECES>() - 16) * 12;
     int  nnueComplexity;
     int  v;
 
