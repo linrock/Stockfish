@@ -62,7 +62,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Value nnue = smallNet ? networks.small.evaluate(pos, &caches.small, true, &nnueComplexity)
                           : networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
 
-    if (smallNet && ((nnue * simpleEval < 0 || abs(nnue) < 500) || (pos.key() & 7) == 0)) {
+    if (smallNet && (nnue * simpleEval < 0 || abs(nnue) < 350 || (((pos.key() & 3) == 0) && abs(nnue) < 700))) {
         nnue = networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
         smallNet = false;
     }
