@@ -36,6 +36,27 @@
 
 namespace Stockfish {
 
+    int snThresh = 1126;
+    TUNE(SetRange(563, 2252), snThresh);
+
+    int snPc = 6;
+    TUNE(SetRange(-26, 38), snPc);
+
+    int optDivNc = 584;
+    TUNE(SetRange(146, 2336), optDivNc);
+
+    int optDivSimpEv = 584;
+    TUNE(SetRange(146, 2336), optDivSimpEv);
+
+    int nnueDiv = 32395;
+    TUNE(SetRange(16197, 64790), nnueDiv);
+
+    int evalDiv = 1058;
+    TUNE(SetRange(529, 2116), evalDiv);
+
+    int npmOffset = 943;
+    TUNE(SetRange(543, 1343), npmOffset);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -46,7 +67,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 1126 + 6 * pos.count<PAWN>();
+    return std::abs(simpleEval) > snThresh + snPc * pos.count<PAWN>();
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -66,18 +87,18 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Value nnue = smallNet ? networks.small.evaluate(pos, &caches.small, true, &nnueComplexity)
                           : networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
 
-    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < 500))
+    if (smallNet && nnue * simpleEval < 0)
     {
         nnue     = networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
         smallNet = false;
     }
 
     // Blend optimism and eval with nnue complexity and material imbalance
-    optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / 584;
-    nnue -= nnue * (nnueComplexity * 5 / 3) / 32395;
+    optimism += optimism * (nnueComplexity / optDivNc + std::abs(simpleEval - nnue) / optDivSimpEv);
+    nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
 
     int npm = pos.non_pawn_material() / 64;
-    v       = (nnue * (npm + 943 + 11 * pos.count<PAWN>()) + optimism * (npm + 140)) / 1058;
+    v       = (nnue * (npm + 943 + 11 * pos.count<PAWN>()) + optimism * (npm + 140)) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
     v = v * ((smallNet ? 206 : 178) - pos.rule50_count()) / 207;
