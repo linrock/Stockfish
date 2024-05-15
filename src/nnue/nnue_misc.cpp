@@ -45,9 +45,10 @@ constexpr std::string_view PieceToChar(" PNBRQK  pnbrqk");
 void hint_common_parent_position(const Position&    pos,
                                  const Networks&    networks,
                                  AccumulatorCaches& caches) {
+    const int bucket = (pos.count<ALL_PIECES>() - 1) / 4;
 
     int simpleEvalAbs = std::abs(simple_eval(pos, pos.side_to_move()));
-    if (simpleEvalAbs > Eval::SmallNetThreshold)
+    if (simpleEvalAbs > Eval::SmallNetThreshold + bucket * 16)
         networks.small.hint_common_access(pos, &caches.small);
     else
         networks.big.hint_common_access(pos, &caches.big);
