@@ -36,6 +36,21 @@
 
 namespace Stockfish {
 
+    int snThresh = 1174;
+    TUNE(SetRange(874, 1474), snThresh);
+
+    int reEvalThresh = 500;
+    TUNE(SetRange(0, 1000), reEvalThresh);
+
+    int optDiv = 584;
+    TUNE(SetRange(292, 1168), optDiv);
+
+    int nnueDiv = 32399;
+    TUNE(SetRange(22399, 42399), nnueDiv);
+
+    int evalDiv = 1058;
+    TUNE(SetRange(758, 1358), evalDiv);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -70,8 +85,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     const auto adjustEval = [&](int pawnCountMul, int shufflingConstant) {
         // Blend optimism and eval with nnue complexity and material imbalance
-        optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / 584;
-        nnue -= nnue * (nnueComplexity * 5 / 3) / 32395;
+        optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / optDiv;
+        nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
 
         int npm = pos.non_pawn_material() / 64;
         v = (nnue * (npm + 943 + pawnCountMul * pos.count<PAWN>()) + optimism * (npm + 140)) / 1058;
