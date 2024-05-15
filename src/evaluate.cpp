@@ -36,6 +36,24 @@
 
 namespace Stockfish {
 
+    int snThresh = 1174;
+    TUNE(SetRange(874, 1474), snThresh);
+
+    int reEvalThresh = 500;
+    TUNE(SetRange(0, 1000), reEvalThresh);
+
+    int optDiv = 584;
+    TUNE(SetRange(292, 1168), optDiv);
+
+    int nnueDivBig = 32395;
+    TUNE(SetRange(27395, 37395), nnueDivBig);
+
+    int nnueDivSmall = 32793;
+    TUNE(SetRange(27793, 37793), nnueDivSmall);
+
+    int evalDiv = 1058;
+    TUNE(SetRange(758, 1358), evalDiv);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -55,19 +73,19 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     assert(!pos.checkers());
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
-    bool smallNet   = std::abs(simpleEval) > SmallNetThreshold;
+    bool smallNet   = std::abs(simpleEval) > snThresh;
     int  nnueComplexity;
     int  v;
 
     Value nnue = smallNet ? networks.small.evaluate(pos, &caches.small, true, &nnueComplexity)
                           : networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
 
-    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < 500))
+    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < reEvalThresh))
         nnue = networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
 
-    const auto adjustEval = [&](int nnueDiv, int pawnCountMul, int evalDiv, int shufflingConstant) {
+    const auto adjustEval = [&](int nnueDiv, int pawnCountMul, int shufflingConstant) {
         // Blend optimism and eval with nnue complexity and material imbalance
-        optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / 584;
+        optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / optDiv;
         nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
 
         int npm = pos.non_pawn_material() / 64;
@@ -80,9 +98,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     };
 
     if (!smallNet)
-        adjustEval(32395, 11, 1058, 178);
+        adjustEval(nnueDivBig, 11, 178);
     else
-        adjustEval(32793, 9, 1067, 206);
+        adjustEval(nnueDivSmall, 9, 206);
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
