@@ -12,6 +12,8 @@ with open("spsa-variables-cpp.txt", "r") as f:
 with open("search.cpp", "w") as f:
     f.write(
         search_cpp.split("// spsa vars start")[0] +
+        "// spsa vars start\n" +
         spsa_cpp +
+        "// spsa vars end\n" +
         search_cpp.split("// spsa vars end")[1]
     )
