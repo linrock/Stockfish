@@ -40,13 +40,13 @@ namespace Stockfish {
     TUNE(SetRange(874, 1474), snThresh);
 
     int snPc = 6;
-    TUNE(SetRange(-10, 22), snPc);
+    TUNE(SetRange(-26, 38), snPc);
 
     int reEvalThresh = 507;
     TUNE(SetRange(0, 1014), reEvalThresh);
 
-    int optDiv = 584;
-    TUNE(SetRange(292, 1168), optDiv);
+    int optDiv = 633;
+    TUNE(SetRange(316, 1266), optDiv);
 
     int nnueDiv = 32399;
     TUNE(SetRange(16200, 64798), nnueDiv);
