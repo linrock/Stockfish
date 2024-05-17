@@ -36,8 +36,11 @@
 
 namespace Stockfish {
 
-    int snThresh = 1174;
+    int snThresh = 1126;
     TUNE(SetRange(874, 1474), snThresh);
+
+    int snPc = 6;
+    TUNE(SetRange(-10, 22), snPc);
 
     int reEvalThresh = 507;
     TUNE(SetRange(0, 1014), reEvalThresh);
@@ -48,8 +51,11 @@ namespace Stockfish {
     int nnueDiv = 32399;
     TUNE(SetRange(16200, 64798), nnueDiv);
 
-    int evalDiv = 1058;
-    TUNE(SetRange(758, 1358), evalDiv);
+    int evalDiv = 1040;
+    TUNE(SetRange(520, 2080), evalDiv);
+
+    int npmOffset = 943;
+    TUNE(SetRange(543, 1343), npmOffset);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -61,7 +67,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 1126 + 6 * pos.count<PAWN>();
+    return std::abs(simpleEval) > snThresh + snPc * pos.count<PAWN>();
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -81,7 +87,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Value nnue = smallNet ? networks.small.evaluate(pos, &caches.small, true, &nnueComplexity)
                           : networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
 
-    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < 500))
+    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < reEvalThresh))
     {
         nnue     = networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
         smallNet = false;
@@ -93,7 +99,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
         nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
 
         int npm = pos.non_pawn_material() / 64;
-        v = (nnue * (npm + 943 + pawnCountMul * pos.count<PAWN>()) + optimism * (npm + 140)) / 1058;
+        v = (nnue * (npm + npmOffset + pawnCountMul * pos.count<PAWN>()) + optimism * (npm + 140)) / evalDiv;
 
         // Damp down the evaluation linearly when shuffling
         int shuffling = pos.rule50_count();
@@ -101,9 +107,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     };
 
     if (!smallNet)
-        adjustEval(11, 178);
+        adjustEval(12, 178);
     else
-        adjustEval(9, 206);
+        adjustEval(8, 206);
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
