@@ -14,6 +14,6 @@ with open("search.cpp", "w") as f:
         search_cpp.split("// spsa vars start")[0] +
         "// spsa vars start\n" +
         spsa_cpp +
-        "// spsa vars end\n" +
+        "// spsa vars end" +
         search_cpp.split("// spsa vars end")[1]
     )
