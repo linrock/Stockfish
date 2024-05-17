@@ -82,7 +82,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     };
 
     if (!smallNet)
-        adjustEval(11, 178);
+        adjustEval(12, 178);
     else
         adjustEval(9, 206);
 
