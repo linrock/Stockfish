@@ -55,7 +55,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     assert(!pos.checkers());
 
     Color c = pos.side_to_move();
-    if (pos.count<ALL_PIECES>() <= 6
+    if (pos.count<ALL_PIECES>() <= 8
         && pos.count<BISHOP>() + pos.count<KNIGHT>() == pos.count<ALL_PIECES>() - 2
         && std::abs(pos.count<BISHOP>(c) + pos.count<KNIGHT>(c) - pos.count<BISHOP>(~c)
                     - pos.count<KNIGHT>(~c))
