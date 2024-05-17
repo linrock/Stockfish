@@ -54,8 +54,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     assert(!pos.checkers());
 
-    if (pos.count<ALL_PIECES>() <= 6 && pos.count<BISHOP>() + pos.count<KNIGHT>() == pos.count<ALL_PIECES>() - 2) {
-      return 0;
+    Color c = pos.side_to_move();
+    if (pos.count<ALL_PIECES>() <= 6
+        && pos.count<BISHOP>() + pos.count<KNIGHT>() == pos.count<ALL_PIECES>() - 2
+        && std::abs(pos.count<BISHOP>(c) + pos.count<KNIGHT>(c) - pos.count<BISHOP>(~c)
+                    - pos.count<KNIGHT>(~c))
+             <= 2)
+    {
+        return 0;
     }
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
