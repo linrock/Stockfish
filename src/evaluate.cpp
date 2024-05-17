@@ -54,6 +54,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     assert(!pos.checkers());
 
+    if (pos.count<ALL_PIECES>() <= 6 && pos.count<BISHOP>() + pos.count<KNIGHT>() == pos.count<ALL_PIECES>() - 2) {
+      return 0;
+    }
+
     int  simpleEval = simple_eval(pos, pos.side_to_move());
     bool smallNet   = std::abs(simpleEval) > SmallNetThreshold + 6 * pos.count<PAWN>();
     int  nnueComplexity;
