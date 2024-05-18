@@ -80,13 +80,13 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
         smallNet = false;
     }
 
-    const auto adjustEval = [&](int pawnCountMul, int shufflingConstant) {
+    const auto adjustEval = [&](int shufflingConstant) {
         // Blend optimism and eval with nnue complexity and material imbalance
         optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / optDiv;
         nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
 
         int npm = pos.non_pawn_material() / 64;
-        v = (nnue * (npm + npmOffset + pawnCountMul * pos.count<PAWN>()) + optimism * (npm + 140)) / evalDiv;
+        v = (nnue * (npm + npmOffset + 11 * pos.count<PAWN>()) + optimism * (npm + 140)) / evalDiv;
 
         // Damp down the evaluation linearly when shuffling
         int shuffling = pos.rule50_count();
@@ -94,9 +94,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     };
 
     if (!smallNet)
-        adjustEval(11, 178);
+        adjustEval(178);
     else
-        adjustEval(11, 206);
+        adjustEval(206);
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
