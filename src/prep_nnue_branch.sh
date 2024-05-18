@@ -6,7 +6,9 @@ nnue_filename=$1
 
 sha256_hash=$(sha256sum $nnue_filename)
 nnue_name=nn-${sha256_hash:0:12}.nnue
-cp $nnue_filename $nnue_name
+if [[ $nnue_filename != $nnue_name ]]; then
+  cp $nnue_filename $nnue_name
+fi
 ls -lth $nnue_name
 echo $nnue_name
 
