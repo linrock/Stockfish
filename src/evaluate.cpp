@@ -58,7 +58,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     assert(!pos.checkers());
 
-    if (pos.count<ALL_PIECES>() <= 6 && pos.count<BISHOP>() + pos.count<KNIGHT>() == pos.count<ALL_PIECES>() - 2) {
+    if (pos.count<ALL_PIECES>() <= 4 && pos.count<BISHOP>() + pos.count<KNIGHT>() == pos.count<ALL_PIECES>() - 2) {
       return 0;
     }
 
