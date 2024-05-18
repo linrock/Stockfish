@@ -74,7 +74,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
         nnue -= nnue * (nnueComplexity * 5 / 3) / 32395;
 
         int npm = pos.non_pawn_material() / 64;
-        v = (nnue * (npm + 943 + 11 * pos.count<PAWN>()) + optimism * (npm + 140)) / 1058;
+        v = (nnue * (npm + 943 + 12 * pos.count<PAWN>()) + optimism * (npm + 140)) / 1058;
 
         // Damp down the evaluation linearly when shuffling
         int shuffling = pos.rule50_count();
