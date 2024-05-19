@@ -73,16 +73,13 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity and material imbalance
+    const int optimismBefore = optimism;
     optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / 584;
+
     const int nnueBefore = nnue;
     nnue -= nnue * (nnueComplexity * 5 / 3) / 32395;
 
-    sync_cout << pos.fen() << sync_endl;
-    sync_cout << "# pieces: " << pos.count<ALL_PIECES>() << sync_endl;
-    sync_cout << "nnueComplexity: " << nnueComplexity << sync_endl;
-    sync_cout << "simpleEval: " << simpleEval << sync_endl;
-    sync_cout << "npm / 256: " << pos.non_pawn_material() / 256 << sync_endl;
-    sync_cout << "nnue: " << nnueBefore << " -> " << nnue << sync_endl << sync_endl;
+    // sync_cout << "npm / 256: " << pos.non_pawn_material() / 256 << sync_endl;  32 pieces = 64
 
     int npm = pos.non_pawn_material() / 64;
     v       = (nnue * (npm + 943 + 11 * pos.count<PAWN>()) + optimism * (npm + 140)) / 1058;
@@ -92,6 +89,18 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
+
+    if (nnueComplexity > 7000) { 
+    sync_cout << pos.fen() << sync_endl;
+    sync_cout << "# pieces: " << pos.count<ALL_PIECES>() << sync_endl;
+    sync_cout << "optimism: " << optimismBefore << " -> " << optimism << sync_endl;
+    sync_cout << "nnueComplexity: " << nnueComplexity << sync_endl;
+    sync_cout << "simpleEval: " << simpleEval << sync_endl;
+    sync_cout << "abs(simpleEval - nnue): " << std::abs(simpleEval - nnue) << sync_endl;
+    sync_cout << "nnue: " << nnueBefore << " -> " << nnue << sync_endl;
+    sync_cout << "v: " << v << " -> " << v << sync_endl << sync_endl;
+    sync_cout << sync_endl;
+    }
 
     return v;
 }
