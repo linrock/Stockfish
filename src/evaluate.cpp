@@ -81,6 +81,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     sync_cout << "# pieces: " << pos.count<ALL_PIECES>() << sync_endl;
     sync_cout << "nnueComplexity: " << nnueComplexity << sync_endl;
     sync_cout << "simpleEval: " << simpleEval << sync_endl;
+    sync_cout << "npm / 256: " << pos.non_pawn_material() / 256 << sync_endl;
     sync_cout << "nnue: " << nnueBefore << " -> " << nnue << sync_endl << sync_endl;
 
     int npm = pos.non_pawn_material() / 64;
