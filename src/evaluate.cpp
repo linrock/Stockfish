@@ -36,26 +36,13 @@
 
 namespace Stockfish {
 
-    int snThresh = 1126;
-    TUNE(SetRange(563, 2252), snThresh);
-
-    int snPc = 6;
-    TUNE(SetRange(-26, 38), snPc);
-
-    int optDivNc = 584;
-    TUNE(SetRange(146, 2336), optDivNc);
-
-    int optDivSimpEv = 584;
-    TUNE(SetRange(146, 2336), optDivSimpEv);
-
-    int nnueDiv = 32395;
-    TUNE(SetRange(16197, 64790), nnueDiv);
-
-    int evalDiv = 1058;
-    TUNE(SetRange(529, 2116), evalDiv);
-
-    int npmOffset = 943;
-    TUNE(SetRange(543, 1343), npmOffset);
+    constexpr int snThresh = 1113;
+    constexpr int snPc = 6;
+    constexpr int optDivNc = 595;
+    constexpr int optDivSimpEv = 590;
+    constexpr int nnueDiv = 32442;
+    constexpr int evalDiv = 1040;
+    constexpr int npmOffset = 949;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
