@@ -78,7 +78,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     nnue -= nnue * (nnueComplexity * 5 / 3) / 32395;
 
     sync_cout << pos.fen() << sync_endl;
-    sync_cout << "complexity nnue se: " << nnueComplexity << " " << std::abs(simpleEval - nnue) << sync_endl;
+    sync_cout << "# pieces: " << pos.count<ALL_PIECES>() << sync_endl;
+    sync_cout << "nnueComplexity: " << nnueComplexity << sync_endl;
+    sync_cout << "simpleEval: " << simpleEval << sync_endl;
     sync_cout << "nnue: " << nnueBefore << " -> " << nnue << sync_endl << sync_endl;
 
     int npm = pos.non_pawn_material() / 64;
