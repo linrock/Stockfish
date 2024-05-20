@@ -80,7 +80,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     v       = (nnue * (npm + 943 + 11 * pos.count<PAWN>()) + optimism * (npm + 140)) / 1058;
 
     if (nnue * v < 0)
-      return nnue;
+      return nnue / 2;
 
     // Damp down the evaluation linearly when shuffling
     v = v * ((smallNet ? 206 : 178) - pos.rule50_count()) / 207;
