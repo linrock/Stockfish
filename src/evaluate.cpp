@@ -48,14 +48,8 @@ namespace Stockfish {
     int nnueDiv = 32279;
     TUNE(SetRange(16139, 64558), nnueDiv);
 
-    int nnueNpmOffset = 943;
-    TUNE(SetRange(543, 1343), nnueNpmOffset);
-
-    int optNpmOffset = 140;
-    TUNE(SetRange(0, 280), optNpmOffset);
-
-    int evalDiv = 965;
-    TUNE(SetRange(482, 1930), evalDiv);
+    int evalDiv = 32768;
+    TUNE(SetRange(16384, 65536), evalDiv);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -97,8 +91,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / optDiv;
     nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
 
-    int npm = pos.non_pawn_material() / 64;
-    v       = (nnue * (npm + nnueNpmOffset + 11 * pos.count<PAWN>()) + optimism * (npm + optNpmOffset)) / evalDiv;
+    v = (nnue * (32961 + 381 * pos.count<PAWN>() + 349 * pos.count<KNIGHT>()
+      + 392 * pos.count<BISHOP>()+ 649 * pos.count<ROOK>() + 1211 * pos.count<QUEEN>())
+      + optimism * (4835 + 136 * pos.count<PAWN>() + 375 * pos.count<KNIGHT>()
+      + 403 * pos.count<BISHOP>() + 628 * pos.count<ROOK>() + 1124 * pos.count<QUEEN>())) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
     v = v * (204 - pos.rule50_count()) / 208;
