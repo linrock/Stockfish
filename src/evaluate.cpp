@@ -36,26 +36,26 @@
 
 namespace Stockfish {
 
-    int snThresh = 1126;
-    TUNE(SetRange(563, 2252), snThresh);
+    int snThresh = 1074;
+    TUNE(SetRange(537, 2094), snThresh);
 
-    int snPc = 6;
-    TUNE(SetRange(-26, 38), snPc);
+    int snPc = 5;
+    TUNE(SetRange(-27, 37), snPc);
 
-    int optDivNc = 584;
-    TUNE(SetRange(146, 2336), optDivNc);
+    int optDiv = 598;
+    TUNE(SetRange(149, 2392), optDiv);
 
-    int optDivSimpEv = 584;
-    TUNE(SetRange(146, 2336), optDivSimpEv);
+    int nnueDiv = 32279;
+    TUNE(SetRange(16139, 64558), nnueDiv);
 
-    int nnueDiv = 32395;
-    TUNE(SetRange(16197, 64790), nnueDiv);
+    int nnueNpmOffset = 943;
+    TUNE(SetRange(543, 1343), nnueNpmOffset);
 
-    int evalDiv = 1058;
-    TUNE(SetRange(529, 2116), evalDiv);
+    int optNpmOffset = 140;
+    TUNE(SetRange(0, 280), optNpmOffset);
 
-    int npmOffset = 943;
-    TUNE(SetRange(543, 1343), npmOffset);
+    int evalDiv = 965;
+    TUNE(SetRange(482, 1930), evalDiv);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -94,7 +94,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity and material imbalance
-    optimism += optimism * (nnueComplexity / optDivNc + std::abs(simpleEval - nnue) / optDivSimpEv);
+    optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / optDiv;
     nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
 
     v = (nnue
