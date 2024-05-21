@@ -73,7 +73,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity and material imbalance
-    optimism += optimism * nnueComplexity / 512;
+    optimism += optimism * (nnueComplexity / 512 + 1);
     nnue -= nnue * (nnueComplexity * 5 / 3) / 32082;
 
     v = (nnue
