@@ -36,6 +36,24 @@
 
 namespace Stockfish {
 
+    int snThresh = 992;
+    TUNE(SetRange(496, 1984), snThresh);
+
+    int optDiv = 470;
+    TUNE(SetRange(235, 940), optDiv);
+
+    int nnueDiv = 20000;
+    TUNE(SetRange(10000, 40000), nnueDiv);
+
+    int nnuePcMult = 300;
+    TUNE(SetRange(-2700, 3300), nnuePcMult);
+
+    int optPcMult = 300;
+    TUNE(SetRange(-2700, 3300), optPcMult);
+
+    int evalDiv = 35967;
+    TUNE(SetRange(18430, 73720), evalDiv);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -46,7 +64,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 992 + 6 * pos.count<PAWN>();
+    return std::abs(simpleEval) > snThresh + 6 * pos.count<PAWN>();
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -74,13 +92,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity
-    optimism += optimism * nnueComplexity / 470;
-    nnue -= nnue * nnueComplexity / 20000;
+    optimism += optimism * nnueComplexity / optDiv;
+    nnue -= nnue * nnueComplexity / nnueDiv;
 
-    int material = 300 * pos.count<PAWN>() + 350 * pos.count<KNIGHT>() + 400 * pos.count<BISHOP>()
+    int material = 350 * pos.count<KNIGHT>() + 400 * pos.count<BISHOP>()
                  + 640 * pos.count<ROOK>() + 1200 * pos.count<QUEEN>();
 
-    v = (nnue * (34300 + material) + optimism * (4400 + material)) / 35967;
+    v = (      nnue * (34300 + material + nnuePcMult * pos.count<PAWN>())
+         + optimism * ( 4400 + material + optPcMult  * pos.count<PAWN>())) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
     v = v * (204 - pos.rule50_count()) / 208;
