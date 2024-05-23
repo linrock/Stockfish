@@ -45,11 +45,14 @@ namespace Stockfish {
     int nnueDiv = 32082;
     TUNE(SetRange(16041, 64164), nnueDiv);
 
-    int nnuePcMult = 0;
-    TUNE(SetRange(-2000, 2000), nnuePcMult);
+    int pcMult = 200;
+    TUNE(SetRange(-1800, 2200), pcMult);
 
-    int optPcMult = 0;
-    TUNE(SetRange(-2000, 2000), optPcMult);
+    int nnueMatOffset = 34000;
+    TUNE(SetRange(24000, 44000), nnueMatOffset);
+
+    int optMatOffset = 4400;
+    TUNE(SetRange(-1400, 9400), optMatOffset);
 
     int evalDiv = 36860;
     TUNE(SetRange(18430, 73720), evalDiv);
@@ -95,14 +98,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     optimism += optimism * nnueComplexity / optDiv;
     nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
 
-    int material = 200 * pos.count<PAWN>()
+    int material = pcMult * pos.count<PAWN>()
                  + 350 * pos.count<KNIGHT>()
                  + 400 * pos.count<BISHOP>()
                  + 640 * pos.count<ROOK>()
                  + 1200 * pos.count<QUEEN>();
 
-    v = (      nnue * (34000 + material + nnuePcMult * pos.count<PAWN>())
-         + optimism * (4400 + material  + optPcMult  * pos.count<PAWN>())) / evalDiv;
+    v = (      nnue * (nnueMatOffset + material)
+         + optimism * (optMatOffset  + material)) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
     v = v * (204 - pos.rule50_count()) / 208;
