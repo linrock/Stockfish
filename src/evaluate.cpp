@@ -36,6 +36,24 @@
 
 namespace Stockfish {
 
+    int snThresh = 1018;
+    TUNE(SetRange(509, 2036), snThresh);
+
+    int optDiv = 512;
+    TUNE(SetRange(256, 1024), optDiv);
+
+    int nnueDiv = 32082;
+    TUNE(SetRange(16041, 64164), nnueDiv);
+
+    int nnuePcMult = 0;
+    TUNE(SetRange(-2000, 2000), nnuePcMult);
+
+    int optPcMult = 0;
+    TUNE(SetRange(-2000, 2000), optPcMult);
+
+    int evalDiv = 36860;
+    TUNE(SetRange(18430, 73720), evalDiv);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -46,7 +64,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 1018 + 5 * pos.count<PAWN>();
+    return std::abs(simpleEval) > snThresh + 6 * pos.count<PAWN>();
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -74,16 +92,17 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity
-    optimism += optimism * nnueComplexity / 512;
-    nnue -= nnue * (nnueComplexity * 5 / 3) / 32082;
+    optimism += optimism * nnueComplexity / optDiv;
+    nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
 
-    v = (nnue
-           * (32961 + 381 * pos.count<PAWN>() + 349 * pos.count<KNIGHT>()
-              + 392 * pos.count<BISHOP>() + 649 * pos.count<ROOK>() + 1211 * pos.count<QUEEN>())
-         + optimism
-             * (4835 + 136 * pos.count<PAWN>() + 375 * pos.count<KNIGHT>()
-                + 403 * pos.count<BISHOP>() + 628 * pos.count<ROOK>() + 1124 * pos.count<QUEEN>()))
-      / 36860;
+    int material = 200 * pos.count<PAWN>()
+                 + 350 * pos.count<KNIGHT>()
+                 + 400 * pos.count<BISHOP>()
+                 + 640 * pos.count<ROOK>()
+                 + 1200 * pos.count<QUEEN>();
+
+    v = (      nnue * (34000 + material + nnuePcMult * pos.count<PAWN>())
+         + optimism * (4400 + material  + optPcMult  * pos.count<PAWN>())) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
     v = v * (204 - pos.rule50_count()) / 208;
