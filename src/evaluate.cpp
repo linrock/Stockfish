@@ -36,22 +36,22 @@
 
 namespace Stockfish {
 
-    int snThresh = 1018;
+    int snThresh = 992;
     TUNE(SetRange(509, 2036), snThresh);
 
-    int optDiv = 512;
+    int optDiv = 470;
     TUNE(SetRange(256, 1024), optDiv);
 
-    int nnueDiv = 32082;
+    int nnueDiv = 32621;
     TUNE(SetRange(16041, 64164), nnueDiv);
 
-    int nnuePcMult = 0;
+    int nnuePcMult = 135;
     TUNE(SetRange(-2000, 2000), nnuePcMult);
 
-    int optPcMult = 0;
+    int optPcMult = 99;
     TUNE(SetRange(-2000, 2000), optPcMult);
 
-    int evalDiv = 36860;
+    int evalDiv = 35967;
     TUNE(SetRange(18430, 73720), evalDiv);
 
 // Returns a static, purely materialistic evaluation of the position from
