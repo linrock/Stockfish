@@ -3,7 +3,7 @@ from pprint import pprint
 from bs4 import BeautifulSoup
 import requests
 
-response = requests.get("https://tests.stockfishchess.org/tests/view/66484da06dcff0d1d6b061a0")
+response = requests.get("https://tests.stockfishchess.org/tests/view/665639d0a86388d5e27dd259")
 with open(f"spsa-3072.html", "w") as f:
     spsa_html = response.text
     f.write(spsa_html)
