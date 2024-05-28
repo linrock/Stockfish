@@ -48,7 +48,7 @@ bool Eval::use_smallnet(const Position& pos) {
     int pieceCount = pos.count<ALL_PIECES>();
     int simpleEval = simple_eval(pos, pos.side_to_move());
 
-    if (pieceCount <= 5 && std::abs(simpleEval) > 700)
+    if (pieceCount <= 4)
         return true;
 
     return std::abs(simpleEval) > 992 + 6 * pos.count<PAWN>();
