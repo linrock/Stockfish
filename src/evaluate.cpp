@@ -44,9 +44,11 @@ int Eval::simple_eval(const Position& pos, Color c) {
          + (pos.non_pawn_material(c) - pos.non_pawn_material(~c));
 }
 
+const int snThresholds[17] = {992, 998, 1004, 1010, 1016, 1022, 1028, 1034, 1040, 1046, 1052, 1058, 1064, 1070, 1076, 1082, 1088};
+
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 992 + 6 * pos.count<PAWN>();
+    return std::abs(simpleEval) > snThresholds[pos.count<PAWN>()];
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
