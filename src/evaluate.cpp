@@ -44,7 +44,15 @@ int Eval::simple_eval(const Position& pos, Color c) {
          + (pos.non_pawn_material(c) - pos.non_pawn_material(~c));
 }
 
-const int snThresholds[17] = {992, 998, 1004, 1010, 1016, 1022, 1028, 1034, 1040, 1046, 1052, 1058, 1064, 1070, 1076, 1082, 1088};
+// int snThresholds[17] = {
+//   992,  998,  1004, 1010, 1016, 1022, 1028, 1034, 1040,
+//   1046, 1052, 1058, 1064, 1070, 1076, 1082, 1088
+// };
+const int snThresholds[17] = {
+  992,
+  1004, 1010, 1016, 1022, 1028, 1034, 1040, 1048,
+  1050, 1058, 1064, 1070, 1076, 1082, 1088, 1088
+};
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
