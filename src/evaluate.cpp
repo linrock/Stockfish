@@ -40,8 +40,14 @@ namespace Stockfish {
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
 int Eval::simple_eval(const Position& pos, Color c) {
+    int materialC = 350 * pos.count<KNIGHT>(c) + 400 * pos.count<BISHOP>(c)
+                  + 640 * pos.count<ROOK>(c) + 1200 * pos.count<QUEEN>(c);
+
+    int materialNotC = 350 * pos.count<KNIGHT>(~c) + 400 * pos.count<BISHOP>(~c)
+                     + 640 * pos.count<ROOK>(~c) + 1200 * pos.count<QUEEN>(~c);
+
     return PawnValue * (pos.count<PAWN>(c) - pos.count<PAWN>(~c))
-         + (pos.non_pawn_material(c) - pos.non_pawn_material(~c));
+         + (materialC - materialNotC) * 2;
 }
 
 bool Eval::use_smallnet(const Position& pos) {
