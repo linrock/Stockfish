@@ -53,7 +53,8 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > snThresh + 6 * pos.count<PAWN>();
+    int pc = pos.count<PAWN>();
+    return std::abs(simpleEval) > snThresh + 6 * pc * pc / 16;
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -74,7 +75,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
                           : networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
-    if (smallNet && nnue * simpleEval < 0)
+    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < 250))
     {
         nnue     = networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
         smallNet = false;
