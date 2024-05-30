@@ -47,7 +47,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
     int pc = pos.count<PAWN>();
-    if (pc <= 6)
+    if (pc <= 4)
         return std::abs(simpleEval) > 992 + 6 * pc * pc / 16;
     else
         return std::abs(simpleEval) > 992 + 6 * pc;
