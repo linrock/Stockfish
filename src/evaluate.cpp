@@ -60,7 +60,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
     int pawnCount = pos.count<PAWN>();
-    if (pawnCount == 1 && std::abs(simpleEval) > 4000)
+    if (pawnCount == 2 && std::abs(simpleEval) > 5500)
+        return simpleEval;
+    else if (pawnCount == 1 && std::abs(simpleEval) > 4000)
         return simpleEval;
     else if (pawnCount == 0 && std::abs(simpleEval) > 2500)
         return simpleEval;
