@@ -59,12 +59,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     assert(!pos.checkers());
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
-    if (std::abs(simpleEval) > 2750 && pos.count<PAWN>() == 0)
-        return simpleEval;
-
     bool smallNet   = use_smallnet(pos);
     int  nnueComplexity;
     int  v;
+
+    if (std::abs(simpleEval) > 2500 && pos.count<PAWN>() == 0) {
+        v = simpleEval;
+        v = v * (204 - pos.rule50_count()) / 208;
+    }
 
     Value nnue = smallNet ? networks.small.evaluate(pos, &caches.small, true, &nnueComplexity)
                           : networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
