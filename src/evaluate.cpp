@@ -60,7 +60,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
     int pawnCount = pos.count<PAWN>();
-    if (pawnCount <= 4 && std::abs(simpleEval) > 2500 + 1000 * pawnCount)
+    if (pawnCount <= 3 && std::abs(simpleEval) > 2500 + 1500 * pawnCount)
         return simpleEval;
 
     bool smallNet   = use_smallnet(pos);
