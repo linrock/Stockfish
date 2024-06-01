@@ -76,7 +76,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     // Blend optimism and eval with nnue complexity
     if (pos.count<PAWN>() == 0)
-      nnueComplexity /= 2;
+        nnueComplexity = 0;
     optimism += optimism * nnueComplexity / 470;
     nnue -= nnue * nnueComplexity / 20000;
 
