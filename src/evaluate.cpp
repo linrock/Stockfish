@@ -50,6 +50,9 @@ bool Eval::use_smallnet(const Position& pos) {
     return std::abs(simpleEval) > 992 + 6 * pawnCount * pawnCount / 16;
 }
 
+int noPcMat = 0;
+TUNE(SetRange(-5000, 5000), noPcMat);
+
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
 Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
@@ -80,6 +83,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     int material = 300 * pos.count<PAWN>() + 350 * pos.count<KNIGHT>() + 400 * pos.count<BISHOP>()
                  + 640 * pos.count<ROOK>() + 1200 * pos.count<QUEEN>();
+
+    if (pos.count<PAWN>() == 0)
+        material += noPcMat;
 
     v = (nnue * (34300 + material) + optimism * (4400 + material)) / 36672;
 
