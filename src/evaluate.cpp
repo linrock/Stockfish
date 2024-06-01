@@ -59,6 +59,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     assert(!pos.checkers());
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
+    bool noPawns = pos.count<PAWN>() == 0;
+    if (noPawns && std::abs(simpleEval) > 2500)
+        return simpleEval;
+
     bool smallNet   = use_smallnet(pos);
     int  nnueComplexity;
     int  v;
@@ -79,6 +83,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     int material = 300 * pos.count<PAWN>() + 350 * pos.count<KNIGHT>() + 400 * pos.count<BISHOP>()
                  + 640 * pos.count<ROOK>() + 1200 * pos.count<QUEEN>();
+
+    if (noPawns)
+        material -= 1050;
 
     v = (nnue * (34300 + material) + optimism * (4400 + material)) / 35967;
 
