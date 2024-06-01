@@ -39,11 +39,14 @@ namespace Stockfish {
 int snThresh = 992;
 TUNE(SetRange(492, 1492), snThresh);
 
-int snPcMult = 6;
-TUNE(SetRange(-26, 38), snPcMult);
+int snPcSqMult = 6;
+TUNE(SetRange(-26, 38), snPcSqMult);
+
+int snPcMult = 0;
+TUNE(SetRange(-32, 32), snPcMult);
 
 int matPcMult = 300;
-TUNE(SetRange(-1700, 2300), matPCMult);
+TUNE(SetRange(-1700, 2300), matPcMult);
 
 int noPcMatAdjust = 0;
 TUNE(SetRange(-5000, 5000), noPcMatAdjust);
@@ -62,7 +65,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
     int pawnCount = pos.count<PAWN>();
-    return std::abs(simpleEval) > snThresh + snPcMult * pawnCount * pawnCount / 16;
+    return std::abs(simpleEval) > snThresh + snPcSqMult * pawnCount * pawnCount / 16 + snPcMult * pawnCount;
 }
 
 
