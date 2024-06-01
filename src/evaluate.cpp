@@ -81,7 +81,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
                  + 640 * pos.count<ROOK>() + 1200 * pos.count<QUEEN>();
 
     if (pos.count<PAWN>() == 0)
-        material -= 1050;
+        material -= 750;
 
     v = (nnue * (34300 + material) + optimism * (4400 + material)) / 35967;
 
