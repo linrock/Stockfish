@@ -39,14 +39,14 @@ namespace Stockfish {
 int snThresh = 992;
 TUNE(SetRange(492, 1492), snThresh);
 
-int snPcMult = 6;
-TUNE(SetRange(-26, 38), snPcMult);
+int snPcSqMult = 6;
+TUNE(SetRange(-26, 38), snPcSqMult);
+
+int snPcMult = 0;
+TUNE(SetRange(-32, 32), snPcMult);
 
 int matPcMult = 300;
-TUNE(SetRange(-1700, 2300), matPCMult);
-
-int noPcMatAdjust = 0;
-TUNE(SetRange(-5000, 5000), noPcMatAdjust);
+TUNE(SetRange(-1700, 2300), matPcMult);
 
 int evalDiv = 36672;
 TUNE(SetRange(18336, 73344), evalDiv);
@@ -62,7 +62,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
     int pawnCount = pos.count<PAWN>();
-    return std::abs(simpleEval) > snThresh + snPcMult * pawnCount * pawnCount / 16;
+    return std::abs(simpleEval) > snThresh + snPcSqMult * pawnCount * pawnCount / 16 + snPcMult * pawnCount;
 }
 
 
@@ -96,9 +96,6 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     int material = matPcMult * pos.count<PAWN>() + 350 * pos.count<KNIGHT>() + 400 * pos.count<BISHOP>()
                  + 640 * pos.count<ROOK>() + 1200 * pos.count<QUEEN>();
-
-    if (pos.count<PAWN>() == 0)
-        material += noPcMatAdjust;
 
     v = (nnue * (34300 + material) + optimism * (4400 + material)) / evalDiv;
 
