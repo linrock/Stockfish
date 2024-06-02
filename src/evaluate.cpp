@@ -41,8 +41,8 @@ namespace Stockfish {
     constexpr int snPcMult = 32;
     constexpr int optDiv = 479;
     constexpr int nnueDiv = 19856;
-    constexpr int nnuePc = 614;
-    constexpr int optPc = 516;
+    constexpr int nnuePc = 600;
+    constexpr int optPc = 600;
     constexpr int evalDiv = 71570;
     constexpr int shufDiv = 207;
 
