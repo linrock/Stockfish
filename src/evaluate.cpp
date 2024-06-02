@@ -52,7 +52,7 @@ bool Eval::use_smallnet(const Position& pos) {
 
 bool Eval::use_psqt_only(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return pos.count<PAWN>() == 0 && std::abs(simpleEval) > 2500;
+    return std::abs(simpleEval) > 2500 + 1000 * pos.count<PAWN>();
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
