@@ -45,11 +45,11 @@ TUNE(SetRange(-50, 78), snPcSqMult);
 int snPcMult = 12;
 TUNE(SetRange(-52, 76), snPcMult);
 
-int matPcMult = 265;
-TUNE(SetRange(-1700, 2300), matPcMult);
+int matPcMult = 530;
+TUNE(SetRange(-3400, 4600), matPcMult);
 
-int evalDiv = 34623;
-TUNE(SetRange(17311, 69246), evalDiv);
+int evalDiv = 69246;
+TUNE(SetRange(34623, 138492), evalDiv);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -94,10 +94,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     optimism += optimism * nnueComplexity / 470;
     nnue -= nnue * nnueComplexity / 20000;
 
-    int material = matPcMult * pos.count<PAWN>() + 350 * pos.count<KNIGHT>() + 400 * pos.count<BISHOP>()
-                 + 640 * pos.count<ROOK>() + 1200 * pos.count<QUEEN>();
-
-    v = (nnue * (34300 + material) + optimism * (4400 + material)) / evalDiv;
+    int material = matPcMult * pos.count<PAWN>() + pos.non_pawn_material();
+    v            = (nnue * (68600 + material) + optimism * (8800 + material)) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
     v -= v * pos.rule50_count() / 212;
