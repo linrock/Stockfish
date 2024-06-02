@@ -78,7 +78,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     optimism += optimism * nnueComplexity / 470;
     nnue -= nnue * nnueComplexity / 20000;
 
-    int material = 252 * pos.count<PAWN>() + 350 * pos.count<KNIGHT>() + 400 * pos.count<BISHOP>()
+    int material = 300 * pos.count<PAWN>() + 350 * pos.count<KNIGHT>() + 400 * pos.count<BISHOP>()
                  + 640 * pos.count<ROOK>() + 1200 * pos.count<QUEEN>();
 
     v = (nnue * (34300 + material) + optimism * (4400 + material)) / 34549;
