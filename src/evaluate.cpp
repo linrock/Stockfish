@@ -36,20 +36,20 @@
 
 namespace Stockfish {
 
-int snThresh = 992;
-TUNE(SetRange(492, 1492), snThresh);
+int snThresh = 952;
+TUNE(SetRange(452, 1452), snThresh);
 
-int snPcSqMult = 6;
-TUNE(SetRange(-26, 38), snPcSqMult);
+int snPcSqMult = 14;
+TUNE(SetRange(-50, 78), snPcSqMult);
 
-int snPcMult = 0;
-TUNE(SetRange(-32, 32), snPcMult);
+int snPcMult = 12;
+TUNE(SetRange(-52, 76), snPcMult);
 
-int matPcMult = 300;
+int matPcMult = 265;
 TUNE(SetRange(-1700, 2300), matPcMult);
 
-int evalDiv = 36672;
-TUNE(SetRange(18336, 73344), evalDiv);
+int evalDiv = 34623;
+TUNE(SetRange(17311, 69246), evalDiv);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -62,7 +62,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
     int pawnCount  = pos.count<PAWN>();
-    return std::abs(simpleEval) > snThresh + snPcSqMult * pawnCount * pawnCount / 16 + snPcMult * pawnCount;
+    return std::abs(simpleEval) > snThresh + snPcSqMult * pawnCount * pawnCount / 32 + snPcMult * pawnCount / 8;
 }
 
 
