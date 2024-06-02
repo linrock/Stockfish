@@ -36,6 +36,35 @@
 
 namespace Stockfish {
 
+
+    int snThresh = 935;
+    TUNE(SetRange(452, 1452), snThresh);
+
+    int snPcSqMult = 28;
+    TUNE(SetRange(-174, 226), snPcSqMult);
+
+    int snPcMult = 28;
+    TUNE(SetRange(-172, 228), snPcMult);
+
+
+    int optDiv = 470;
+    TUNE(SetRange(235, 940), optDiv);
+
+    int nnueDiv = 20000;
+    TUNE(SetRange(10000, 40000), nnueDiv);
+
+    int nnuePc = 592;
+    TUNE(SetRange(-1000, 2200), nnuePc);
+
+    int optPc = 592;
+    TUNE(SetRange(-1000, 2200), optPc);
+
+    int evalDiv = 71563;
+    TUNE(SetRange(36672, 146688), evalDiv);
+
+    int shufDiv = 212;
+    TUNE(SetRange(106, 424), shufDiv);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -47,7 +76,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
     int pawnCount  = pos.count<PAWN>();
-    return std::abs(simpleEval) > 992 + 6 * pawnCount * pawnCount / 16;
+    return std::abs(simpleEval) > snThresh + snPcSqMult * pawnCount * pawnCount / 64 + snPcMult * pawnCount / 16; 
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -75,14 +104,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity
-    optimism += optimism * nnueComplexity / 470;
-    nnue -= nnue * nnueComplexity / 20000;
+    optimism += optimism * nnueComplexity / optDiv;
+    nnue -= nnue * nnueComplexity / nnueDiv;
 
-    int material = 600 * pos.count<PAWN>() + pos.non_pawn_material();
-    v            = (nnue * (68600 + material) + optimism * (8800 + material)) / 73344;
+    v   = (      nnue * ( 68600 + pos.non_pawn_material() + nnuePc * pos.count<PAWN>())
+           + optimism * (  8800 + pos.non_pawn_material() +  optPc * pos.count<PAWN>())) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
-    v -= v * pos.rule50_count() / 212;
+    v -= v * pos.rule50_count() / shufDiv;
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
