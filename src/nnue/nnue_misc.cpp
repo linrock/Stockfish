@@ -46,9 +46,9 @@ void hint_common_parent_position(const Position&    pos,
                                  const Networks&    networks,
                                  AccumulatorCaches& caches) {
     if (Eval::use_smallnet(pos))
-        networks.small.hint_common_access(pos, &caches.small);
+        networks.small.hint_common_access(pos, &caches.small, false);
     else
-        networks.big.hint_common_access(pos, &caches.big);
+        networks.big.hint_common_access(pos, &caches.big, false);
 }
 
 namespace {
@@ -146,14 +146,18 @@ trace(Position& pos, const Eval::NNUE::Networks& networks, Eval::NNUE::Accumulat
                 auto st = pos.state();
 
                 pos.remove_piece(sq);
-                st->accumulatorBig.computed[WHITE] = st->accumulatorBig.computed[BLACK] = false;
+                st->accumulatorBig.computed[WHITE]       = st->accumulatorBig.computed[BLACK] =
+                  st->accumulatorBig.computedPSQT[WHITE] = st->accumulatorBig.computedPSQT[BLACK] =
+                    false;
 
                 Value eval = networks.big.evaluate(pos, &caches.big);
                 eval       = pos.side_to_move() == WHITE ? eval : -eval;
                 v          = base - eval;
 
                 pos.put_piece(pc, sq);
-                st->accumulatorBig.computed[WHITE] = st->accumulatorBig.computed[BLACK] = false;
+                st->accumulatorBig.computed[WHITE]       = st->accumulatorBig.computed[BLACK] =
+                  st->accumulatorBig.computedPSQT[WHITE] = st->accumulatorBig.computedPSQT[BLACK] =
+                    false;
             }
 
             writeSquare(f, r, pc, v);

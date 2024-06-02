@@ -61,11 +61,13 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
     bool smallNet   = use_smallnet(pos);
+    bool psqtOnly   = false; // std::abs(simpleEval) > PsqtOnlyThreshold;
     int  nnueComplexity;
     int  v;
 
-    Value nnue = smallNet ? networks.small.evaluate(pos, &caches.small, true, &nnueComplexity)
-                          : networks.big.evaluate(pos, &caches.big, true, &nnueComplexity);
+    Value nnue = smallNet
+                 ? networks.small.evaluate(pos, &caches.small, true, &nnueComplexity, psqtOnly)
+                 : networks.big.evaluate(pos, &caches.big, true, &nnueComplexity, false);
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
     if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < 250))
