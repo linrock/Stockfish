@@ -50,6 +50,12 @@ bool Eval::use_smallnet(const Position& pos) {
     return std::abs(simpleEval) > 992 + 6 * pawnCount * pawnCount / 16;
 }
 
+bool Eval::use_psqt_only(const Position& pos) {
+    int simpleEval = simple_eval(pos, pos.side_to_move());
+    int pawnCount  = pos.count<PAWN>();
+    return std::abs(simpleEval) > 2300 + 6 * pawnCount;
+}
+
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
 Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
@@ -61,7 +67,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
     bool smallNet   = use_smallnet(pos);
-    bool psqtOnly   = false; // std::abs(simpleEval) > PsqtOnlyThreshold;
+    bool psqtOnly   = use_psqt_only(pos);
     int  nnueComplexity;
     int  v;
 

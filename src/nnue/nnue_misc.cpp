@@ -46,7 +46,7 @@ void hint_common_parent_position(const Position&    pos,
                                  const Networks&    networks,
                                  AccumulatorCaches& caches) {
     if (Eval::use_smallnet(pos))
-        networks.small.hint_common_access(pos, &caches.small, false);
+        networks.small.hint_common_access(pos, &caches.small, Eval::use_psqt_only(pos));
     else
         networks.big.hint_common_access(pos, &caches.big, false);
 }
