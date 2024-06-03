@@ -39,8 +39,7 @@ namespace Stockfish {
 constexpr int snThresh = 935;
 constexpr int snPcSqMult = 14;
 constexpr int snPcMult = 14;
-constexpr int matPcMult = 592;
-constexpr int evalDiv = 71563;
+constexpr int evalDiv = 71570;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -85,7 +84,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     optimism += optimism * nnueComplexity / 470;
     nnue -= nnue * nnueComplexity / 20000;
 
-    int material = matPcMult * pos.count<PAWN>() + pos.non_pawn_material();
+    int material = 600 * pos.count<PAWN>() + pos.non_pawn_material();
     v            = (nnue * (68600 + material) + optimism * (8800 + material)) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
