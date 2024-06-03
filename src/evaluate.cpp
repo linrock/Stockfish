@@ -39,12 +39,8 @@ namespace Stockfish {
     constexpr int snThresh = 935;
     constexpr int snPcSqMult = 29;
     constexpr int snPcMult = 32;
-    constexpr int optDiv = 479;
-    constexpr int nnueDiv = 19856;
-    constexpr int nnuePc = 614;
-    constexpr int optPc = 516;
+
     constexpr int evalDiv = 71570;
-    constexpr int shufDiv = 207;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -85,14 +81,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity
-    optimism += optimism * nnueComplexity / optDiv;
-    nnue -= nnue * nnueComplexity / nnueDiv;
+    optimism += optimism * nnueComplexity / 470;
+    nnue -= nnue * nnueComplexity / 20000;
 
-    v   = (      nnue * ( 68600 + pos.non_pawn_material() + nnuePc * pos.count<PAWN>())
-           + optimism * (  8800 + pos.non_pawn_material() +  optPc * pos.count<PAWN>())) / evalDiv;
+    v   = (      nnue * ( 68600 + pos.non_pawn_material() + 600 * pos.count<PAWN>())
+           + optimism * (  8800 + pos.non_pawn_material() + 600 * pos.count<PAWN>())) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
-    v -= v * pos.rule50_count() / shufDiv;
+    v -= v * pos.rule50_count() / 212;
 
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
