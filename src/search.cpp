@@ -158,7 +158,7 @@ void Search::Worker::start_searching() {
     {
         for (size_t i = 0; i < 32; ++i)
         {
-            std::cout << int(networks->big.network[j]->fc_2.weights[i]);
+            std::cout << int(networks->big.network[j].fc_2.weights[i]);
             std::cout << ", ";
         }
     }
@@ -170,7 +170,7 @@ void Search::Worker::start_searching() {
     {
         for (size_t i = 0; i < 1; ++i)
         {
-            std::cout << int(networks->big.network[j]->fc_2.biases[i]);
+            std::cout << int(networks->big.network[j].fc_2.biases[i]);
             std::cout << ", ";
         }
     }
@@ -182,7 +182,7 @@ void Search::Worker::start_searching() {
     {
         for (size_t i = 0; i < 32; ++i)
         {
-            std::cout << int(networks->big.network[j]->fc_1.biases[i]);
+            std::cout << int(networks->big.network[j].fc_1.biases[i]);
             std::cout << ", ";
         }
     }
@@ -194,7 +194,7 @@ void Search::Worker::start_searching() {
     {
         for (size_t i = 0; i < 16; ++i)
         {
-            std::cout << int(networks->big.network[j]->fc_0.biases[i]);
+            std::cout << int(networks->big.network[j].fc_0.biases[i]);
             std::cout << ", ";
         }
     }
