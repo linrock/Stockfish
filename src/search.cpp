@@ -189,10 +189,10 @@ void Search::Worker::start_searching() {
     std::cout << "};" << std::endl << std::endl;
 
 
-    std::cout << "int oneb[128] = {" << std::endl;
+    std::cout << "int oneb[256] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
-        for (size_t i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 32; ++i)
         {
             std::cout << int(networks->big.network[j].fc_0.biases[i]);
             std::cout << ", ";
