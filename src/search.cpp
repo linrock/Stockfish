@@ -193,6 +193,9 @@ void Search::Worker::start_searching() {
         }
     }
 
+    std::optional<std::string> filename = "spsa-exported-3072-31.nnue";
+    networks->big.save(filename);
+
 
     // Non-main threads go directly to iterative_deepening()
     if (!is_mainthread())
