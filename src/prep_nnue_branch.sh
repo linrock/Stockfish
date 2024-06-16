@@ -16,7 +16,7 @@ nnue_file_size=$(ls -lth $nnue_name | awk '{print $5}' | grep -oE '[0-9]+')
 echo nnue file size: $nnue_file_size M
 
 git checkout 3072-31
-git pull origin 3071-31
+git pull origin 3072-31
 git log --oneline | head -1 || true
 echo
 
