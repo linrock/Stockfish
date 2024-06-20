@@ -37,14 +37,14 @@
 
 namespace Stockfish {
 
-    constexpr int snThresh = 968;
-    constexpr int reThresh = 229;
-    constexpr int optDiv = 466;
-    constexpr int nnueDiv = 19020;
-    constexpr int matPc = 552;
-    constexpr int nnueMatOffset = 73464;
-    constexpr int optMatOffset = 8397;
-    constexpr int evalDiv = 74879;
+    constexpr int snThresh = 981;
+    constexpr int reThresh = 242;
+    constexpr int optDiv = 489;
+    constexpr int nnueDiv = 19161;
+    constexpr int matPc = 557;
+    constexpr int nnueMatOffset = 73262;
+    constexpr int optMatOffset = 8456;
+    constexpr int evalDiv = 76501;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -56,7 +56,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > snThresh;
+    return std::abs(simpleEval) > snThresh - 2 * pos.count<PAWN>();
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
