@@ -37,15 +37,14 @@
 
 namespace Stockfish {
 
-int snTh7 = 962;
-int snTh6 = 962;
-int snTh5 = 962;
-int snTh4 = 962;
-int snTh3 = 962;
-int snTh2 = 962;
-int snTh1 = 962;
-int snTh0 = 962;
-TUNE(SetRange(662, 1262), snTh7, snTh6, snTh5, snTh4, snTh3, snTh2, snTh1, snTh0);
+constexpr int snTh7 = 960;
+constexpr int snTh6 = 971;
+constexpr int snTh5 = 985;
+constexpr int snTh4 = 971;
+constexpr int snTh3 = 953;
+constexpr int snTh2 = 965;
+constexpr int snTh1 = 959;
+constexpr int snTh0 = 967;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
