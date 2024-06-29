@@ -37,6 +37,16 @@
 
 namespace Stockfish {
 
+int snTh7 = 962;
+int snTh6 = 962;
+int snTh5 = 962;
+int snTh4 = 962;
+int snTh3 = 962;
+int snTh2 = 962;
+int snTh1 = 962;
+int snTh0 = 962;
+TUNE(SetRange(662, 1262), snTh7, snTh6, snTh5, snTh4, snTh3, snTh2, snTh1, snTh0);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -47,7 +57,23 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 962;
+    int bucketIdx = (pos.count<ALL_PIECES>() - 1) / 4;
+    if (bucketIdx == 7)
+        return std::abs(simpleEval) > snTh7;
+    else if (bucketIdx == 6)
+        return std::abs(simpleEval) > snTh6;
+    else if (bucketIdx == 5)
+        return std::abs(simpleEval) > snTh5;
+    else if (bucketIdx == 4)
+        return std::abs(simpleEval) > snTh4;
+    else if (bucketIdx == 3)
+        return std::abs(simpleEval) > snTh3;
+    else if (bucketIdx == 2)
+        return std::abs(simpleEval) > snTh2;
+    else if (bucketIdx == 1)
+        return std::abs(simpleEval) > snTh1;
+    else if (bucketIdx == 0)
+        return std::abs(simpleEval) > snTh0;
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation

@@ -35,7 +35,7 @@ namespace Stockfish {
 bool          Tune::update_on_last;
 const Option* LastOption = nullptr;
 OptionsMap*   Tune::options;
-bool          Tune::enabled = false;
+bool          Tune::enabled = true;
 
 namespace {
 std::map<std::string, int> TuneResults;
