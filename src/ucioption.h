@@ -81,6 +81,7 @@ class OptionsMap {
     void add_info_listener(InfoListener&&);
 
     void setoption(std::istringstream&);
+    void setoption(const std::string&, const std::string&);
 
     Option  operator[](const std::string&) const;
     Option& operator[](const std::string&);
