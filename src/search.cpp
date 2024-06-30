@@ -48,6 +48,17 @@
 
 namespace Stockfish {
 
+  int bMax = 1371;
+  int bonusOffset = 800;
+  int nmSeOffset = 393;
+  int bSeOffset1 = 107;
+  int bSeOffset2 = 75;
+  int fbSeOffset = 294;
+  int pcbOffset = 177;
+  int pcbImpMult = 57;
+
+  TUNE(bMax, bonusOffset, nmSeOffset, bSeOffset1, bSeOffset2, fbSeOffset, pcbOffset, pcbImpMult);
+
 namespace TB = Tablebases;
 
 using Eval::evaluate;
@@ -750,7 +761,7 @@ Value Search::Worker::search(
     // Use static evaluation difference to improve quiet move ordering (~9 Elo)
     if (((ss - 1)->currentMove).is_ok() && !(ss - 1)->inCheck && !priorCapture)
     {
-        int bonus = std::clamp(-10 * int((ss - 1)->staticEval + ss->staticEval), -1590, 1371) + 800;
+        int bonus = std::clamp(-10 * int((ss - 1)->staticEval + ss->staticEval), -1590, bMax) + bonusOffset;
         thisThread->mainHistory[~us][((ss - 1)->currentMove).from_to()] << bonus;
         if (type_of(pos.piece_on(prevSq)) != PAWN && ((ss - 1)->currentMove).type_of() != PROMOTION)
             thisThread->pawnHistory[pawn_structure_index(pos)][pos.piece_on(prevSq)][prevSq]
@@ -789,7 +800,7 @@ Value Search::Worker::search(
 
     // Step 9. Null move search with verification search (~35 Elo)
     if (!PvNode && (ss - 1)->currentMove != Move::null() && (ss - 1)->statScore < 14369
-        && eval >= beta && ss->staticEval >= beta - 21 * depth + 393 && !excludedMove
+        && eval >= beta && ss->staticEval >= beta - 21 * depth + nmSeOffset && !excludedMove
         && pos.non_pawn_material(us) && ss->ply >= thisThread->nmpMinPly
         && beta > VALUE_TB_LOSS_IN_MAX_PLY)
     {
@@ -848,7 +859,8 @@ Value Search::Worker::search(
     // Step 11. ProbCut (~10 Elo)
     // If we have a good enough capture (or queen promotion) and a reduced search returns a value
     // much above beta, we can (almost) safely prune the previous move.
-    probCutBeta = beta + 177 - 57 * improving;
+    probCutBeta = beta + pcbOffset - pcbImpMult * improving;
+
     if (
       !PvNode && depth > 3
       && std::abs(beta) < VALUE_TB_WIN_IN_MAX_PLY
@@ -1356,8 +1368,8 @@ moves_loop:  // When in check, search starts here
     {
         int bonus = (113 * (depth > 5) + 118 * (PvNode || cutNode)
                      + 191 * ((ss - 1)->statScore < -14396) + 119 * ((ss - 1)->moveCount > 8)
-                     + 64 * (!ss->inCheck && bestValue <= ss->staticEval - 107)
-                     + 147 * (!(ss - 1)->inCheck && bestValue <= -(ss - 1)->staticEval - 75));
+                     + 64 * (!ss->inCheck && bestValue <= ss->staticEval - bSeOffset1)
+                     + 147 * (!(ss - 1)->inCheck && bestValue <= -(ss - 1)->staticEval - bSeOffset2));
         update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq,
                                       stat_bonus(depth) * bonus / 100);
         thisThread->mainHistory[~us][((ss - 1)->currentMove).from_to()]
@@ -1529,7 +1541,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
         if (bestValue > alpha)
             alpha = bestValue;
 
-        futilityBase = ss->staticEval + 294;
+        futilityBase = ss->staticEval + fbSeOffset;
     }
 
     const PieceToHistory* contHist[] = {(ss - 1)->continuationHistory,
