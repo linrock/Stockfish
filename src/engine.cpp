@@ -60,9 +60,7 @@ Engine::Engine(std::string path) :
     pos.set(StartFEN, false, &states->back());
     capSq = SQ_NONE;
 
-    // delayed addition of options
-    if (Tune::enabled)
-        options["TuneFile"] << Option("<empty>", [](const Option& o) { Tune::read_file(o); return std::nullopt; });
+    options["TuneFile"] << Option("<empty>", [](const Option& o) { Tune::read_file(o); return std::nullopt; });
 
     options["Debug Log File"] << Option("", [](const Option& o) {
         start_logger(o);
