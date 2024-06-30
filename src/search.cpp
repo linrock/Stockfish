@@ -48,16 +48,14 @@
 
 namespace Stockfish {
 
-  int bMax = 1371;
-  int bonusOffset = 800;
-  int nmSeOffset = 393;
-  int bSeOffset1 = 107;
-  int bSeOffset2 = 75;
-  int fbSeOffset = 294;
-  int pcbOffset = 177;
-  int pcbImpMult = 57;
-
-  TUNE(bMax, bonusOffset, nmSeOffset, bSeOffset1, bSeOffset2, fbSeOffset, pcbOffset, pcbImpMult);
+  constexpr int bMax = 1344;
+  constexpr int bonusOffset = 782;
+  constexpr int nmSeOffset = 393;
+  constexpr int bSeOffset1 = 110;
+  constexpr int bSeOffset2 = 73;
+  constexpr int fbSeOffset = 308;
+  constexpr int pcbOffset = 185;
+  constexpr int pcbImpMult = 57;
 
 namespace TB = Tablebases;
 
