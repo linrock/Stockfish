@@ -789,14 +789,12 @@ Value Search::Worker::search(
 
     // Step 9. Null move search with verification search (~35 Elo)
     if (!PvNode && (ss - 1)->currentMove != Move::null() && (ss - 1)->statScore < 14369
-        && eval >= beta && ss->staticEval >= beta - 21 * depth + 393 && !excludedMove
+        && ss->staticEval >= beta - 21 * depth + 393 && !excludedMove
         && pos.non_pawn_material(us) && ss->ply >= thisThread->nmpMinPly
         && beta > VALUE_TB_LOSS_IN_MAX_PLY)
     {
-        assert(eval - beta >= 0);
-
         // Null move dynamic reduction based on depth and eval
-        Depth R = std::min(int(eval - beta) / 197, 6) + depth / 3 + 5;
+        Depth R = std::min(std::max(int(eval - beta), 0) / 197, 6) + depth / 3 + 5;
 
         ss->currentMove         = Move::null();
         ss->continuationHistory = &thisThread->continuationHistory[0][0][NO_PIECE][0];
