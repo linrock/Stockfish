@@ -153,6 +153,7 @@ Search::Worker::Worker(SharedState&                    sharedState,
 
 void Search::Worker::start_searching() {
 
+    /*
     std::cout << "int ow[256] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
@@ -175,6 +176,22 @@ void Search::Worker::start_searching() {
         }
     }
     std::cout << "};" << std::endl << std::endl;
+    */
+
+
+    std::cout << "int twow[7680] = {" << std::endl;
+    for (size_t i = 0; i < 8; ++i)
+    {
+        for (size_t j = 0; j < 32; ++j)
+        {
+            for (size_t k = 0; k < 30; ++k)
+            {
+                std::cout << int(networks->big.network[i].fc_1.weights[k + j * 32]) << ", ";
+            }
+            std::cout << std::endl;
+        }
+    }
+    std::cout << "};" << std::endl << std::endl;
 
 
     std::cout << "int twob[256] = {" << std::endl;
@@ -189,6 +206,18 @@ void Search::Worker::start_searching() {
     std::cout << "};" << std::endl << std::endl;
 
 
+    /*
+    std::cout << "int onew[393216] = {" << std::endl;
+    for (size_t j = 0; j < 8; ++j)
+    {
+        for (size_t i = 0; i < 256; ++i)
+        {
+            std::cout << int(networks->big.network[j].fc_0.weights[i]);
+            std::cout << ", ";
+        }
+    }
+    std::cout << "};" << std::endl << std::endl;
+
     std::cout << "int oneb[128] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
@@ -199,6 +228,7 @@ void Search::Worker::start_searching() {
         }
     }
     std::cout << "};" << std::endl << std::endl;
+    */
 
 
     // Non-main threads go directly to iterative_deepening()
