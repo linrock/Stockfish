@@ -720,7 +720,8 @@ Value Search::Worker::search(
     {
         // Providing the hint that this node's accumulator will be used often
         // brings significant Elo gain (~13 Elo).
-        Eval::NNUE::hint_common_parent_position(pos, networks[numaAccessToken], refreshTable);
+        Eval::NNUE::hint_common_parent_position(pos, networks[numaAccessToken], refreshTable,
+                                                thisThread->optimism[us]);
         unadjustedStaticEval = eval = ss->staticEval;
     }
     else if (ss->ttHit)
@@ -731,7 +732,8 @@ Value Search::Worker::search(
             unadjustedStaticEval =
               evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->optimism[us]);
         else if (PvNode)
-            Eval::NNUE::hint_common_parent_position(pos, networks[numaAccessToken], refreshTable);
+            Eval::NNUE::hint_common_parent_position(pos, networks[numaAccessToken], refreshTable,
+                                                    thisThread->optimism[us]);
 
         ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
 
@@ -923,7 +925,8 @@ Value Search::Worker::search(
                     probcutCapturesSearched[probcutCaptureCount++] = move;
             }
 
-        Eval::NNUE::hint_common_parent_position(pos, networks[numaAccessToken], refreshTable);
+        Eval::NNUE::hint_common_parent_position(pos, networks[numaAccessToken], refreshTable,
+                                                thisThread->optimism[us]);
     }
 
 moves_loop:  // When in check, search starts here
