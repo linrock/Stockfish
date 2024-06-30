@@ -48,6 +48,15 @@
 
 namespace Stockfish {
 
+int fvOffset = 287;
+int fvLmrMult = 248;
+int seeGeDMult = -160;
+int histDMult = -4151;
+int histDiv = 3678;
+int bvTh1 = 138;
+int bvTh2 = 54;
+TUNE(fvOffset, fvLmrMult, seeGeDMult, histDMult, histDiv, bvTh1, bvTh2);
+
 namespace TB = Tablebases;
 
 using Eval::evaluate;
@@ -993,7 +1002,7 @@ moves_loop:  // When in check, search starts here
                 // Futility pruning for captures (~2 Elo)
                 if (!givesCheck && lmrDepth < 7 && !ss->inCheck)
                 {
-                    Value futilityValue = ss->staticEval + 287 + 248 * lmrDepth
+                    Value futilityValue = ss->staticEval + fvOffset + fvLmrMult * lmrDepth
                                         + PieceValue[capturedPiece] + captHist / 7;
                     if (futilityValue <= alpha)
                         continue;
@@ -1001,7 +1010,7 @@ moves_loop:  // When in check, search starts here
 
                 // SEE based pruning for captures and checks (~11 Elo)
                 int seeHist = std::clamp(captHist / 32, -180 * depth, 163 * depth);
-                if (!pos.see_ge(move, -160 * depth - seeHist))
+                if (!pos.see_ge(move, seeGeDMult * depth - seeHist))
                     continue;
             }
             else
@@ -1012,15 +1021,15 @@ moves_loop:  // When in check, search starts here
                   + thisThread->pawnHistory[pawn_structure_index(pos)][movedPiece][move.to_sq()];
 
                 // Continuation history based pruning (~2 Elo)
-                if (lmrDepth < 6 && history < -4151 * depth)
+                if (lmrDepth < 6 && history < histDMult * depth)
                     continue;
 
                 history += 2 * thisThread->mainHistory[us][move.from_to()];
 
-                lmrDepth += history / 3678;
+                lmrDepth += history / histDiv;
 
                 Value futilityValue =
-                  ss->staticEval + (bestValue < ss->staticEval - 51 ? 138 : 54) + 140 * lmrDepth;
+                  ss->staticEval + (bestValue < ss->staticEval - 51 ? bvTh1 : bvTh2) + 140 * lmrDepth;
 
                 // Futility pruning: parent node (~13 Elo)
                 if (!ss->inCheck && lmrDepth < 12 && futilityValue <= alpha)
