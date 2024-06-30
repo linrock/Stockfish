@@ -37,6 +37,9 @@
 
 namespace Stockfish {
 
+int nnueDiv = 128;
+TUNE(SetRange(1, 256), nnueDiv);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -66,7 +69,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     auto [psqt, positional] = smallNet ? networks.small.evaluate(pos, &caches.small)
                                        : networks.big.evaluate(pos, &caches.big);
 
-    Value nnue           = (125 * psqt + 131 * positional) / 128;
+    // sync_cout << nnueDiv << sync_endl;
+    Value nnue           = (125 * psqt + 131 * positional) / nnueDiv;
     int   nnueComplexity = std::abs(psqt - positional);
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
