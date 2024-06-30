@@ -48,12 +48,12 @@
 
 namespace Stockfish {
 
-constexpr int fvOffset = 293;
-constexpr int fvLmrMult = 250;
-constexpr int seeGeDMult = -161;
-constexpr int histDMult = -4011;
-constexpr int histDiv = 4005;
-constexpr int bvTh1 = 134;
+constexpr int fvOffset = 294;
+constexpr int fvLmrMult = 246;
+constexpr int seeGeDMult = -163;
+constexpr int histDMult = -3899;
+constexpr int histDiv = 4040;
+constexpr int bvTh1 = 135;
 constexpr int bvTh2 = 56;
 
 namespace TB = Tablebases;
