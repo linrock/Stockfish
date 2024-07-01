@@ -179,18 +179,21 @@ void Search::Worker::start_searching() {
     */
 
 
-    std::cout << "int twoW[256][30] = {" << std::endl;
+    std::cout << "int twoW[8][32][30] = {" << std::endl;
     for (size_t i = 0; i < 8; ++i)
     {
+        std::cout << "  {" << std::endl;
         for (size_t j = 0; j < 32; ++j)
         {
-            std::cout << "  {";
+            std::cout << "    {";
             for (size_t k = 0; k < 30; ++k)
             {
-                std::cout << int(networks->big.network[i].fc_1.weights[k + j * 32]) << ", ";
+                std::cout << int(networks->big.network[i].fc_1.weights[k + j * 32]);
+                if (k < 29) std::cout << ", ";
             }
             std::cout << "}," << std::endl;
         }
+        std::cout << "  }," << std::endl;
     }
     std::cout << "};" << std::endl << std::endl;
 
