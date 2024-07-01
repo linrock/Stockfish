@@ -346,7 +346,7 @@ int twoB[8][32] = {
 };
 
 
-TUNE(SetRange(-127, 127), twoW[0], SetRange(-20000, 20000), twoB[0]);
+TUNE(SetRange(-127, 127), twoW[3], SetRange(-20000, 20000), twoB[3]);
 
 
 // Futility margin
