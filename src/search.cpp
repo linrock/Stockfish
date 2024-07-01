@@ -459,12 +459,14 @@ void Search::Worker::start_searching() {
     }
     */
 
-    for (size_t i = 0; i < 8; ++i)
+    size_t i = 3;
+
+    // for (size_t i = 0; i < 8; ++i)
         for (size_t j = 0; j < 32; ++j)
             for (size_t k = 0; k < 30; ++k)
                 networks->big.network[i].fc_1.weights[k + j*32] = twoW[i][j][k];
 
-    for (size_t i = 0; i < 8; ++i)
+    // for (size_t i = 0; i < 8; ++i)
         for (size_t j = 0; j < 32; ++j)
             networks->big.network[i].fc_1.biases[j] = twoB[i][j];
 
