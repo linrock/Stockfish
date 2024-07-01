@@ -198,15 +198,16 @@ void Search::Worker::start_searching() {
     std::cout << "};" << std::endl << std::endl;
 
 
-    std::cout << "int twoB[256] = {" << std::endl;
+    std::cout << "int twoB[8][32] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
+        std::cout << "  {";
         for (size_t i = 0; i < 32; ++i)
         {
             std::cout << int(networks->big.network[j].fc_1.biases[i]);
-            std::cout << ", ";
-            if (i == 31) std::cout << std::endl;
+            if (i < 31) std::cout << ", ";
         }
+        std::cout << "}," << std::endl;
     }
     std::cout << "};" << std::endl << std::endl;
 
