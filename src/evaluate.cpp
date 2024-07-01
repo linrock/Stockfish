@@ -37,6 +37,14 @@
 
 namespace Stockfish {
 
+    constexpr int snThresh = 952;
+    constexpr int reThresh = 221;
+    constexpr int optDiv = 464;
+    constexpr int nnueDiv = 18598;
+    constexpr int nnueMatOffset = 74417;
+    constexpr int optMatOffset = 8018;
+    constexpr int evalDiv = 76247;
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -47,7 +55,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 962;
+    return std::abs(simpleEval) > snThresh;
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -70,7 +78,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     int   nnueComplexity = std::abs(psqt - positional);
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
-    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < 227))
+    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < reThresh))
     {
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
         nnue                       = (125 * psqt + 131 * positional) / 128;
@@ -79,11 +87,11 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity
-    optimism += optimism * nnueComplexity / 457;
-    nnue -= nnue * nnueComplexity / 19157;
+    optimism += optimism * nnueComplexity / optDiv;
+    nnue -= nnue * nnueComplexity / nnueDiv;
 
     int material = 554 * pos.count<PAWN>() + pos.non_pawn_material();
-    v            = (nnue * (73921 + material) + optimism * (8112 + material)) / 73260;
+    v            = (nnue * (nnueMatOffset + material) + optimism * (optMatOffset + material)) / evalDiv;
 
     // Damp down the evaluation linearly when shuffling
     v -= v * pos.rule50_count() / 212;
