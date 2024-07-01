@@ -205,6 +205,7 @@ void Search::Worker::start_searching() {
         {
             std::cout << int(networks->big.network[j].fc_1.biases[i]);
             std::cout << ", ";
+            if (i == 31) std::cout << std::endl;
         }
     }
     std::cout << "};" << std::endl << std::endl;
