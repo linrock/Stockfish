@@ -55,6 +55,17 @@ using namespace Search;
 
 namespace {
 
+
+int sbDMult = 186;
+int sbMax = 1524;
+int smDMult = 707;
+int smMax = 2073;
+int ssTh = -8000;
+int bMax = 250;
+int betaOffset = 164;
+TUNE(sbDMult, sbMax, smDMult, smMax, ssTh, bMax, betaOffset);
+
+
 static constexpr double EvalLevel[10] = {0.981, 0.956, 0.895, 0.949, 0.913,
                                          0.942, 0.933, 0.890, 0.984, 0.941};
 
@@ -79,10 +90,10 @@ Value to_corrected_static_eval(Value v, const Worker& w, const Position& pos) {
 }
 
 // History and stats update bonus, based on depth
-int stat_bonus(Depth d) { return std::clamp(186 * d - 285, 20, 1524); }
+int stat_bonus(Depth d) { return std::clamp(sbDMult * d - 285, 20, sbMax); }
 
 // History and stats update malus, based on depth
-int stat_malus(Depth d) { return (d < 4 ? 707 * d - 260 : 2073); }
+int stat_malus(Depth d) { return (d < 4 ? smDMult * d - 260 : smMax); }
 
 // Add a small random component to draw evaluations to avoid 3-fold blindness
 Value value_draw(size_t nodes) { return VALUE_DRAW - 1 + Value(nodes & 0x2); }
@@ -1358,10 +1369,9 @@ moves_loop:  // When in check, search starts here
                      + 64 * (!ss->inCheck && bestValue <= ss->staticEval - 107)
                      + 147 * (!(ss - 1)->inCheck && bestValue <= -(ss - 1)->staticEval - 75));
 
-
         // proportional to "how much damage we have to undo"
-        if ((ss - 1)->statScore < -8000)
-            bonus += std::clamp(-(ss - 1)->statScore / 100, 0, 250);
+        if ((ss - 1)->statScore < ssTh)
+            bonus += std::clamp(-(ss - 1)->statScore / 100, 0, bMax);
 
 
         update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq,
@@ -1780,8 +1790,8 @@ void update_all_stats(const Position& pos,
 
     if (!pos.capture_stage(bestMove))
     {
-        int bestMoveBonus = bestValue > beta + 164 ? quietMoveBonus      // larger bonus
-                                                   : stat_bonus(depth);  // smaller bonus
+        int bestMoveBonus = bestValue > beta + betaOffset ? quietMoveBonus      // larger bonus
+                                                          : stat_bonus(depth);  // smaller bonus
 
         update_quiet_stats(pos, ss, workerThread, bestMove, bestMoveBonus);
 
