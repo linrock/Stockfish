@@ -347,7 +347,7 @@ int twoB[8][32] = {
 
 
 // TUNE(SetRange(-127, 127), twoW[3], SetRange(-20000, 20000), twoB[3]);
-TUNE(SetRange(-127, 127), twoW[3], twoW[4]);
+TUNE(SetRange(-127, 127), twoW[3]);
 
 
 // Futility margin
@@ -454,16 +454,17 @@ void Search::Worker::start_searching() {
         networks->big.network[j].fc_2.biases[0] = ob[j]; 
     */
 
-    for (size_t i = 3; i < 5; ++i)
+    // for (size_t i = 3; i < 5; ++i)
+        size_t i = 3;
         for (size_t j = 0; j < 32; ++j)
             for (size_t k = 0; k < 30; ++k)
                 networks->big.network[i].fc_1.weights[k + j*32] = twoW[i][j][k];
 
+    /*
     for (size_t i = 3; i < 5; ++i)
         for (size_t j = 0; j < 32; ++j)
             networks->big.network[i].fc_1.biases[j] = twoB[i][j];
 
-    /*
     for (size_t j = 0; j < 8; ++j)
         for (size_t i = 0; i < 16; ++i)
             networks->big.network[j].fc_0.biases[i] = oneb[(j * 16) + i]; 
