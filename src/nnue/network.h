@@ -73,7 +73,6 @@ class Network {
                                  AccumulatorCaches::Cache<FTDimensions>* cache) const;
 
     // Evaluation function
-    // AlignedPtr<Arch> network[LayerStacks];
     AlignedPtr<Arch[]> network;
 
    private:
@@ -93,9 +92,6 @@ class Network {
 
     // Input feature converter
     LargePagePtr<Transformer> featureTransformer;
-
-    // Evaluation function
-    // AlignedPtr<Arch[]> network;
 
     EvalFile         evalFile;
     EmbeddedNNUEType embeddedType;

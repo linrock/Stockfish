@@ -295,7 +295,7 @@ class AffineTransform {
 #endif
     }
 
-   //private:
+    // private:
     using BiasType   = OutputType;
     using WeightType = std::int8_t;
 
