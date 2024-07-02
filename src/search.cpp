@@ -56,13 +56,13 @@ using namespace Search;
 namespace {
 
 
-constexpr int sbDMult = 189;
-constexpr int sbMax = 1410;
-constexpr int smDMult = 742;
-constexpr int smMax = 1911;
-constexpr int ssTh = -8208;
-constexpr int bMax = 222;
-constexpr int betaOffset = 162;
+constexpr int sbDMult = 191;
+constexpr int sbMax = 1412;
+constexpr int smDMult = 727;
+constexpr int smMax = 1908;
+constexpr int ssTh = -7850;
+constexpr int bMax = 224;
+constexpr int betaOffset = 166;
 
 
 static constexpr double EvalLevel[10] = {0.981, 0.956, 0.895, 0.949, 0.913,
