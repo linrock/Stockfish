@@ -453,6 +453,7 @@ void Search::Worker::start_searching() {
         networks->big.network[j].fc_2.biases[0] = ob[j]; 
     */
 
+// spsa vars start
 twoW[3][0][0] = -39;
 twoW[3][0][1] = -46;
 twoW[3][0][2] = -47;
@@ -1413,6 +1414,7 @@ twoW[3][31][26] = 4;
 twoW[3][31][27] = -15;
 twoW[3][31][28] = -24;
 twoW[3][31][29] = 15;
+// spsa vars end
 
     // for (size_t i = 3; i < 5; ++i)
         size_t i = 3;
