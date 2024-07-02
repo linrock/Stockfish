@@ -57,12 +57,12 @@ namespace {
 
 
 constexpr int sbDMult = 191;
-constexpr int sbMax = 1412;
-constexpr int smDMult = 727;
-constexpr int smMax = 1908;
-constexpr int ssTh = -7850;
-constexpr int bMax = 224;
-constexpr int betaOffset = 166;
+constexpr int sbMax = 1409;
+constexpr int smDMult = 725;
+constexpr int smMax = 1903;
+constexpr int ssTh = -7872;
+constexpr int bMax = 223;
+constexpr int betaOffset = 165;
 
 
 static constexpr double EvalLevel[10] = {0.981, 0.956, 0.895, 0.949, 0.913,
