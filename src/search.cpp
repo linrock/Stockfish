@@ -347,7 +347,7 @@ int twoB[8][32] = {
 
 
 // TUNE(SetRange(-127, 127), twoW[3], SetRange(-20000, 20000), twoB[3]);
-TUNE(SetRange(-127, 127), twoW[3]);
+TUNE(SetRange(-127, 127), twoW[4]);
 
 
 // Futility margin
@@ -455,10 +455,11 @@ void Search::Worker::start_searching() {
     */
 
     // for (size_t i = 3; i < 5; ++i)
-        size_t i = 3;
-        for (size_t j = 0; j < 32; ++j)
-            for (size_t k = 0; k < 30; ++k)
-                networks->big.network[i].fc_1.weights[k + j*32] = twoW[i][j][k];
+
+    //    size_t i = 4;
+    //    for (size_t j = 0; j < 32; ++j)
+    //        for (size_t k = 0; k < 30; ++k)
+    //            networks->big.network[i].fc_1.weights[k + j*32] = twoW[i][j][k];
 
     /*
     for (size_t i = 3; i < 5; ++i)
