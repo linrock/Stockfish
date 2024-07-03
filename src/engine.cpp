@@ -102,6 +102,7 @@ Engine::Engine(std::string path) :
     options["SyzygyProbeLimit"] << Option(7, 0, 7);
     options["EvalFile"] << Option(EvalFileDefaultNameBig, [this](const Option& o) {
         load_big_network(o);
+        sync_cout << "Loading EvalFile: " << std::string(o) << sync_endl;
         return std::nullopt;
     });
     options["EvalFileSmall"] << Option(EvalFileDefaultNameSmall, [this](const Option& o) {
