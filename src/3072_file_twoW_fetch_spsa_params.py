@@ -6,7 +6,7 @@ import requests
 
 
 server = os.environ["FISHTEST_SERVER"]
-response = requests.get(f"{server}/tests/view/66839a8d208b8aa978e47dda")
+response = requests.get(f"{server}/tests/view/668555af208b8aa978e47e66")
 
 with open(f"spsa-3072-twoW.html", "w") as f:
     spsa_html = response.text
