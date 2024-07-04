@@ -445,6 +445,7 @@ int twoB[8][32] = {
 // TUNE(SetRange(-127, 127), twoW[3], SetRange(-20000, 20000), twoB[3]);
 // TUNE(SetRange(-127, 127), twoW[2], twoW[3], twoW[4], twoW[5]);
 
+// TUNE(SetRange(-2048, 2048), ftB);
 
 void Search::Worker::start_searching() {
 
