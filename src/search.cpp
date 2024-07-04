@@ -58,6 +58,100 @@ namespace {
 static constexpr double EvalLevel[10] = {0.981, 0.956, 0.895, 0.949, 0.913,
                                          0.942, 0.933, 0.890, 0.984, 0.941};
 
+// Futility margin
+Value futility_margin(Depth d, bool noTtCutNode, bool improving, bool oppWorsening) {
+    Value futilityMult       = 109 - 40 * noTtCutNode;
+    Value improvingDeduction = 59 * improving * futilityMult / 32;
+    Value worseningDeduction = oppWorsening * futilityMult / 3;
+
+    return futilityMult * d - improvingDeduction - worseningDeduction;
+}
+
+constexpr int futility_move_count(bool improving, Depth depth) {
+    return improving ? (3 + depth * depth) : (3 + depth * depth) / 2;
+}
+
+// Add correctionHistory value to raw staticEval and guarantee evaluation does not hit the tablebase range
+Value to_corrected_static_eval(Value v, const Worker& w, const Position& pos) {
+    auto cv = w.correctionHistory[pos.side_to_move()][pawn_structure_index<Correction>(pos)];
+    v += cv / 10;
+    return std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
+}
+
+// History and stats update bonus, based on depth
+int stat_bonus(Depth d) { return std::clamp(186 * d - 285, 20, 1524); }
+
+// History and stats update malus, based on depth
+int stat_malus(Depth d) { return (d < 4 ? 707 * d - 260 : 2073); }
+
+// Add a small random component to draw evaluations to avoid 3-fold blindness
+Value value_draw(size_t nodes) { return VALUE_DRAW - 1 + Value(nodes & 0x2); }
+
+// Skill structure is used to implement strength limit. If we have a UCI_Elo,
+// we convert it to an appropriate skill level, anchored to the Stash engine.
+// This method is based on a fit of the Elo results for games played between
+// Stockfish at various skill levels and various versions of the Stash engine.
+// Skill 0 .. 19 now covers CCRL Blitz Elo from 1320 to 3190, approximately
+// Reference: https://github.com/vondele/Stockfish/commit/a08b8d4e9711c2
+struct Skill {
+    Skill(int skill_level, int uci_elo) {
+        if (uci_elo)
+        {
+            double e = double(uci_elo - 1320) / (3190 - 1320);
+            level = std::clamp((((37.2473 * e - 40.8525) * e + 22.2943) * e - 0.311438), 0.0, 19.0);
+        }
+        else
+            level = double(skill_level);
+    }
+    bool enabled() const { return level < 20.0; }
+    bool time_to_pick(Depth depth) const { return depth == 1 + int(level); }
+    Move pick_best(const RootMoves&, size_t multiPV);
+
+    double level;
+    Move   best = Move::none();
+};
+
+Value value_to_tt(Value v, int ply);
+Value value_from_tt(Value v, int ply, int r50c);
+void  update_pv(Move* pv, Move move, const Move* childPv);
+void  update_continuation_histories(Stack* ss, Piece pc, Square to, int bonus);
+void  update_refutations(const Position& pos, Stack* ss, Search::Worker& workerThread, Move move);
+void  update_quiet_histories(
+   const Position& pos, Stack* ss, Search::Worker& workerThread, Move move, int bonus);
+void update_quiet_stats(
+  const Position& pos, Stack* ss, Search::Worker& workerThread, Move move, int bonus);
+void update_all_stats(const Position& pos,
+                      Stack*          ss,
+                      Search::Worker& workerThread,
+                      Move            bestMove,
+                      Value           bestValue,
+                      Value           beta,
+                      Square          prevSq,
+                      Move*           quietsSearched,
+                      int             quietCount,
+                      Move*           capturesSearched,
+                      int             captureCount,
+                      Depth           depth);
+
+}  // namespace
+
+Search::Worker::Worker(SharedState&                    sharedState,
+                       std::unique_ptr<ISearchManager> sm,
+                       size_t                          threadId,
+                       NumaReplicatedAccessToken       token) :
+    // Unpack the SharedState struct into member variables
+    threadIdx(threadId),
+    numaAccessToken(token),
+    manager(std::move(sm)),
+    options(sharedState.options),
+    threads(sharedState.threads),
+    tt(sharedState.tt),
+    networks(sharedState.networks),
+    refreshTable(networks[token]) {
+    clear();
+}
+
+
 
 int twoW[8][32][30] = {
   {
@@ -347,102 +441,8 @@ int twoB[8][32] = {
 
 
 // TUNE(SetRange(-127, 127), twoW[3], SetRange(-20000, 20000), twoB[3]);
+// TUNE(SetRange(-127, 127), twoW[2], twoW[3], twoW[4], twoW[5]);
 
-TUNE(SetRange(-127, 127), twoW[2], twoW[3], twoW[4], twoW[5]);
-
-
-// Futility margin
-Value futility_margin(Depth d, bool noTtCutNode, bool improving, bool oppWorsening) {
-    Value futilityMult       = 109 - 40 * noTtCutNode;
-    Value improvingDeduction = 59 * improving * futilityMult / 32;
-    Value worseningDeduction = oppWorsening * futilityMult / 3;
-
-    return futilityMult * d - improvingDeduction - worseningDeduction;
-}
-
-constexpr int futility_move_count(bool improving, Depth depth) {
-    return improving ? (3 + depth * depth) : (3 + depth * depth) / 2;
-}
-
-// Add correctionHistory value to raw staticEval and guarantee evaluation does not hit the tablebase range
-Value to_corrected_static_eval(Value v, const Worker& w, const Position& pos) {
-    auto cv = w.correctionHistory[pos.side_to_move()][pawn_structure_index<Correction>(pos)];
-    v += cv / 10;
-    return std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
-}
-
-// History and stats update bonus, based on depth
-int stat_bonus(Depth d) { return std::clamp(186 * d - 285, 20, 1524); }
-
-// History and stats update malus, based on depth
-int stat_malus(Depth d) { return (d < 4 ? 707 * d - 260 : 2073); }
-
-// Add a small random component to draw evaluations to avoid 3-fold blindness
-Value value_draw(size_t nodes) { return VALUE_DRAW - 1 + Value(nodes & 0x2); }
-
-// Skill structure is used to implement strength limit. If we have a UCI_Elo,
-// we convert it to an appropriate skill level, anchored to the Stash engine.
-// This method is based on a fit of the Elo results for games played between
-// Stockfish at various skill levels and various versions of the Stash engine.
-// Skill 0 .. 19 now covers CCRL Blitz Elo from 1320 to 3190, approximately
-// Reference: https://github.com/vondele/Stockfish/commit/a08b8d4e9711c2
-struct Skill {
-    Skill(int skill_level, int uci_elo) {
-        if (uci_elo)
-        {
-            double e = double(uci_elo - 1320) / (3190 - 1320);
-            level = std::clamp((((37.2473 * e - 40.8525) * e + 22.2943) * e - 0.311438), 0.0, 19.0);
-        }
-        else
-            level = double(skill_level);
-    }
-    bool enabled() const { return level < 20.0; }
-    bool time_to_pick(Depth depth) const { return depth == 1 + int(level); }
-    Move pick_best(const RootMoves&, size_t multiPV);
-
-    double level;
-    Move   best = Move::none();
-};
-
-Value value_to_tt(Value v, int ply);
-Value value_from_tt(Value v, int ply, int r50c);
-void  update_pv(Move* pv, Move move, const Move* childPv);
-void  update_continuation_histories(Stack* ss, Piece pc, Square to, int bonus);
-void  update_refutations(const Position& pos, Stack* ss, Search::Worker& workerThread, Move move);
-void  update_quiet_histories(
-   const Position& pos, Stack* ss, Search::Worker& workerThread, Move move, int bonus);
-void update_quiet_stats(
-  const Position& pos, Stack* ss, Search::Worker& workerThread, Move move, int bonus);
-void update_all_stats(const Position& pos,
-                      Stack*          ss,
-                      Search::Worker& workerThread,
-                      Move            bestMove,
-                      Value           bestValue,
-                      Value           beta,
-                      Square          prevSq,
-                      Move*           quietsSearched,
-                      int             quietCount,
-                      Move*           capturesSearched,
-                      int             captureCount,
-                      Depth           depth);
-
-}  // namespace
-
-Search::Worker::Worker(SharedState&                    sharedState,
-                       std::unique_ptr<ISearchManager> sm,
-                       size_t                          threadId,
-                       NumaReplicatedAccessToken       token) :
-    // Unpack the SharedState struct into member variables
-    threadIdx(threadId),
-    numaAccessToken(token),
-    manager(std::move(sm)),
-    options(sharedState.options),
-    threads(sharedState.threads),
-    tt(sharedState.tt),
-    networks(sharedState.networks),
-    refreshTable(networks[token]) {
-    clear();
-}
 
 void Search::Worker::start_searching() {
 
@@ -453,17 +453,13 @@ void Search::Worker::start_searching() {
 
     for (size_t j = 0; j < 8; ++j)
         networks->big.network[j].fc_2.biases[0] = ob[j]; 
-    */
 
-    // for (size_t i = 3; i < 5; ++i)
+    for (size_t i = 0; i < 8; ++i)
+       for (size_t j = 0; j < 32; ++j)
+           for (size_t k = 0; k < 30; ++k)
+               networks->big.network[i].fc_1.weights[k + j*32] = twoW[i][j][k];
 
-    //    size_t i = 4;
-    //    for (size_t j = 0; j < 32; ++j)
-    //        for (size_t k = 0; k < 30; ++k)
-    //            networks->big.network[i].fc_1.weights[k + j*32] = twoW[i][j][k];
-
-    /*
-    for (size_t i = 3; i < 5; ++i)
+    for (size_t i = 0; i < 8; ++i)
         for (size_t j = 0; j < 32; ++j)
             networks->big.network[i].fc_1.biases[j] = twoB[i][j];
 
