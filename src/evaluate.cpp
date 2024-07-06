@@ -38,12 +38,12 @@
 
 namespace Stockfish {
 
-  constexpr int snTh = 1071;
-  constexpr int reTh = 231;
-  constexpr int optDiv = 422;
-  constexpr int nnueDiv = 20208;
-  constexpr int evalDiv = 75535;
-  constexpr int shufDiv = 208;
+  constexpr int snTh = 1060;
+  constexpr int reTh = 235;
+  constexpr int optDiv = 435;
+  constexpr int nnueDiv = 20470;
+  constexpr int evalDiv = 73383;
+  constexpr int shufDiv = 210;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
