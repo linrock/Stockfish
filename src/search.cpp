@@ -1798,10 +1798,7 @@ void update_all_stats(const Position& pos,
 
     if (!pos.capture_stage(bestMove))
     {
-        int bestMoveBonus = bestValue > beta + 172 ? quietMoveBonus      // larger bonus
-                                                   : stat_bonus(depth);  // smaller bonus
-
-        update_quiet_stats(pos, ss, workerThread, bestMove, bestMoveBonus);
+        update_quiet_stats(pos, ss, workerThread, bestMove, stat_bonus(depth));
 
         // Decrease stats for all non-best quiet moves
         for (int i = 0; i < quietCount; ++i)
