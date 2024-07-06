@@ -153,30 +153,25 @@ Search::Worker::Worker(SharedState&                    sharedState,
 
 void Search::Worker::start_searching() {
 
-    /*
-    std::cout << "int ow[256] = {" << std::endl;
-    for (size_t j = 0; j < 8; ++j)
+    std::cout << "int ftB[3072] = {" << std::endl;
+    for (size_t i = 0; i < 3072; ++i)
     {
-        for (size_t i = 0; i < 32; ++i)
-        {
-            std::cout << int(networks->big.network[j].fc_2.weights[i]);
-            std::cout << ", ";
-        }
+        std::cout << int(networks->big.featureTransformer->biases[i]);
+        std::cout << ", ";
     }
     std::cout << "};" << std::endl << std::endl;
 
 
-    std::cout << "int ob[8] = {" << std::endl;
+    std::cout << "int oneb[128] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
-        for (size_t i = 0; i < 1; ++i)
+        for (size_t i = 0; i < 16; ++i)
         {
-            std::cout << int(networks->big.network[j].fc_2.biases[i]);
+            std::cout << int(networks->big.network[j].fc_0.biases[i]);
             std::cout << ", ";
         }
     }
     std::cout << "};" << std::endl << std::endl;
-    */
 
 
     std::cout << "int twoW[8][32][30] = {" << std::endl;
@@ -224,17 +219,30 @@ void Search::Worker::start_searching() {
     }
     std::cout << "};" << std::endl << std::endl;
 
-    std::cout << "int oneb[128] = {" << std::endl;
+    */
+
+    std::cout << "int ow[256] = {" << std::endl;
     for (size_t j = 0; j < 8; ++j)
     {
-        for (size_t i = 0; i < 16; ++i)
+        for (size_t i = 0; i < 32; ++i)
         {
-            std::cout << int(networks->big.network[j].fc_0.biases[i]);
+            std::cout << int(networks->big.network[j].fc_2.weights[i]);
             std::cout << ", ";
         }
     }
     std::cout << "};" << std::endl << std::endl;
-    */
+
+
+    std::cout << "int ob[8] = {" << std::endl;
+    for (size_t j = 0; j < 8; ++j)
+    {
+        for (size_t i = 0; i < 1; ++i)
+        {
+            std::cout << int(networks->big.network[j].fc_2.biases[i]);
+            std::cout << ", ";
+        }
+    }
+    std::cout << "};" << std::endl << std::endl;
 
 
     // Non-main threads go directly to iterative_deepening()

@@ -76,7 +76,6 @@ class Network {
     // AlignedPtr<Arch> network[LayerStacks];
     AlignedPtr<Arch[]> network;
 
-   private:
     void load_user_net(const std::string&, const std::string&);
     void load_internal();
 

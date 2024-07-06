@@ -404,7 +404,6 @@ class FeatureTransformer {
         hint_common_access_for_perspective<BLACK>(pos, cache);
     }
 
-   private:
     template<Color Perspective>
     [[nodiscard]] std::pair<StateInfo*, StateInfo*>
     try_find_computed_accumulator(const Position& pos) const {
