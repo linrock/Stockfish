@@ -38,11 +38,11 @@
 
 namespace Stockfish {
 
-  constexpr int snTh = 1081;
-  constexpr int reTh = 228;
-  constexpr int optDiv = 424;
-  constexpr int nnueDiv = 19904;
-  constexpr int evalDiv = 74635;
+  constexpr int snTh = 1071;
+  constexpr int reTh = 231;
+  constexpr int optDiv = 422;
+  constexpr int nnueDiv = 20208;
+  constexpr int evalDiv = 75535;
   constexpr int shufDiv = 208;
 
 // Returns a static, purely materialistic evaluation of the position from
