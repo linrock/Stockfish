@@ -54,13 +54,13 @@ namespace Stockfish {
 
 
   constexpr int sbOffset = 110;
-  constexpr int sbMax = 1636;
-  constexpr int smDMult = 812;
-  constexpr int smMax = 2087;
-  constexpr int cMin = -49;
-  constexpr int cMax = 281;
-  constexpr int b1Div = 105;
-  constexpr int b2Div = 208;
+  constexpr int sbMax = 1555;
+  constexpr int smDMult = 821;
+  constexpr int smMax = 2022;
+  constexpr int cMin = -50;
+  constexpr int cMax = 274;
+  constexpr int b1Div = 106;
+  constexpr int b2Div = 210;
 
 
 namespace TB = Tablebases;
