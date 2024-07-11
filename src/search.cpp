@@ -87,10 +87,10 @@ Value to_corrected_static_eval(Value v, const Worker& w, const Position& pos) {
 }
 
 // History and stats update bonus, based on depth
-int stat_bonus(Depth d) { return std::min(190 * d - 108, 1596); }
+int stat_bonus(Depth d) { return std::min(234 * d - 132, 1964); }
 
 // History and stats update malus, based on depth
-int stat_malus(Depth d) { return (d < 4 ? 736 * d - 268 : 2044); }
+int stat_malus(Depth d) { return (d < 4 ? 905 * d - 330 : 2515); }
 
 // Add a small random component to draw evaluations to avoid 3-fold blindness
 Value value_draw(size_t nodes) { return VALUE_DRAW - 1 + Value(nodes & 0x2); }
@@ -1372,14 +1372,14 @@ moves_loop:  // When in check, search starts here
         bonus += std::clamp(-(ss - 1)->statScore / 100, -50, 274);
 
         update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq,
-                                      stat_bonus(depth) * bonus / 100);
+                                      stat_bonus(depth) * bonus / 123);
         thisThread->mainHistory[~us][((ss - 1)->currentMove).from_to()]
-          << stat_bonus(depth) * bonus / 200;
+          << stat_bonus(depth) * bonus / 246;
 
 
         if (type_of(pos.piece_on(prevSq)) != PAWN && ((ss - 1)->currentMove).type_of() != PROMOTION)
             thisThread->pawnHistory[pawn_structure_index(pos)][pos.piece_on(prevSq)][prevSq]
-              << stat_bonus(depth) * bonus / 25;
+              << stat_bonus(depth) * bonus / 30;
     }
 
     if (PvNode)
@@ -1818,9 +1818,6 @@ void update_all_stats(const Position& pos,
 // Updates histories of the move pairs formed by moves
 // at ply -1, -2, -3, -4, and -6 with current move.
 void update_continuation_histories(Stack* ss, Piece pc, Square to, int bonus) {
-
-    bonus = bonus * 52 / 64;
-
     for (int i : {1, 2, 3, 4, 6})
     {
         // Only update the first 2 continuation histories if we are in check
