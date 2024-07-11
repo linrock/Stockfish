@@ -52,6 +52,18 @@
 
 namespace Stockfish {
 
+
+  int sbOffset = 108;
+  int sbMax = 1596;
+  int smDMult = 736;
+  int smMax = 2044;
+  int cMin = -50;
+  int cMax = 274;
+  int b1Div = 100;
+  int b2Div = 200;
+  TUNE(sbOffset, sbMax, smDMult, smMax, cMin, cMax, b1Div, b2Div);
+
+
 namespace TB = Tablebases;
 
 void syzygy_extend_pv(const OptionsMap&            options,
@@ -87,10 +99,10 @@ Value to_corrected_static_eval(Value v, const Worker& w, const Position& pos) {
 }
 
 // History and stats update bonus, based on depth
-int stat_bonus(Depth d) { return std::min(190 * d - 108, 1596); }
+int stat_bonus(Depth d) { return std::min(190 * d - sbOffset, sbMax); }
 
 // History and stats update malus, based on depth
-int stat_malus(Depth d) { return (d < 4 ? 736 * d - 268 : 2044); }
+int stat_malus(Depth d) { return (d < 4 ? smDMult * d - 268 : smMax); }
 
 // Add a small random component to draw evaluations to avoid 3-fold blindness
 Value value_draw(size_t nodes) { return VALUE_DRAW - 1 + Value(nodes & 0x2); }
@@ -1373,9 +1385,9 @@ moves_loop:  // When in check, search starts here
         bonus += std::clamp(-(ss - 1)->statScore / 100, -64, 300);
 
         update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq,
-                                      stat_bonus(depth) * bonus / 100);
+                                      stat_bonus(depth) * bonus / b1Div);
         thisThread->mainHistory[~us][((ss - 1)->currentMove).from_to()]
-          << stat_bonus(depth) * bonus / 200;
+          << stat_bonus(depth) * bonus / b2Div;
 
 
         if (type_of(pos.piece_on(prevSq)) != PAWN && ((ss - 1)->currentMove).type_of() != PROMOTION)
