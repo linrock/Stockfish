@@ -55,7 +55,7 @@ namespace Stockfish {
 
   constexpr int sbOffset = 110;
   constexpr int sbMax = 1556;
-  constexpr int smDMult = 814;
+  constexpr int smDMult = 736;
   constexpr int smMax = 2034;
   constexpr int cMin = -50;
   constexpr int cMax = 279;
