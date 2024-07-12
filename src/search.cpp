@@ -52,10 +52,10 @@
 
 namespace Stockfish {
 
-    int fpBetaW = 512;
-    int spBetaW = 256;
-    int bvW = 768;
-    int fpBvW = 256;
+    int fpBetaW = 500;
+    int spBetaW = 265;
+    int bvW = 777;
+    int fpBvW = 260;
     TUNE(fpBetaW, spBetaW, bvW, fpBvW);
 
 namespace TB = Tablebases;
