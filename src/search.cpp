@@ -52,11 +52,9 @@
 
 namespace Stockfish {
 
-    int fpBetaW = 500;
-    int spBetaW = 265;
-    int bvW = 777;
-    int fpBvW = 260;
-    TUNE(fpBetaW, spBetaW, bvW, fpBvW);
+    constexpr int spBetaW = 265;
+    constexpr int bvW = 777;
+    constexpr int fpBvW = 260;
 
 namespace TB = Tablebases;
 
@@ -797,7 +795,7 @@ Value Search::Worker::search(
              >= beta
         && eval >= beta && (!ttData.move || ttCapture) && beta > VALUE_TB_LOSS_IN_MAX_PLY
         && eval < VALUE_TB_WIN_IN_MAX_PLY)
-        return (fpBetaW * beta + (768 - fpBetaW) * eval) / 768;
+        return beta + (eval - beta) / 4;
 
     // Step 9. Null move search with verification search (~35 Elo)
     if (!PvNode && (ss - 1)->currentMove != Move::null() && (ss - 1)->statScore < 14389
