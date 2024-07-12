@@ -37,6 +37,13 @@
 
 namespace Stockfish {
 
+int snTh = 962;
+int optDiv = 457;
+int nnueDiv = 19157;
+int optOffset = 8112;
+int evalDiv = 73260;
+TUNE(snTh, optDiv, nnueDiv, optOffset, evalDiv);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -47,7 +54,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 962;
+    return std::abs(simpleEval) > snTh;
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -79,11 +86,11 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity
-    optimism += optimism * nnueComplexity / 457;
-    nnue -= nnue * nnueComplexity / 19157;
+    optimism += optimism * nnueComplexity / optDiv;
+    nnue -= nnue * nnueComplexity / nnueDiv;
 
     int material = 554 * pos.count<PAWN>() + pos.non_pawn_material();
-    v            = (nnue * (73921 + material) + optimism * (8112 + material)) / 73260;
+    v            = (nnue * (73921 + material) + optimism * (optOffset + material)) / evalDiv;
 
     // Evaluation grain (to get more alpha-beta cuts) with randomization (for robustness)
     v = (v / 16) * 16 - 1 + (pos.key() & 0x2);
