@@ -37,15 +37,25 @@
 
 namespace Stockfish {
 
-    constexpr int snTh = 961;
-    constexpr int snOptDiv = 430;
-    constexpr int optDiv = 452;
-    constexpr int snNnueDiv = 18832;
-    constexpr int nnueDiv = 18056;
-    constexpr int snEvalDiv = 69378;
-    constexpr int evalDiv = 75477;
-    constexpr int snPawnMult = 549;
-    constexpr int pawnMult = 536;
+    int snTh = 962;
+    int reTh = 227;
+    int snOptDiv = 433;
+    int optDiv = 453;
+    int snNnueDiv = 18815;
+    int nnueDiv = 17864;
+    int snEvalDiv = 68104;
+    int evalDiv = 74715;
+    int snPawnMult = 553;
+    int pawnMult = 532;
+
+    int snNnueMat = 73921;
+    int nnueMat = 73921;
+    int snOptMat = 8112;
+    int optMat = 8112;
+
+    TUNE(SetRange(562, 1362), snTh);
+    TUNE(snOptDiv, optDiv, snNnueDiv, nnueDiv, snEvalDiv, evalDiv, snPawnMult, pawnMult);
+    TUNE(reTh, snNnueMat, nnueMat, snOptMat, optMat);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -80,7 +90,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     int   nnueComplexity = std::abs(psqt - positional);
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
-    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < 227))
+    if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < reTh))
     {
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
         nnue                       = (125 * psqt + 131 * positional) / 128;
@@ -93,7 +103,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     nnue -= nnue * nnueComplexity / (smallNet ? snNnueDiv : nnueDiv);
 
     int material = (smallNet ? snPawnMult : pawnMult) * pos.count<PAWN>() + pos.non_pawn_material();
-    v            = (nnue * (73921 + material) + optimism * (8112 + material)) / (smallNet ? snEvalDiv : evalDiv);
+    v            = (nnue * ((smallNet ? snNnueMat : nnueMat) + material) + optimism * ((smallNet ? snOptMat : optMat) + material)) / (smallNet ? snEvalDiv : evalDiv);
 
     // Evaluation grain (to get more alpha-beta cuts) with randomization (for robustness)
     v = (v / 16) * 16 - 1 + (pos.key() & 0x2);
