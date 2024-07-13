@@ -37,21 +37,22 @@
 
 namespace Stockfish {
 
-    int snTh = 962;
-    int reTh = 227;
-    int snOptDiv = 433;
-    int optDiv = 453;
-    int snNnueDiv = 18815;
-    int nnueDiv = 17864;
-    int snEvalDiv = 68104;
-    int evalDiv = 74715;
-    int snPawnMult = 553;
-    int pawnMult = 532;
+    int snTh = 968;
+    int reTh = 228;
 
-    int snNnueMat = 73921;
-    int nnueMat = 73921;
-    int snOptMat = 8112;
-    int optMat = 8112;
+    int snOptDiv = 430;
+    int optDiv = 445;
+    int snNnueDiv = 19302;
+    int nnueDiv = 17671;
+    int snEvalDiv = 65780;
+    int evalDiv = 79861;
+    int snPawnMult = 541;
+    int pawnMult = 535;
+
+    int snNnueMat = 75896;
+    int nnueMat = 75802;
+    int snOptMat = 7922;
+    int optMat = 7716;
 
     TUNE(SetRange(562, 1362), snTh);
     TUNE(snOptDiv, optDiv, snNnueDiv, nnueDiv, snEvalDiv, evalDiv, snPawnMult, pawnMult);
