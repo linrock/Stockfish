@@ -37,26 +37,22 @@
 
 namespace Stockfish {
 
-    int snTh = 970;
-    int reTh = 227;
+    constexpr int snTh = 991;
+    constexpr int reTh = 224;
 
-    int snOptDiv = 430;
-    int optDiv = 438;
-    int snNnueDiv = 19356;
-    int nnueDiv = 17678;
-    int snEvalDiv = 66648;
-    int evalDiv = 78714;
-    int snPawnMult = 532;
-    int pawnMult = 544;
+    constexpr int snOptDiv = 416;
+    constexpr int optDiv = 456;
+    constexpr int snNnueDiv = 17657;
+    constexpr int nnueDiv = 19338;
+    constexpr int snEvalDiv = 71934;
+    constexpr int evalDiv = 79762;
+    constexpr int snPawnMult = 519;
+    constexpr int pawnMult = 537;
 
-    int snNnueMat = 76976;
-    int nnueMat = 75687;
-    int snOptMat = 7860;
-    int optMat = 7912;
-
-    TUNE(SetRange(562, 1362), snTh);
-    TUNE(snOptDiv, optDiv, snNnueDiv, nnueDiv, snEvalDiv, evalDiv, snPawnMult, pawnMult);
-    TUNE(reTh, snNnueMat, nnueMat, snOptMat, optMat);
+    constexpr int snNnueMat = 74518;
+    constexpr int nnueMat = 78144;
+    constexpr int snOptMat = 7967;
+    constexpr int optMat = 7888;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
