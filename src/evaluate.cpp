@@ -37,7 +37,6 @@
 
 namespace Stockfish {
 
-    constexpr int snTh = 962;
     constexpr int snOptDiv = 433;
     constexpr int optDiv = 453;
     constexpr int snNnueDiv = 18815;
@@ -57,7 +56,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > snTh;
+    return std::abs(simpleEval) > 986 - 3 * pos.count<PAWN>();
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
