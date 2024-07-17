@@ -514,6 +514,7 @@ class FeatureTransformer {
                                            vec_add_16(columnR0[k], columnR1[k]));
             }
 
+            /*
             auto accPsqtIn =
               reinterpret_cast<const psqt_vec_t*>(&(st->*accPtr).psqtAccumulation[Perspective][0]);
             auto accPsqtOut = reinterpret_cast<psqt_vec_t*>(
@@ -542,6 +543,7 @@ class FeatureTransformer {
                       vec_sub_psqt_32(vec_add_psqt_32(accPsqtIn[k], columnPsqtA[k]),
                                       vec_add_psqt_32(columnPsqtR0[k], columnPsqtR1[k]));
             }
+            */
         }
         else
         {
@@ -581,6 +583,7 @@ class FeatureTransformer {
                 }
             }
 
+            /*
             for (IndexType j = 0; j < PSQTBuckets / PsqtTileHeight; ++j)
             {
                 // Load accumulator
@@ -617,6 +620,7 @@ class FeatureTransformer {
                         vec_store_psqt(&accTilePsqtOut[k], psqt[k]);
                 }
             }
+            */
         }
 #else
         for (IndexType i = 0; i < N; ++i)
@@ -624,9 +628,9 @@ class FeatureTransformer {
             std::memcpy((states_to_update[i]->*accPtr).accumulation[Perspective],
                         (st->*accPtr).accumulation[Perspective], HalfDimensions * sizeof(BiasType));
 
-            for (std::size_t k = 0; k < PSQTBuckets; ++k)
-                (states_to_update[i]->*accPtr).psqtAccumulation[Perspective][k] =
-                  (st->*accPtr).psqtAccumulation[Perspective][k];
+            // for (std::size_t k = 0; k < PSQTBuckets; ++k)
+            //     (states_to_update[i]->*accPtr).psqtAccumulation[Perspective][k] =
+            //       (st->*accPtr).psqtAccumulation[Perspective][k];
 
             st = states_to_update[i];
 
@@ -637,9 +641,9 @@ class FeatureTransformer {
                 for (IndexType j = 0; j < HalfDimensions; ++j)
                     (st->*accPtr).accumulation[Perspective][j] -= weights[offset + j];
 
-                for (std::size_t k = 0; k < PSQTBuckets; ++k)
-                    (st->*accPtr).psqtAccumulation[Perspective][k] -=
-                      psqtWeights[index * PSQTBuckets + k];
+                // for (std::size_t k = 0; k < PSQTBuckets; ++k)
+                //     (st->*accPtr).psqtAccumulation[Perspective][k] -=
+                //       psqtWeights[index * PSQTBuckets + k];
             }
 
             // Difference calculation for the activated features
@@ -649,9 +653,9 @@ class FeatureTransformer {
                 for (IndexType j = 0; j < HalfDimensions; ++j)
                     (st->*accPtr).accumulation[Perspective][j] += weights[offset + j];
 
-                for (std::size_t k = 0; k < PSQTBuckets; ++k)
-                    (st->*accPtr).psqtAccumulation[Perspective][k] +=
-                      psqtWeights[index * PSQTBuckets + k];
+                // for (std::size_t k = 0; k < PSQTBuckets; ++k)
+                //     (st->*accPtr).psqtAccumulation[Perspective][k] +=
+                //       psqtWeights[index * PSQTBuckets + k];
             }
         }
 #endif
@@ -743,6 +747,7 @@ class FeatureTransformer {
                 vec_store(&accTile[k], acc[k]);
         }
 
+        /*
         for (IndexType j = 0; j < PSQTBuckets / PsqtTileHeight; ++j)
         {
             auto accTilePsqt = reinterpret_cast<psqt_vec_t*>(
@@ -777,6 +782,7 @@ class FeatureTransformer {
             for (std::size_t k = 0; k < NumPsqtRegs; ++k)
                 vec_store_psqt(&accTilePsqt[k], psqt[k]);
         }
+        */
 
 #else
 
@@ -786,8 +792,8 @@ class FeatureTransformer {
             for (IndexType j = 0; j < HalfDimensions; ++j)
                 entry.accumulation[j] -= weights[offset + j];
 
-            for (std::size_t k = 0; k < PSQTBuckets; ++k)
-                entry.psqtAccumulation[k] -= psqtWeights[index * PSQTBuckets + k];
+            // for (std::size_t k = 0; k < PSQTBuckets; ++k)
+            //     entry.psqtAccumulation[k] -= psqtWeights[index * PSQTBuckets + k];
         }
         for (const auto index : added)
         {
@@ -795,8 +801,8 @@ class FeatureTransformer {
             for (IndexType j = 0; j < HalfDimensions; ++j)
                 entry.accumulation[j] += weights[offset + j];
 
-            for (std::size_t k = 0; k < PSQTBuckets; ++k)
-                entry.psqtAccumulation[k] += psqtWeights[index * PSQTBuckets + k];
+            // for (std::size_t k = 0; k < PSQTBuckets; ++k)
+            //     entry.psqtAccumulation[k] += psqtWeights[index * PSQTBuckets + k];
         }
 
         // The accumulator of the refresh entry has been updated.
@@ -805,8 +811,8 @@ class FeatureTransformer {
         std::memcpy(accumulator.accumulation[Perspective], entry.accumulation,
                     sizeof(BiasType) * HalfDimensions);
 
-        std::memcpy(accumulator.psqtAccumulation[Perspective], entry.psqtAccumulation,
-                    sizeof(int32_t) * PSQTBuckets);
+        // std::memcpy(accumulator.psqtAccumulation[Perspective], entry.psqtAccumulation,
+        //             sizeof(int32_t) * PSQTBuckets);
 #endif
 
         for (Color c : {WHITE, BLACK})
