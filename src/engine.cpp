@@ -232,12 +232,14 @@ void Engine::set_ponderhit(bool b) { threads.main_manager()->ponder = b; }
 
 void Engine::verify_networks() const {
     networks->big.verify(options["EvalFile"]);
+    networks->medium.verify(options["EvalFileMedium"]);
     networks->small.verify(options["EvalFileSmall"]);
 }
 
 void Engine::load_networks() {
     networks.modify_and_replicate([this](NN::Networks& networks_) {
         networks_.big.load(binaryDirectory, options["EvalFile"]);
+        networks_.medium.load(binaryDirectory, options["EvalFileMedium"]);
         networks_.small.load(binaryDirectory, options["EvalFileSmall"]);
     });
     threads.clear();
@@ -264,10 +266,11 @@ void Engine::load_small_network(const std::string& file) {
     threads.ensure_network_replicated();
 }
 
-void Engine::save_network(const std::pair<std::optional<std::string>, std::string> files[2]) {
+void Engine::save_network(const std::pair<std::optional<std::string>, std::string> files[3]) {
     networks.modify_and_replicate([&files](NN::Networks& networks_) {
         networks_.big.save(files[0].first);
-        networks_.small.save(files[1].first);
+        networks_.medium.save(files[1].first);
+        networks_.small.save(files[2].first);
     });
 }
 
