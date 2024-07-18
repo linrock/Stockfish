@@ -38,6 +38,7 @@ namespace Stockfish::Eval::NNUE {
 
 enum class EmbeddedNNUEType {
     BIG,
+    MEDIUM,
     SMALL,
 };
 
@@ -109,21 +110,29 @@ using SmallFeatureTransformer =
 using SmallNetworkArchitecture =
   NetworkArchitecture<TransformedFeatureDimensionsSmall, L2Small, L3Small>;
 
+using MediumFeatureTransformer =
+  FeatureTransformer<TransformedFeatureDimensionsMedium, &StateInfo::accumulatorMedium>;
+using MediumNetworkArchitecture =
+  NetworkArchitecture<TransformedFeatureDimensionsMedium, L2Medium, L3Medium>;
+
 using BigFeatureTransformer =
   FeatureTransformer<TransformedFeatureDimensionsBig, &StateInfo::accumulatorBig>;
 using BigNetworkArchitecture = NetworkArchitecture<TransformedFeatureDimensionsBig, L2Big, L3Big>;
 
-using NetworkBig   = Network<BigNetworkArchitecture, BigFeatureTransformer>;
-using NetworkSmall = Network<SmallNetworkArchitecture, SmallFeatureTransformer>;
+using NetworkBig    = Network<BigNetworkArchitecture, BigFeatureTransformer>;
+using NetworkMedium = Network<MediumNetworkArchitecture, MediumFeatureTransformer>;
+using NetworkSmall  = Network<SmallNetworkArchitecture, SmallFeatureTransformer>;
 
 
 struct Networks {
-    Networks(NetworkBig&& nB, NetworkSmall&& nS) :
+    Networks(NetworkBig&& nB, NetworkMedium&& nM, NetworkSmall&& nS) :
         big(std::move(nB)),
+        medium(std::move(nM)),
         small(std::move(nS)) {}
 
-    NetworkBig   big;
-    NetworkSmall small;
+    NetworkBig     big;
+    NetworkMedium  medium;
+    NetworkSmall   small;
 };
 
 
