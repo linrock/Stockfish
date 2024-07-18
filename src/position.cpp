@@ -969,7 +969,8 @@ void Position::do_null_move(StateInfo& newSt, TranspositionTable& tt) {
     st->dirtyPiece.dirty_num               = 0;
     st->dirtyPiece.piece[0]                = NO_PIECE;  // Avoid checks in UpdateAccumulator()
     st->accumulatorBig.computed[WHITE]     = st->accumulatorBig.computed[BLACK] =
-      st->accumulatorSmall.computed[WHITE] = st->accumulatorSmall.computed[BLACK] = false;
+      st->accumulatorMedium.computed[WHITE]     = st->accumulatorMedium.computed[BLACK] =
+        st->accumulatorSmall.computed[WHITE] = st->accumulatorSmall.computed[BLACK] = false;
 
     if (st->epSquare != SQ_NONE)
     {
