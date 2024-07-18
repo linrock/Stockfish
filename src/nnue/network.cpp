@@ -449,6 +449,10 @@ template class Network<
   FeatureTransformer<TransformedFeatureDimensionsBig, &StateInfo::accumulatorBig>>;
 
 template class Network<
+  NetworkArchitecture<TransformedFeatureDimensionsMedium, L2Medium, L3Medium>,
+  FeatureTransformer<TransformedFeatureDimensionsMedium, &StateInfo::accumulatorMedium>>;
+
+template class Network<
   NetworkArchitecture<TransformedFeatureDimensionsSmall, L2Small, L3Small>,
   FeatureTransformer<TransformedFeatureDimensionsSmall, &StateInfo::accumulatorSmall>>;
 
