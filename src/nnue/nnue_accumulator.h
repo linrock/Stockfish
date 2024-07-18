@@ -96,8 +96,9 @@ struct AccumulatorCaches {
         small.clear(networks.small);
     }
 
-    Cache<TransformedFeatureDimensionsBig>   big;
-    Cache<TransformedFeatureDimensionsSmall> small;
+    Cache<TransformedFeatureDimensionsBig>    big;
+    Cache<TransformedFeatureDimensionsMedium> medium;
+    Cache<TransformedFeatureDimensionsSmall>  small;
 };
 
 }  // namespace Stockfish::Eval::NNUE
