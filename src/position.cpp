@@ -681,7 +681,8 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
 
     // Used by NNUE
     st->accumulatorBig.computed[WHITE]     = st->accumulatorBig.computed[BLACK] =
-      st->accumulatorSmall.computed[WHITE] = st->accumulatorSmall.computed[BLACK] = false;
+      st->accumulatorMedium.computed[WHITE]     = st->accumulatorMedium.computed[BLACK] =
+        st->accumulatorSmall.computed[WHITE] = st->accumulatorSmall.computed[BLACK] = false;
 
     auto& dp     = st->dirtyPiece;
     dp.dirty_num = 1;
