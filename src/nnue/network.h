@@ -130,9 +130,9 @@ struct Networks {
         medium(std::move(nM)),
         small(std::move(nS)) {}
 
-    NetworkBig     big;
-    NetworkMedium  medium;
-    NetworkSmall   small;
+    NetworkBig    big;
+    NetworkMedium medium;
+    NetworkSmall  small;
 };
 
 
