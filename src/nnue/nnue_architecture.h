@@ -42,6 +42,10 @@ constexpr IndexType TransformedFeatureDimensionsBig = 3072;
 constexpr int       L2Big                           = 15;
 constexpr int       L3Big                           = 32;
 
+constexpr IndexType TransformedFeatureDimensionsMedium = 512;
+constexpr int       L2Medium                           = 15;
+constexpr int       L3Medium                           = 32;
+
 constexpr IndexType TransformedFeatureDimensionsSmall = 128;
 constexpr int       L2Small                           = 15;
 constexpr int       L3Small                           = 32;
