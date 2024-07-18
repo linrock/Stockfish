@@ -62,8 +62,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     bool smallNet = use_smallnet(pos);
     int  v;
 
-    auto [psqt, positional] = smallNet ? networks.small.evaluate(pos, &caches.small)
-                                       : networks.big.evaluate(pos, &caches.big);
+    auto [psqt, positional] = smallNet         ? networks.small.evaluate(pos, &caches.small)
+                            : simpleEval > 700 ? networks.medium.evaluate(pos, &caches.medium)
+                                               : networks.big.evaluate(pos, &caches.big);
 
     Value nnue = (125 * psqt + 131 * positional) / 128;
 
