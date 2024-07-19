@@ -53,7 +53,7 @@ void hint_common_parent_position(const Position&    pos,
     else
     {
         int simpleEval = simple_eval(pos, pos.side_to_move());
-        if (simpleEval > 900)
+        if (simpleEval > 910)
             networks.medium.hint_common_access(pos, &caches.medium);
         else
             networks.big.hint_common_access(pos, &caches.big);
