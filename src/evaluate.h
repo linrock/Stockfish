@@ -34,7 +34,7 @@ namespace Eval {
 // name of the macro or the location where this macro is defined, as it is used
 // in the Makefile/Fishtest.
 #define EvalFileDefaultNameBig "nn-1111cefa1111.nnue"
-#define EvalFileDefaultNameMedium "nn-72cb16b20207.nnue"
+#define EvalFileDefaultNameMedium "nn-1aea984b9baa.nnue"
 #define EvalFileDefaultNameSmall "nn-37f18f62d772.nnue"
 
 namespace NNUE {
