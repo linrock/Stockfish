@@ -50,7 +50,7 @@ bool Eval::use_smallnet(const Position& pos) {
     if (pos.count<ALL_PIECES>() <= 8) {
       return std::abs(simpleEval) > 962;
     } else {
-      return std::abs(simpleEval) > 962 + (pos.count<ALL_PIECES>() - 8) * 4;
+      return std::abs(simpleEval) > 962 + (pos.count<ALL_PIECES>() - 10) * 4;
     }
 }
 
