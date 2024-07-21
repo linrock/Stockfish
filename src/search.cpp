@@ -590,7 +590,7 @@ Value Search::Worker::search(
         if (threads.stop.load(std::memory_order_relaxed) || pos.is_draw(ss->ply)
             || ss->ply >= MAX_PLY)
             return (ss->ply >= MAX_PLY && !ss->inCheck)
-                   ? evaluate(networks[numaAccessToken], pos, refreshTable,
+                   ? evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->reEvalSet,
                               thisThread->optimism[us])
                    : value_draw(thisThread->nodes);
 
@@ -730,7 +730,7 @@ Value Search::Worker::search(
         unadjustedStaticEval = ttData.eval;
         if (unadjustedStaticEval == VALUE_NONE)
             unadjustedStaticEval =
-              evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->optimism[us]);
+              evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->reEvalSet, thisThread->optimism[us]);
         else if (PvNode)
             Eval::NNUE::hint_common_parent_position(pos, networks[numaAccessToken], refreshTable);
 
@@ -744,7 +744,7 @@ Value Search::Worker::search(
     else
     {
         unadjustedStaticEval =
-          evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->optimism[us]);
+          evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->reEvalSet, thisThread->optimism[us]);
         ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
 
         // Static evaluation is saved as it was before adjustment by correction history
@@ -1470,7 +1470,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
     // Step 2. Check for an immediate draw or maximum ply reached
     if (pos.is_draw(ss->ply) || ss->ply >= MAX_PLY)
         return (ss->ply >= MAX_PLY && !ss->inCheck)
-               ? evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->optimism[us])
+               ? evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->reEvalSet, thisThread->optimism[us])
                : VALUE_DRAW;
 
     assert(0 <= ss->ply && ss->ply < MAX_PLY);
@@ -1508,7 +1508,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
             unadjustedStaticEval = ttData.eval;
             if (unadjustedStaticEval == VALUE_NONE)
                 unadjustedStaticEval =
-                  evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->optimism[us]);
+                  evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->reEvalSet, thisThread->optimism[us]);
             ss->staticEval = bestValue =
               to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
 
@@ -1522,7 +1522,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
             // In case of null move search, use previous static eval with opposite sign
             unadjustedStaticEval =
               (ss - 1)->currentMove != Move::null()
-                ? evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->optimism[us])
+                ? evaluate(networks[numaAccessToken], pos, refreshTable, thisThread->reEvalSet, thisThread->optimism[us])
                 : -(ss - 1)->staticEval;
             ss->staticEval = bestValue =
               to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);

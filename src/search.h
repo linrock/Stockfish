@@ -28,6 +28,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <set>
 #include <vector>
 
 #include "misc.h"
@@ -282,6 +283,7 @@ class Worker {
     int                   selDepth, nmpMinPly;
 
     Value optimism[COLOR_NB];
+    std::set<Key> reEvalSet;
 
     Position  rootPos;
     StateInfo rootState;

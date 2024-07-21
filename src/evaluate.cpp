@@ -55,12 +55,13 @@ bool Eval::use_smallnet(const Position& pos) {
 Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
                      const Position&                pos,
                      Eval::NNUE::AccumulatorCaches& caches,
+                     std::set<Key>&                 reEvalSet,
                      int                            optimism) {
 
     assert(!pos.checkers());
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
-    bool smallNet   = use_smallnet(pos);
+    bool smallNet   = use_smallnet(pos) && (reEvalSet.find(pos.key()) == reEvalSet.end());
     int  v;
 
     auto [psqt, positional] = smallNet ? networks.small.evaluate(pos, &caches.small)
@@ -68,9 +69,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     Value nnue = (125 * psqt + 131 * positional) / 128;
 
+    // dbg_hit_on(smallNet, 0);
+    // dbg_hit_on(smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < 227), 1);
+    // dbg_extremes_of(reEvalSet.size(), 2);
+
     // Re-evaluate the position when higher eval accuracy is worth the time spent
     if (smallNet && (nnue * simpleEval < 0 || std::abs(nnue) < 227))
     {
+        reEvalSet.insert(pos.key());
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
         nnue                       = (125 * psqt + 131 * positional) / 128;
         smallNet                   = false;
@@ -106,6 +112,7 @@ std::string Eval::trace(Position& pos, const Eval::NNUE::Networks& networks) {
         return "Final evaluation: none (in check)";
 
     auto caches = std::make_unique<Eval::NNUE::AccumulatorCaches>(networks);
+    std::set<Key> reEvalSet;
 
     std::stringstream ss;
     ss << std::showpoint << std::noshowpos << std::fixed << std::setprecision(2);
@@ -118,7 +125,7 @@ std::string Eval::trace(Position& pos, const Eval::NNUE::Networks& networks) {
     v                       = pos.side_to_move() == WHITE ? v : -v;
     ss << "NNUE evaluation        " << 0.01 * UCIEngine::to_cp(v, pos) << " (white side)\n";
 
-    v = evaluate(networks, pos, *caches, VALUE_ZERO);
+    v = evaluate(networks, pos, *caches, reEvalSet, VALUE_ZERO);
     v = pos.side_to_move() == WHITE ? v : -v;
     ss << "Final evaluation       " << 0.01 * UCIEngine::to_cp(v, pos) << " (white side)";
     ss << " [with scaled NNUE, ...]";

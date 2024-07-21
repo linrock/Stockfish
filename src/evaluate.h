@@ -19,6 +19,7 @@
 #ifndef EVALUATE_H_INCLUDED
 #define EVALUATE_H_INCLUDED
 
+#include <set>
 #include <string>
 
 #include "types.h"
@@ -48,6 +49,7 @@ bool  use_smallnet(const Position& pos);
 Value evaluate(const NNUE::Networks&          networks,
                const Position&                pos,
                Eval::NNUE::AccumulatorCaches& caches,
+               std::set<Key>&                 reEvalSet,
                int                            optimism);
 }  // namespace Eval
 
