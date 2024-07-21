@@ -51,6 +51,12 @@ bool Eval::use_smallnet(const Position& pos) {
     return std::abs(simpleEval) > 962 + (pc > 24) * 32 + (pc > 16) * 32 + (pc > 8) * 32;
 }
 
+bool Eval::use_midnet(const Position& pos) {
+    int simpleEval = simple_eval(pos, pos.side_to_move());
+    int pc = pos.count<ALL_PIECES>();
+    return std::abs(simpleEval) > 962 - (pc > 24) * 16 - (pc > 16) * 16;
+}
+
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
 Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
@@ -62,11 +68,12 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
     bool smallNet   = use_smallnet(pos);
+    bool midNet     = !smallNet && use_midnet(pos);
     int  v;
 
-    auto [psqt, positional] = smallNet         ? networks.small.evaluate(pos, &caches.small)
-                            : simpleEval > 962 ? networks.medium.evaluate(pos, &caches.medium)
-                                               : networks.big.evaluate(pos, &caches.big);
+    auto [psqt, positional] = smallNet ? networks.small.evaluate(pos, &caches.small)
+                            : midNet   ? networks.medium.evaluate(pos, &caches.medium)
+                                       : networks.big.evaluate(pos, &caches.big);
 
     Value nnue = (125 * psqt + 131 * positional) / 128;
 
