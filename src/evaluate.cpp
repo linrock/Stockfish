@@ -64,7 +64,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     int  v;
 
     auto [psqt, positional] = smallNet         ? networks.small.evaluate(pos, &caches.small)
-                            : simpleEval > 900 ? networks.medium.evaluate(pos, &caches.medium)
+                            : simpleEval > 875 ? networks.medium.evaluate(pos, &caches.medium)
                                                : networks.big.evaluate(pos, &caches.big);
 
     Value nnue = (125 * psqt + 131 * positional) / 128;
@@ -75,7 +75,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
         nnue                       = (125 * psqt + 131 * positional) / 128;
         smallNet                   = false;
-    } else if (simpleEval > 900)
+    } else if (simpleEval > 875)
         smallNet = true;
 
     // Blend optimism and eval with nnue complexity
