@@ -50,6 +50,8 @@ bool Eval::use_smallnet(const Position& pos) {
     return std::abs(simpleEval) > 962;
 }
 
+typedef std::chrono::high_resolution_clock Clock;
+
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
 Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
@@ -60,12 +62,20 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     assert(!pos.checkers());
 
     bool smallNet = use_smallnet(pos);
+    bool psqtOnly = simple_eval(pos, pos.side_to_move()) > 2500;
     int  v;
 
+    auto t0 = Clock::now();
     auto [psqt, positional] =
       smallNet
-        ? networks.small.evaluate(pos, &caches.small, simple_eval(pos, pos.side_to_move()) > 2500)
+        ? networks.small.evaluate(pos, &caches.small, psqtOnly)
         : networks.big.evaluate(pos, &caches.big, false);
+    auto t1 = Clock::now();
+
+    int caseLabel = 0;
+    if (smallNet)
+        caseLabel = psqtOnly ? 2 : 1;
+    dbg_mean_of(std::chrono::duration_cast<std::chrono::nanoseconds>(t1-t0).count(), caseLabel);
 
     Value nnue = (125 * psqt + 131 * positional) / 128;
 
