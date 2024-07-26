@@ -45,9 +45,9 @@ int Eval::simple_eval(const Position& pos, Color c) {
          + (pos.non_pawn_material(c) - pos.non_pawn_material(~c));
 }
 
-bool Eval::use_smallnet(const Position& pos) {
-    int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 962;
+std::tuple<bool, bool> Eval::use_smallnet(const Position& pos) {
+    int simpleEval = std::abs(simple_eval(pos, pos.side_to_move()));
+    return {simpleEval > 962, simpleEval > 2500};
 }
 
 typedef std::chrono::high_resolution_clock Clock;
@@ -61,8 +61,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     assert(!pos.checkers());
 
-    bool smallNet = use_smallnet(pos);
-    bool psqtOnly = simple_eval(pos, pos.side_to_move()) > 2500;
+    auto [smallNet, psqtOnly] = use_smallnet(pos);
     int  v;
 
     // auto t0 = Clock::now();
