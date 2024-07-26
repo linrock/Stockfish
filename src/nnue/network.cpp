@@ -228,6 +228,9 @@ Network<Arch, Transformer>::evaluate(const Position&                         pos
 
     const int  bucket     = (pos.count<ALL_PIECES>() - 1) / 4;
     const auto psqt       = featureTransformer->transform(pos, cache, transformedFeatures, bucket, false);
+    if (Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsSmall && std::abs(psqt) > 10000) {
+        psqtOnly = true;
+    }
     const auto positional = !psqtOnly ? network[bucket].propagate(transformedFeatures) : 0;
     return {static_cast<Value>(psqt / OutputScale), static_cast<Value>(positional / OutputScale)};
 }
