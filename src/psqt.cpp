@@ -114,7 +114,7 @@ void init() {
 
   for (Piece pc : {W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING})
   {
-    Score score = make_score(PieceValue[MG][pc], PieceValue[EG][pc]);
+    Score score = PieceValue[pc];
 
     for (Square s = SQ_A1; s <= SQ_H8; ++s)
     {
