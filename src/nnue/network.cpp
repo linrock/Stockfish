@@ -232,7 +232,7 @@ Network<Arch, Transformer>::evaluate(const Position&                         pos
     //     dbg_extremes_of(std::abs(psqt));
     //     dbg_hit_on(std::abs(psqt) > 40000);
     // }
-    if (Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsSmall && std::abs(psqt) > 40000) {
+    if (Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsSmall && std::abs(psqt) > 20000) {
         psqtOnly = true;
     }
     const auto positional = !psqtOnly ? network[bucket].propagate(transformedFeatures) : 0;
