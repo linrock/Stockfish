@@ -47,7 +47,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 std::tuple<bool, bool> Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return {std::abs(simpleEval) > 962, simpleEval > 2000};
+    return {std::abs(simpleEval) > 962, simpleEval > 2600};
 }
 
 typedef std::chrono::high_resolution_clock Clock;
