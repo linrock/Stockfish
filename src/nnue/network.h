@@ -62,7 +62,8 @@ class Network {
     bool save(const std::optional<std::string>& filename) const;
 
     NetworkOutput evaluate(const Position&                         pos,
-                           AccumulatorCaches::Cache<FTDimensions>* cache, bool psqtOnly = false) const;
+                           AccumulatorCaches::Cache<FTDimensions>* cache,
+                           bool                                    psqtOnly = false) const;
 
 
     void hint_common_access(const Position&                         pos,
