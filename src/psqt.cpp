@@ -31,7 +31,7 @@ namespace
 
 // 'Bonus' contains Piece-Square parameters.
 // Scores are explicit for files A to D, implicitly mirrored for E to H.
-constexpr Score Bonus[][RANK_NB][int(FILE_NB) / 2] = {
+constexpr int Bonus[][RANK_NB][int(FILE_NB) / 2] = {
   { },
   { },
   { // Knight
@@ -86,7 +86,7 @@ constexpr Score Bonus[][RANK_NB][int(FILE_NB) / 2] = {
   }
 };
 
-constexpr Score PBonus[RANK_NB][FILE_NB] =
+constexpr int PBonus[RANK_NB][FILE_NB] =
   { // Pawn (asymmetric distribution)
    { },
    { -8, -6, 9, 5, 16, 6, -6, -18 },
@@ -102,7 +102,7 @@ constexpr Score PBonus[RANK_NB][FILE_NB] =
 namespace PSQT
 {
 
-Score psq[PIECE_NB][SQUARE_NB];
+int psq[PIECE_NB][SQUARE_NB];
 
 // PSQT::init() initializes piece-square tables: the white halves of the tables are
 // copied from Bonus[] and PBonus[], adding the piece value, then the black halves of
@@ -111,7 +111,7 @@ void init() {
 
   for (Piece pc : {W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING})
   {
-    Score score = PieceValue[pc];
+    int score = PieceValue[pc];
 
     for (Square s = SQ_A1; s <= SQ_H8; ++s)
     {

@@ -21,13 +21,10 @@
 #define PSQT_H_INCLUDED
 
 
-#include "types.h"
-
-
 namespace Stockfish::PSQT
 {
 
-extern Score psq[PIECE_NB][SQUARE_NB];
+extern int psq[16][64];
 
 // Fill psqt array from a set of internally linked parameters
 void init();

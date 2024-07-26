@@ -199,7 +199,7 @@ class Position {
     StateInfo* st;
     int        gamePly;
     Color      sideToMove;
-    Score psq;
+    int psq;
     bool       chess960;
 };
 
