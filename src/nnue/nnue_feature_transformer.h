@@ -324,8 +324,10 @@ class FeatureTransformer {
                            OutputType*                               output,
                            int                                       bucket,
                            bool                                      psqtOnly) const {
-        update_accumulator<WHITE>(pos, cache, psqtOnly);
-        update_accumulator<BLACK>(pos, cache, psqtOnly);
+        // update_accumulator<WHITE>(pos, cache, psqtOnly);
+        // update_accumulator<BLACK>(pos, cache, psqtOnly);
+        update_accumulator<WHITE>(pos, cache, false);
+        update_accumulator<BLACK>(pos, cache, false);
 
         const Color perspectives[2]  = {pos.side_to_move(), ~pos.side_to_move()};
         const auto& psqtAccumulation = (pos.state()->*accPtr).psqtAccumulation;
@@ -333,7 +335,7 @@ class FeatureTransformer {
           (psqtAccumulation[perspectives[0]][bucket] - psqtAccumulation[perspectives[1]][bucket])
           / 2;
 
-        if (psqtOnly)
+        if (psqtOnly && psqt > 40000)
             return psqt;
 
         const auto& accumulation = (pos.state()->*accPtr).accumulation;

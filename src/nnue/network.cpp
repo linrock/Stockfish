@@ -227,12 +227,14 @@ Network<Arch, Transformer>::evaluate(const Position&                         pos
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
     const int  bucket     = (pos.count<ALL_PIECES>() - 1) / 4;
-    const auto psqt       = featureTransformer->transform(pos, cache, transformedFeatures, bucket, false);
+    const auto psqt       = featureTransformer->transform(pos, cache, transformedFeatures, bucket,
+                            Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsSmall);
+
     // if (Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsSmall) {
     //     dbg_extremes_of(std::abs(psqt));
     //     dbg_hit_on(std::abs(psqt) > 40000);
     // }
-    if (Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsSmall && std::abs(psqt) > 30000) {
+    if (Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsSmall && std::abs(psqt) > 40000) {
         psqtOnly = true;
     }
     const auto positional = !psqtOnly ? network[bucket].propagate(transformedFeatures) : 0;
