@@ -310,7 +310,7 @@ class Worker {
     std::atomic<uint64_t> nodes, tbHits, bestMoveChanges;
     int                   selDepth, nmpMinPly;
 
-    Value optimism[COLOR_NB];
+    Value optimism;
 
     Position  rootPos;
     StateInfo rootState;
