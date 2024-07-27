@@ -59,7 +59,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     assert(!pos.checkers());
 
-    bool smallNet = optimism > -119 && use_smallnet(pos);
+    bool smallNet = optimism > -115 && use_smallnet(pos);
     int  v;
 
     auto [psqt, positional] = smallNet ? networks.small.evaluate(pos, &caches.small)
