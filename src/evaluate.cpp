@@ -59,7 +59,15 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     assert(!pos.checkers());
 
-    bool smallNet = optimism > -110 && use_smallnet(pos);
+    /*
+    dbg_extremes_of(optimism);
+    dbg_hit_on(optimism < -119, 0);
+    dbg_hit_on(optimism < -120, 1);
+    dbg_hit_on(optimism < -121, 2);
+    dbg_hit_on(optimism < -122, 3);
+    dbg_hit_on(optimism < -123, 4);
+    */
+    bool smallNet = optimism > -119 && use_smallnet(pos);
     int  v;
 
     auto [psqt, positional] = smallNet ? networks.small.evaluate(pos, &caches.small)
