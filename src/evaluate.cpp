@@ -48,7 +48,9 @@ int Eval::simple_eval(const Position& pos, Color c) {
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
     int psqt = pos.psq_eg_stm();
-    return std::abs(simpleEval) > 962 && std::abs(simpleEval - psqt) < 150;
+    dbg_hit_on(std::abs(simpleEval - psqt) < 200);
+    dbg_extremes_of(std::abs(simpleEval - psqt));
+    return std::abs(simpleEval) > 962 && std::abs(simpleEval - psqt) < 300;
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
