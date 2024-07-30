@@ -227,7 +227,7 @@ NetworkOutput Network<Arch, Transformer>::evaluate(const Position&              
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
     const int  bucket = (pos.count<ALL_PIECES>() - 1) / 4;
-    const auto psqt = featureTransformer->transform(pos, cache, transformedFeatures, bucket, false);
+    const auto psqt = featureTransformer->transform(pos, cache, transformedFeatures, bucket, psqtOnly);
     const auto positional = !psqtOnly ? network[bucket].propagate(transformedFeatures) : 0;
     return {static_cast<Value>(psqt / OutputScale), static_cast<Value>(positional / OutputScale)};
 }
