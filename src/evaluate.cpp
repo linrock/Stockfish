@@ -66,10 +66,11 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     // auto t0 = Clock::now();
     bool twoP = pos.count<ALL_PIECES>() <= 2;
+    bool threePdraw = pos.count<ALL_PIECES>() == 3 && (pos.count<BISHOP>() == 1 || pos.count<KNIGHT>() == 1);
     auto [psqt, positional] =
       smallNet
         ? networks.small.evaluate(pos, &caches.small, twoP)
-        : networks.big.evaluate(pos, &caches.big, twoP);
+        : networks.big.evaluate(pos, &caches.big, twoP || threePdraw);
     // auto t1 = Clock::now();
 
     // int caseLabel = 0;
