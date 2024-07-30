@@ -47,10 +47,11 @@ void hint_common_parent_position(const Position&    pos,
                                  const Networks&    networks,
                                  AccumulatorCaches& caches) {
     auto [smallNet, psqtOnly] = Eval::use_smallnet(pos);
+    bool twoP = pos.count<ALL_PIECES>() <= 2;
     if (smallNet)
-        networks.small.hint_common_access(pos, &caches.small, psqtOnly);
+        networks.small.hint_common_access(pos, &caches.small, twoP);
     else
-        networks.big.hint_common_access(pos, &caches.big, false);
+        networks.big.hint_common_access(pos, &caches.big, twoP);
 }
 
 namespace {
