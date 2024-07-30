@@ -68,7 +68,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     auto [psqt, positional] =
       smallNet
         ? networks.small.evaluate(pos, &caches.small, false)
-        : networks.big.evaluate(pos, &caches.big, pos.count<ALL_PIECES>() <= 3);
+        : networks.big.evaluate(pos, &caches.big, pos.count<ALL_PIECES>() <= 4);
     // auto t1 = Clock::now();
 
     // int caseLabel = 0;
