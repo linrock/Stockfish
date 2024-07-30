@@ -47,7 +47,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 std::tuple<bool, bool> Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return {std::abs(simpleEval) > 962, simpleEval > 2600};
+    return {std::abs(simpleEval) > 962, std::abs(simpleEval) > 2500};
 }
 
 typedef std::chrono::high_resolution_clock Clock;
@@ -69,12 +69,13 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
       smallNet
         ? networks.small.evaluate(pos, &caches.small, psqtOnly)
         : networks.big.evaluate(pos, &caches.big, false);
-    // auto t1 = Clock::now();
-
-    // int caseLabel = 0;
-    // if (smallNet)
-    //     caseLabel = psqtOnly ? 2 : 1;
-    // dbg_mean_of(std::chrono::duration_cast<std::chrono::nanoseconds>(t1-t0).count(), caseLabel);
+    /*
+    auto t1 = Clock::now();
+    int caseLabel = 0;
+    if (smallNet)
+        caseLabel = psqtOnly ? 2 : 1;
+    dbg_mean_of(std::chrono::duration_cast<std::chrono::nanoseconds>(t1-t0).count(), caseLabel);
+    */
 
     Value nnue = (125 * psqt + 131 * positional) / 128;
 
