@@ -67,14 +67,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     // auto t0 = Clock::now();
     auto [psqt, positional] =
       smallNet
-        ? networks.small.evaluate(pos, &caches.small, psqtOnly)
-        : networks.big.evaluate(pos, &caches.big, false);
+        ? networks.small.evaluate(pos, &caches.small, false)
+        : networks.big.evaluate(pos, &caches.big, pos.count<ALL_PIECES>() <= 3);
     // auto t1 = Clock::now();
 
     // int caseLabel = 0;
-    // if (smallNet)
+    // if (!smallNet)
     //     caseLabel = psqtOnly ? 2 : 1;
-    // dbg_mean_of(std::chrono::duration_cast<std::chrono::nanoseconds>(t1-t0).count(), caseLabel);
+    // dbg_mean_of(std::chrono::duration_cast<std::chrono::nanoseconds>(t1-t0).count(), smallNet);
 
     Value nnue = (125 * psqt + 131 * positional) / 128;
 
