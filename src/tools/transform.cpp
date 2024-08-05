@@ -564,9 +564,8 @@ namespace Stockfish::Tools
 
         std::atomic<std::uint64_t> num_processed = 0;
         std::atomic<std::uint64_t> num_standard_startpos = 0;
-        std::atomic<std::uint64_t> num_position_in_check = 0;
-        std::atomic<std::uint64_t> num_move_already_is_capture = 0;
-        std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap0 = 0;
+        std::atomic<std::uint64_t> num_zero_or_one_move = 0;
+        std::atomic<std::uint64_t> num_one_good_move = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap1 = 0;
 
         Threads.execute_with_workers([&](auto& th){
@@ -585,70 +584,57 @@ namespace Stockfish::Tools
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
                     bool should_skip_position = false;
-                    if (pos.checkers()) {
-                        // Skip if in check
-                        if (debug_print) {
-                            sync_cout << "[debug] " << pos.fen() << sync_endl
-                                      << "[debug] Position is in check" << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_position_in_check.fetch_add(1);
+                    if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
                         should_skip_position = true;
-                    } else if (pos.capture_or_promotion((Stockfish::Move)ps.move)) {
-                        // Skip if the provided move is already a capture or promotion
-                        if (debug_print) {
-                            sync_cout << "[debug] " << pos.fen() << sync_endl
-                                      << "[debug] Provided move is capture or promo: "
-                                      << UCI::move((Stockfish::Move)ps.move, false)
-                                      << sync_endl
-                                      << "[debug]" << sync_endl;
-                        }
-                        num_move_already_is_capture.fetch_add(1);
-                        should_skip_position = true;
-		    } else if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
                         num_standard_startpos.fetch_add(1);
-                        should_skip_position = true;
                     } else {
                         auto [search_val, pvs] = Search::search(pos, 6, 2);
-                        if (!pvs.empty() && th.rootMoves.size() > 0) {
+                        if (pvs.empty() || th.rootMoves.size() <= 1) {
+                            // skip if 0 or 1 valid moves
+                            should_skip_position = true;
+                            num_zero_or_one_move.fetch_add(1);
+                            if (debug_print) {
+                                sync_cout << "[debug] " << pos.fen() << sync_endl;
+                                sync_cout << "[debug] skipping - 0 or 1 valid moves" << sync_endl;
+                            }
+                        } else {
                             auto best_move = th.rootMoves[0].pv[0];
-                            bool more_than_one_valid_move = th.rootMoves.size() > 1;
+                            auto best_move_score = th.rootMoves[0].score;
+                            auto second_best_move_score = th.rootMoves[1].score;
                             if (debug_print) {
                                 sync_cout << "[debug] " << pos.fen() << sync_endl;
                                 sync_cout << "[debug] Main PV move:    "
                                           << UCI::move(best_move, false) << " "
-                                          << th.rootMoves[0].score << " " << sync_endl;
-                                if (more_than_one_valid_move) {
-                                    sync_cout << "[debug] 2nd PV move:     "
-                                              << UCI::move(th.rootMoves[1].pv[0], false) << " "
-                                              << th.rootMoves[1].score << " " << sync_endl;
-                                } else {
-                                    sync_cout << "[debug] The only valid move" << sync_endl;
+                                          << best_move_score << " " << sync_endl;
+                                sync_cout << "[debug] 2nd PV move:     "
+                                          << UCI::move(th.rootMoves[1].pv[0], false) << " "
+                                          << second_best_move_score << " " << sync_endl;
+                            }
+                            int abs_best_move_score = std::abs(best_move_score);
+                            int abs_second_best_move_score = std::abs(second_best_move_score);
+                            if (abs_best_move_score < 100 && abs_second_best_move_score > 150) {
+                                // skip - best move about equal, 2nd best move loses
+                                should_skip_position = true;
+                                num_one_good_move.fetch_add(1);
+                            } else if (abs_best_move_score > 150 && abs_second_best_move_score < 100) {
+                                // skip - best move gains advantage, 2nd best move equalizes
+                                should_skip_position = true;
+                                num_one_good_move.fetch_add(1);
+                            } else if ((best_move_score > 0) != (second_best_move_score > 0)) {
+                                // if the 2 best move scores favor different sides
+                                if (abs_best_move_score > 150 && abs_second_best_move_score > 150) {
+                                    // skip - best move gains an advantage, 2nd best move loses
+                                    should_skip_position = true;
+                                    num_one_good_move.fetch_add(1);
+                                } else if (std::abs(best_move_score - second_best_move_score) > 200) {
+                                    // skip - best moves favor different sides
+                                    should_skip_position = true;
+                                    num_one_good_move.fetch_add(1);
                                 }
                             }
-                            if (pos.capture_or_promotion(best_move)) {
-                                // skip if multipv 1st line bestmove is a capture or promo
-                                if (debug_print) {
-                                    sync_cout << "[debug] Move is capture or promo: " << UCI::move(best_move, false)
-                                              << sync_endl
-                                              << "[debug] 1st best move at depth 6 multipv 2" << sync_endl
-                                              << "[debug]" << sync_endl;
-                                }
-                                num_capture_or_promo_skipped_multipv_cap0.fetch_add(1);
-                                should_skip_position = true;
-                            } else if (more_than_one_valid_move && pos.capture_or_promotion(th.rootMoves[1].pv[0])) {
-                                // skip if multipv 2nd line bestmove is a capture or promo
-                                if (debug_print) {
-                                    sync_cout << "[debug] Move is capture or promo: " << UCI::move(best_move, false)
-                                              << sync_endl
-                                              << "[debug] 2nd best move at depth 6 multipv 2" << sync_endl
-                                              << "[debug]" << sync_endl;
-                                }
-                                num_capture_or_promo_skipped_multipv_cap1.fetch_add(1);
-                                should_skip_position = true;
-                            }
-			}
+                        }
                     }
+
                     pos.sfen_pack(ps.sfen, false);
                     // nnue-pytorch training data loader skips positions with score VALUE_NONE
                     if (should_skip_position)
@@ -659,19 +645,15 @@ namespace Stockfish::Tools
 
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 10000 == 0) {
-                        auto c = num_position_in_check.load();
-                        auto a = num_move_already_is_capture.load();
                         auto s = num_standard_startpos.load();
-                        auto multipv_cap0 = num_capture_or_promo_skipped_multipv_cap0.load();
-                        auto multipv_cap1 = num_capture_or_promo_skipped_multipv_cap1.load();
-                        sync_cout << "Processed " << p << " positions. Skipped " << (c + a + s + multipv_cap0 + multipv_cap1) << " positions."
+                        auto z = num_zero_or_one_move.load();
+                        auto o = num_one_good_move.load();
+                        sync_cout << "Processed " << p << " positions. Skipped " << (s + z + o) << " positions."
                                   << sync_endl
-                                  << "  Static filter: " << (a + c + s)
-                                  << " (capture or promo: " << a << ", in check: " << c << ", startpos: " << s << ")"
+                                  << "  Static filter: " << (s + z) << " (zero/one move: " << z << ", startpos: " << s << ")"
                                   << sync_endl
-                                  << "  MultiPV filter: " << (multipv_cap0 + multipv_cap1)
-                                  << " (cap0: " << multipv_cap0 << ", cap1: " << multipv_cap1 << ")"
-                                  << " depth 6 multipv 2" << sync_endl;
+                                  << "  MultiPV filter: " << o << " (one good move: " << o << ")" << " depth 6 multipv 2"
+                                  << sync_endl;
                     }
                 }
             }
