@@ -1,0 +1,24 @@
+fen r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 1
+move f3g5
+score 39
+ply 1
+result 0
+e
+fen r1bqk1nr/ppppbppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 1
+move d2d3
+score 131
+ply 1
+result 0
+e
+fen r1bqkbnr/pppp1p1p/2n3p1/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 1
+move c2c4
+score 175
+ply 1
+result 0
+e
+fen rnbqkb1r/pppppppp/8/8/3Pn3/8/PPP2PPP/RNBQKBNR w KQkq - 0 1
+move e1e2
+score 111
+ply 1
+result 1
+e

@@ -1107,7 +1107,7 @@ namespace Stockfish::Tools
         const std::map<std::string, CommandFunc> subcommands = {
             { "nudged_static", &nudged_static },
             { "rescore", &rescore },
-            { "filter_335a9b2d8a80", &filter_335a9b2d8a80 },
+            { "filter_v6", &filter_335a9b2d8a80 },
             { "minimize_binpack", &minimize_binpack }
         };
 
