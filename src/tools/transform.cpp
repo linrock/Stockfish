@@ -564,6 +564,7 @@ namespace Stockfish::Tools
 
         std::atomic<std::uint64_t> num_processed = 0;
         std::atomic<std::uint64_t> num_standard_startpos = 0;
+        std::atomic<std::uint64_t> num_value_none = 0;
         std::atomic<std::uint64_t> num_zero_or_one_move = 0;
         std::atomic<std::uint64_t> num_one_good_move = 0;
         std::atomic<std::uint64_t> num_capture_or_promo_skipped_multipv_cap1 = 0;
@@ -587,6 +588,9 @@ namespace Stockfish::Tools
                     if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
                         should_skip_position = true;
                         num_standard_startpos.fetch_add(1);
+                    } else if (pos.score == 32002) {
+                        should_skip_position = true;
+                        num_value_none.fetch_add(1);
                     } else {
                         auto [search_val, pvs] = Search::search(pos, 6, 2);
                         if (pvs.empty() || th.rootMoves.size() <= 1) {
@@ -646,11 +650,14 @@ namespace Stockfish::Tools
                     auto p = num_processed.fetch_add(1) + 1;
                     if (p % 10000 == 0) {
                         auto s = num_standard_startpos.load();
+                        auto v = num_value_none.load();
                         auto z = num_zero_or_one_move.load();
+
                         auto o = num_one_good_move.load();
-                        sync_cout << "Processed " << p << " positions. Skipped " << (s + z + o) << " positions."
+
+                        sync_cout << "Processed " << p << " positions. Skipped " << (s + v + z + o) << " positions."
                                   << sync_endl
-                                  << "  Static filter: " << (s + z) << " (zero/one move: " << z << ", startpos: " << s << ")"
+                                  << "  Static filter: " << (s + v + z) << " (zero/one move: " << z << ", startpos: " << s << ", value none: " << v << ")"
                                   << sync_endl
                                   << "  MultiPV filter: " << o << " (one good move: " << o << ")" << " depth 6 multipv 2"
                                   << sync_endl;
