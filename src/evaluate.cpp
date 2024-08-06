@@ -68,9 +68,29 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Value nnue = (125 * psqt + 131 * positional) / 128;
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
-    if (smallNet && (nnue * psqt < 0 || std::abs(nnue) < 227))
+    int pc = pos.count<ALL_PIECES>();
+    if (smallNet && (nnue * psqt < 0 || (std::abs(nnue) < 227 && (pc > 5 || pos.count<PAWN>() == 0))))
     {
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
+
+        int nnueDiff = nnue - (125 * psqt + 131 * positional) / 128;
+
+        /*
+        dbg_mean_of(std::abs(nnueDiff));
+        dbg_stdev_of(std::abs(nnueDiff));
+        dbg_extremes_of(std::abs(nnueDiff));
+     
+        dbg_hit_on(std::abs(nnueDiff) <= 5);
+
+        if (std::abs(nnueDiff) <= 5) {
+            sync_cout << "-- no diff --" << sync_endl;
+            sync_cout << pos.fen() << sync_endl;
+            sync_cout << nnue << sync_endl;
+            sync_cout << pos.count<ALL_PIECES>() << sync_endl;
+            sync_cout << "-- no diff --" << sync_endl;
+        }
+        */
+
         nnue                       = (125 * psqt + 131 * positional) / 128;
         smallNet                   = false;
     }
