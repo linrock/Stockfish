@@ -585,12 +585,12 @@ namespace Stockfish::Tools
                 {
                     pos.set_from_packed_sfen(ps.sfen, &si, &th, frc);
                     bool should_skip_position = false;
-                    if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
-                        should_skip_position = true;
-                        num_standard_startpos.fetch_add(1);
-                    } else if (pos.score == 32002) {
+                    if (ps.score == 32002) {
                         should_skip_position = true;
                         num_value_none.fetch_add(1);
+                    } else if (pos.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
+                        should_skip_position = true;
+                        num_standard_startpos.fetch_add(1);
                     } else {
                         auto [search_val, pvs] = Search::search(pos, 6, 2);
                         if (pvs.empty() || th.rootMoves.size() <= 1) {
