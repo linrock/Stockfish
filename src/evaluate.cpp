@@ -75,10 +75,11 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     bool enemyQueenThreatened = pos.pieces(~us, QUEEN) & (threatenedByPawn | threatenedByMinor | threatenedByRook);
     bool enemyRookThreatened = pos.pieces(~us, ROOK) & (threatenedByPawn | threatenedByMinor);
+    bool enemyMinorThreatened = (pos.pieces(~us, KNIGHT) & threatenedByPawn) | (pos.pieces(~us, BISHOP) & threatenedByPawn);
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
     int pc = pos.count<ALL_PIECES>();
-    if (smallNet && !enemyQueenThreatened && !enemyRookThreatened && (nnue * psqt < 0 || std::abs(nnue) < 227))
+    if (smallNet && !enemyQueenThreatened && !enemyRookThreatened && !enemyMinorThreatened && (nnue * psqt < 0 || std::abs(nnue) < 227))
     {
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
 
