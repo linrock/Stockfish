@@ -603,19 +603,22 @@ namespace Stockfish::Tools
                             }
                         } else {
                             auto best_move = th.rootMoves[0].pv[0];
-                            auto best_move_score = th.rootMoves[0].score;
-                            auto second_best_move_score = th.rootMoves[1].score;
+                            int best_move_score = th.rootMoves[0].score;
+                            int abs_best_move_score = std::abs(best_move_score);
+
+                            auto second_best_move = th.rootMoves[1].pv[0];
+                            int second_best_move_score = th.rootMoves[1].score;
+                            int abs_second_best_move_score = std::abs(second_best_move_score);
+
                             if (debug_print) {
                                 sync_cout << "[debug] " << pos.fen() << sync_endl;
                                 sync_cout << "[debug] Main PV move:    "
                                           << UCI::move(best_move, false) << " "
                                           << best_move_score << " " << sync_endl;
                                 sync_cout << "[debug] 2nd PV move:     "
-                                          << UCI::move(th.rootMoves[1].pv[0], false) << " "
+                                          << UCI::move(second_best_move, false) << " "
                                           << second_best_move_score << " " << sync_endl;
                             }
-                            int abs_best_move_score = std::abs(best_move_score);
-                            int abs_second_best_move_score = std::abs(second_best_move_score);
                             if (abs_best_move_score < 100 && abs_second_best_move_score > 150) {
                                 // skip - best move about equal, 2nd best move loses
                                 should_skip_position = true;
@@ -647,7 +650,7 @@ namespace Stockfish::Tools
 
                     out.write(th.id(), ps);
 
-                    auto p = num_processed.fetch_add(1) + 1;
+                    auto p = num_processed.fetch_add(1);
                     if (p % 10000 == 0) {
                         auto s = num_standard_startpos.load();
                         auto v = num_value_none.load();
