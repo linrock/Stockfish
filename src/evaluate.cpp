@@ -74,7 +74,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     bool  noMateMaterial =
       pcUs == 1 || pcThem == 1
       || (pcUs == 2 && (pos.count<BISHOP>(us) == 1 || pos.count<KNIGHT>(us) == 1))
-      || (pcThem == 2 && (pos.count<BISHOP>(~us) == 1 || pos.count<KNIGHT>(~us) == 1));
+      || (pcThem == 2 && (pos.count<BISHOP>(~us) == 1 || pos.count<KNIGHT>(~us) == 1))
+      || (pos.count<ALL_PIECES>() == 4 && pos.count<KNIGHT>() == 2);
 
     if (smallNet && !noMateMaterial && (nnue * psqt < 0 || std::abs(nnue) < 227))
     {
