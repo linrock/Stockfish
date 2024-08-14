@@ -58,6 +58,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
                      int                            optimism) {
 
     assert(!pos.checkers());
+    if (!MoveList<LEGAL>(pos).size())
+        return 0;
 
     bool smallNet = use_smallnet(pos);
     int  v;
