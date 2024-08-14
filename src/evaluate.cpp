@@ -71,13 +71,14 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Color us     = pos.side_to_move();
     int   pcUs   = pos.count<ALL_PIECES>(us);
     int   pcThem = pos.count<ALL_PIECES>(~us);
-    bool  noMateMaterial =
+    bool  noRe =
       pcUs == 1 || pcThem == 1
       || (pcUs == 2 && (pos.count<BISHOP>(us) == 1 || pos.count<KNIGHT>(us) == 1))
       || (pcThem == 2 && (pos.count<BISHOP>(~us) == 1 || pos.count<KNIGHT>(~us) == 1))
-      || (pos.count<ALL_PIECES>() == 4 && pos.count<KNIGHT>() == 2);
+      || (pos.count<ALL_PIECES>() == 4 && pos.count<KNIGHT>() == 2)
+      || !MoveList<LEGAL>(pos).size();
 
-    if (smallNet && !noMateMaterial && (nnue * psqt < 0 || std::abs(nnue) < 227))
+    if (smallNet && !noRe && (nnue * psqt < 0 || std::abs(nnue) < 227))
     {
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
         nnue                       = (125 * psqt + 131 * positional) / 128;
