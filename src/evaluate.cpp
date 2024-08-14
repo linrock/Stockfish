@@ -68,8 +68,15 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Value nnue = (125 * psqt + 131 * positional) / 128;
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
-    Color us = pos.side_to_move();
-    if (smallNet && (pos.count<ALL_PIECES>(us) != 1 && pos.count<ALL_PIECES>(~us) != 1) && (nnue * psqt < 0 || std::abs(nnue) < 227))
+    Color us     = pos.side_to_move();
+    int   pcUs   = pos.count<ALL_PIECES>(us);
+    int   pcThem = pos.count<ALL_PIECES>(~us);
+    bool  noMateMaterial =
+      pcUs == 1 || pcThem == 1
+      || (pcUs == 2 && (pos.count<BISHOP>(us) == 1 || pos.count<KNIGHT>(us) == 1))
+      || (pcThem == 2 && (pos.count<BISHOP>(~us) == 1 || pos.count<KNIGHT>(~us) == 1));
+
+    if (smallNet && !noMateMaterial && (nnue * psqt < 0 || std::abs(nnue) < 227))
     {
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
         nnue                       = (125 * psqt + 131 * positional) / 128;
