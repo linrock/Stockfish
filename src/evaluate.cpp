@@ -37,6 +37,15 @@
 
 namespace Stockfish {
 
+ int TUNE_snOptDiv = 430;
+ int TUNE_mainOptDiv = 474;
+ int TUNE_snNnueDiv = 20233;
+ int TUNE_mainNnueDiv = 17879;
+ int TUNE_vMatOffset = 76898;
+ int TUNE_vSnDiv = 74411;
+ int TUNE_vMainDiv = 76256;
+ TUNE(TUNE_snOptDiv, TUNE_mainOptDiv, TUNE_snNnueDiv, TUNE_mainNnueDiv, TUNE_vMatOffset, TUNE_vSnDiv, TUNE_vMainDiv);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -77,11 +86,11 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     // Blend optimism and eval with nnue complexity
     int nnueComplexity = std::abs(psqt - positional);
-    optimism += optimism * nnueComplexity / (smallNet ? 430 : 474);
-    nnue -= nnue * nnueComplexity / (smallNet ? 20233 : 17879);
+    optimism += optimism * nnueComplexity / (smallNet ? TUNE_snOptDiv : TUNE_mainOptDiv);
+    nnue -= nnue * nnueComplexity / (smallNet ? TUNE_snNnueDiv : TUNE_mainNnueDiv);
 
     int material = (smallNet ? 553 : 532) * pos.count<PAWN>() + pos.non_pawn_material();
-    v = (nnue * (76898 + material) + optimism * (8112 + material)) / (smallNet ? 74411 : 76256);
+    v = (nnue * (TUNE_vMatOffset + material) + optimism * (8112 + material)) / (smallNet ? TUNE_vSnDiv : TUNE_vMainDiv);
 
     // Evaluation grain (to get more alpha-beta cuts) with randomization (for robustness)
     v = (v / 16) * 16 - 1 + (pos.key() & 0x2);
