@@ -37,13 +37,13 @@
 
 namespace Stockfish {
 
-    constexpr int TUNE_snOptDiv = 432;
-    constexpr int TUNE_mainOptDiv = 475;
-    constexpr int TUNE_snNnueDiv = 19702;
-    constexpr int TUNE_mainNnueDiv = 16876;
-    constexpr int TUNE_vMatOffset = 75584;
-    constexpr int TUNE_vSnDiv = 69469;
-    constexpr int TUNE_vMainDiv = 75259;
+    constexpr int TUNE_snOptDiv = 434;
+    constexpr int TUNE_mainOptDiv = 470;
+    constexpr int TUNE_snNnueDiv = 20274;
+    constexpr int TUNE_mainNnueDiv = 17497;
+    constexpr int TUNE_vMatOffset = 74562;
+    constexpr int TUNE_vSnDiv = 74600;
+    constexpr int TUNE_vMainDiv = 77201;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
