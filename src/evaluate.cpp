@@ -37,14 +37,19 @@
 
 namespace Stockfish {
 
-    int TUNE_snOptDiv = 433;
-    int TUNE_mainOptDiv = 453;
-    int TUNE_snNnueDiv = 18815;
-    int TUNE_mainNnueDiv = 17864;
-    int TUNE_vMatOffset = 73921;
-    int TUNE_vSnDiv = 68104;
-    int TUNE_vMainDiv = 74715;
-    TUNE(TUNE_snOptDiv, TUNE_mainOptDiv, TUNE_snNnueDiv, TUNE_mainNnueDiv, TUNE_vMatOffset, TUNE_vSnDiv, TUNE_vMainDiv);
+   int TUNE_snThresh = 962;
+   int TUNE_snBMult = 0;
+   int TUNE_snOptDiv = 430;
+   int TUNE_mainOptDiv = 474;
+   int TUNE_snNnueDiv = 20233;
+   int TUNE_mainNnueDiv = 17879;
+   int TUNE_vMatOffset = 76898;
+   int TUNE_vSnDiv = 74411;
+   int TUNE_vMainDiv = 76256;
+
+   TUNE(SetRange(-64, 64), TUNE_snBMult);
+   TUNE(TUNE_snThresh, TUNE_snOptDiv, TUNE_mainOptDiv,
+        TUNE_snNnueDiv, TUNE_mainNnueDiv, TUNE_vMatOffset, TUNE_vSnDiv, TUNE_vMainDiv);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -56,7 +61,8 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 962;
+    int pc         = pos.count<ALL_PIECES>();
+    return std::abs(simpleEval) > TUNE_snThresh + (pc > 24) * TUNE_snBMult + (pc > 16) * TUNE_snBMult + (pc > 8) * TUNE_snBMult;
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
