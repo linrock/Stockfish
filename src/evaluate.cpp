@@ -38,18 +38,29 @@
 namespace Stockfish {
 
    int TUNE_snThresh = 962;
-   int TUNE_snBMult = 0;
+   int TUNE_snPcMult = 0;
+
    int TUNE_snOptDiv = 430;
    int TUNE_mainOptDiv = 474;
    int TUNE_snNnueDiv = 20233;
    int TUNE_mainNnueDiv = 17879;
    int TUNE_vMatOffset = 76898;
+   int TUNE_vOptMatOffset = 8112;
    int TUNE_vSnDiv = 74411;
    int TUNE_vMainDiv = 76256;
 
-   TUNE(SetRange(-64, 64), TUNE_snBMult);
-   TUNE(TUNE_snThresh, TUNE_snOptDiv, TUNE_mainOptDiv,
-        TUNE_snNnueDiv, TUNE_mainNnueDiv, TUNE_vMatOffset, TUNE_vSnDiv, TUNE_vMainDiv);
+   int TUNE_snNpmMult = 1024;
+   int TUNE_npmMult = 1024;
+
+   int TUNE_nnuePsqSeMult = 0;
+   int TUNE_optPsqSeMult = 0;
+   TUNE(SetRange(-64, 64), TUNE_snPcMult);
+   TUNE(SetRange(-16384, 16384), TUNE_nnuePsqSeMult);
+   TUNE(SetRange(-16384, 16384), TUNE_optPsqSeMult);
+
+   TUNE(TUNE_snThresh, TUNE_snOptDiv, TUNE_mainOptDiv, TUNE_snNpmMult, TUNE_npmMult,
+        TUNE_snNnueDiv, TUNE_mainNnueDiv, TUNE_vMatOffset, TUNE_vOptMatOffset,
+        TUNE_vSnDiv, TUNE_vMainDiv);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -62,7 +73,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
     int pc         = pos.count<ALL_PIECES>();
-    return std::abs(simpleEval) > TUNE_snThresh + (pc > 24) * TUNE_snBMult + (pc > 16) * TUNE_snBMult + (pc > 8) * TUNE_snBMult;
+    return std::abs(simpleEval) > TUNE_snThresh + pc * TUNE_snPcMult;
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -91,12 +102,15 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity
+    int simpleEval = simple_eval(pos, pos.side_to_move());
     int nnueComplexity = std::abs(psqt - positional);
     optimism += optimism * nnueComplexity / (smallNet ? TUNE_snOptDiv : TUNE_mainOptDiv);
+    optimism += optimism * TUNE_optPsqSeMult * std::abs(psqt - simpleEval) / 16384;
     nnue -= nnue * nnueComplexity / (smallNet ? TUNE_snNnueDiv : TUNE_mainNnueDiv);
+    nnue += nnue * TUNE_nnuePsqSeMult * std::abs(psqt - simpleEval) / 16384;
 
-    int material = (smallNet ? 553 : 532) * pos.count<PAWN>() + pos.non_pawn_material();
-    v = (nnue * (TUNE_vMatOffset + material) + optimism * (8112 + material)) / (smallNet ? TUNE_vSnDiv : TUNE_vMainDiv);
+    int material = (1024 * (smallNet ? 553 : 532) * pos.count<PAWN>() + (smallNet ? TUNE_snNpmMult : TUNE_npmMult) * pos.non_pawn_material()) / 1024;
+    v = (nnue * (TUNE_vMatOffset + material) + optimism * (TUNE_vOptMatOffset + material)) / (smallNet ? TUNE_vSnDiv : TUNE_vMainDiv);
 
     // Evaluation grain (to get more alpha-beta cuts) with randomization (for robustness)
     v = (v / 16) * 16 - 1 + (pos.key() & 0x2);
