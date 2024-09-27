@@ -39,6 +39,7 @@ namespace Stockfish {
 
    int TUNE_snThresh = 962;
    int TUNE_snPcMult = 0;
+   TUNE(SetRange(-64, 64), TUNE_snPcMult);
 
    int TUNE_snOptDiv = 430;
    int TUNE_mainOptDiv = 474;
@@ -51,12 +52,6 @@ namespace Stockfish {
 
    int TUNE_snNpmMult = 1024;
    int TUNE_npmMult = 1024;
-
-   int TUNE_nnuePsqSeMult = 0;
-   int TUNE_optPsqSeMult = 0;
-   TUNE(SetRange(-64, 64), TUNE_snPcMult);
-   TUNE(SetRange(-16384, 16384), TUNE_nnuePsqSeMult);
-   TUNE(SetRange(-16384, 16384), TUNE_optPsqSeMult);
 
    TUNE(TUNE_snThresh, TUNE_snOptDiv, TUNE_mainOptDiv, TUNE_snNpmMult, TUNE_npmMult,
         TUNE_snNnueDiv, TUNE_mainNnueDiv, TUNE_vMatOffset, TUNE_vOptMatOffset,
@@ -102,12 +97,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     }
 
     // Blend optimism and eval with nnue complexity
-    int simpleEval = simple_eval(pos, pos.side_to_move());
     int nnueComplexity = std::abs(psqt - positional);
     optimism += optimism * nnueComplexity / (smallNet ? TUNE_snOptDiv : TUNE_mainOptDiv);
-    optimism += optimism * TUNE_optPsqSeMult * std::abs(psqt - simpleEval) / 16384;
     nnue -= nnue * nnueComplexity / (smallNet ? TUNE_snNnueDiv : TUNE_mainNnueDiv);
-    nnue += nnue * TUNE_nnuePsqSeMult * std::abs(psqt - simpleEval) / 16384;
 
     int material = (1024 * (smallNet ? 553 : 532) * pos.count<PAWN>() + (smallNet ? TUNE_snNpmMult : TUNE_npmMult) * pos.non_pawn_material()) / 1024;
     v = (nnue * (TUNE_vMatOffset + material) + optimism * (TUNE_vOptMatOffset + material)) / (smallNet ? TUNE_vSnDiv : TUNE_vMainDiv);
