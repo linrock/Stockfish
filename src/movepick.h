@@ -66,6 +66,22 @@ inline int minor_piece_index(const Position& pos) {
     return pos.minor_piece_key() & (CORRECTION_HISTORY_SIZE - 1);
 }
 
+inline int knight_piece_index(const Position& pos) {
+    return pos.knight_piece_key() & (CORRECTION_HISTORY_SIZE - 1);
+}
+
+inline int bishop_piece_index(const Position& pos) {
+    return pos.bishop_piece_key() & (CORRECTION_HISTORY_SIZE - 1);
+}
+
+inline int rook_piece_index(const Position& pos) {
+    return pos.rook_piece_key() & (CORRECTION_HISTORY_SIZE - 1);
+}
+
+inline int queen_piece_index(const Position& pos) {
+    return pos.queen_piece_key() & (CORRECTION_HISTORY_SIZE - 1);
+}
+
 template<Color c>
 inline int non_pawn_index(const Position& pos) {
     return pos.non_pawn_key(c) & (CORRECTION_HISTORY_SIZE - 1);
@@ -169,6 +185,18 @@ using MajorPieceCorrectionHistory =
 
 // MinorPieceCorrectionHistory is addressed by color and king/minor piece (Knight, Bishop) positions
 using MinorPieceCorrectionHistory =
+  Stats<int16_t, CORRECTION_HISTORY_LIMIT, COLOR_NB, CORRECTION_HISTORY_SIZE>;
+
+using KnightPieceCorrectionHistory =
+  Stats<int16_t, CORRECTION_HISTORY_LIMIT, COLOR_NB, CORRECTION_HISTORY_SIZE>;
+
+using BishopPieceCorrectionHistory =
+  Stats<int16_t, CORRECTION_HISTORY_LIMIT, COLOR_NB, CORRECTION_HISTORY_SIZE>;
+
+using RookPieceCorrectionHistory =
+  Stats<int16_t, CORRECTION_HISTORY_LIMIT, COLOR_NB, CORRECTION_HISTORY_SIZE>;
+
+using QueenPieceCorrectionHistory =
   Stats<int16_t, CORRECTION_HISTORY_LIMIT, COLOR_NB, CORRECTION_HISTORY_SIZE>;
 
 // NonPawnCorrectionHistory is addressed by color and non-pawn material positions

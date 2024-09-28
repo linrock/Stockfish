@@ -288,6 +288,12 @@ class Worker {
     MaterialCorrectionHistory   materialCorrectionHistory;
     MajorPieceCorrectionHistory majorPieceCorrectionHistory;
     MinorPieceCorrectionHistory minorPieceCorrectionHistory;
+
+    KnightPieceCorrectionHistory knightPieceCorrectionHistory;
+    BishopPieceCorrectionHistory bishopPieceCorrectionHistory;
+    RookPieceCorrectionHistory   rookPieceCorrectionHistory;
+    QueenPieceCorrectionHistory  queenPieceCorrectionHistory;
+
     NonPawnCorrectionHistory    nonPawnCorrectionHistory[COLOR_NB];
 
    private:

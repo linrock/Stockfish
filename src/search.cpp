@@ -64,6 +64,15 @@ using namespace Search;
 
 namespace {
 
+int mPcv = 6245;
+int mMcv = 3442;
+int mNpcv = 6566;
+int mNcv = 5958;
+int mBcv = 5958;
+int mRcv = 3471;
+int mQcv = 3471;
+TUNE(mPcv, mMcv, mNpcv, mNcv, mBcv, mRcv, mQcv);
+
 // Futility margin
 Value futility_margin(Depth d, bool noTtCutNode, bool improving, bool oppWorsening) {
     Value futilityMult       = 118 - 33 * noTtCutNode;
@@ -83,12 +92,25 @@ Value to_corrected_static_eval(Value v, const Worker& w, const Position& pos) {
     const Color us    = pos.side_to_move();
     const auto  pcv   = w.pawnCorrectionHistory[us][pawn_structure_index<Correction>(pos)];
     const auto  mcv   = w.materialCorrectionHistory[us][material_index(pos)];
-    const auto  macv  = w.majorPieceCorrectionHistory[us][major_piece_index(pos)];
-    const auto  micv  = w.minorPieceCorrectionHistory[us][minor_piece_index(pos)];
+
+    // const auto  macv  = w.majorPieceCorrectionHistory[us][major_piece_index(pos)];
+    // const auto  micv  = w.minorPieceCorrectionHistory[us][minor_piece_index(pos)];
+
+    const auto  ncv  = w.knightPieceCorrectionHistory[us][major_piece_index(pos)];
+    const auto  bcv  = w.bishopPieceCorrectionHistory[us][major_piece_index(pos)];
+    const auto  rcv  = w.rookPieceCorrectionHistory[us][major_piece_index(pos)];
+    const auto  qcv  = w.queenPieceCorrectionHistory[us][major_piece_index(pos)];
+
     const auto  wnpcv = w.nonPawnCorrectionHistory[WHITE][us][non_pawn_index<WHITE>(pos)];
     const auto  bnpcv = w.nonPawnCorrectionHistory[BLACK][us][non_pawn_index<BLACK>(pos)];
-    const auto  cv =
-      (6245 * pcv + 3442 * mcv + 3471 * macv + 5958 * micv + 6566 * (wnpcv + bnpcv)) / 131072;
+
+    // const auto  cv =
+    //   (6245 * pcv + 3442 * mcv + 3471 * macv + 5958 * micv + 6566 * (wnpcv + bnpcv)) / 131072;
+    const auto  cv = (
+      mPcv * pcv + mMcv * mcv + mNpcv * (wnpcv + bnpcv) +
+      mNcv * ncv + mBcv * bcv + mRcv * rcv + mQcv * qcv
+    ) / 131072;
+
     v += cv;
     return std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 }
@@ -506,6 +528,12 @@ void Search::Worker::clear() {
     materialCorrectionHistory.fill(0);
     majorPieceCorrectionHistory.fill(0);
     minorPieceCorrectionHistory.fill(0);
+
+    knightPieceCorrectionHistory.fill(0);
+    bishopPieceCorrectionHistory.fill(0);
+    rookPieceCorrectionHistory.fill(0);
+    queenPieceCorrectionHistory.fill(0);
+
     nonPawnCorrectionHistory[WHITE].fill(0);
     nonPawnCorrectionHistory[BLACK].fill(0);
 
@@ -1414,6 +1442,12 @@ moves_loop:  // When in check, search starts here
         thisThread->materialCorrectionHistory[us][material_index(pos)] << bonus * 99 / 128;
         thisThread->majorPieceCorrectionHistory[us][major_piece_index(pos)] << bonus * 157 / 128;
         thisThread->minorPieceCorrectionHistory[us][minor_piece_index(pos)] << bonus * 153 / 128;
+
+        thisThread->knightPieceCorrectionHistory[us][knight_piece_index(pos)] << bonus;
+        thisThread->bishopPieceCorrectionHistory[us][bishop_piece_index(pos)] << bonus;
+        thisThread->rookPieceCorrectionHistory[us][rook_piece_index(pos)] << bonus;
+        thisThread->queenPieceCorrectionHistory[us][queen_piece_index(pos)] << bonus;
+
         thisThread->nonPawnCorrectionHistory[WHITE][us][non_pawn_index<WHITE>(pos)]
           << bonus * 123 / 128;
         thisThread->nonPawnCorrectionHistory[BLACK][us][non_pawn_index<BLACK>(pos)]
