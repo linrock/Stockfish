@@ -96,10 +96,10 @@ Value to_corrected_static_eval(Value v, const Worker& w, const Position& pos) {
     // const auto  macv  = w.majorPieceCorrectionHistory[us][major_piece_index(pos)];
     // const auto  micv  = w.minorPieceCorrectionHistory[us][minor_piece_index(pos)];
 
-    const auto  ncv  = w.knightPieceCorrectionHistory[us][major_piece_index(pos)];
-    const auto  bcv  = w.bishopPieceCorrectionHistory[us][major_piece_index(pos)];
-    const auto  rcv  = w.rookPieceCorrectionHistory[us][major_piece_index(pos)];
-    const auto  qcv  = w.queenPieceCorrectionHistory[us][major_piece_index(pos)];
+    const auto  ncv  = w.knightPieceCorrectionHistory[us][knight_piece_index(pos)];
+    const auto  bcv  = w.bishopPieceCorrectionHistory[us][bishop_piece_index(pos)];
+    const auto  rcv  = w.rookPieceCorrectionHistory[us][rook_piece_index(pos)];
+    const auto  qcv  = w.queenPieceCorrectionHistory[us][queen_piece_index(pos)];
 
     const auto  wnpcv = w.nonPawnCorrectionHistory[WHITE][us][non_pawn_index<WHITE>(pos)];
     const auto  bnpcv = w.nonPawnCorrectionHistory[BLACK][us][non_pawn_index<BLACK>(pos)];
