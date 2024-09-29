@@ -64,14 +64,13 @@ using namespace Search;
 
 namespace {
 
-int mPcv = 6245;
-int mMcv = 3442;
-int mNpcv = 6566;
-int mNcv = 5958;
-int mBcv = 5958;
-int mRcv = 3471;
-int mQcv = 3471;
-TUNE(mPcv, mMcv, mNpcv, mNcv, mBcv, mRcv, mQcv);
+constexpr int mPcv = 6367;
+constexpr int mMcv = 3418;
+constexpr int mNpcv = 6864;
+constexpr int mNcv = 6282;
+constexpr int mBcv = 6097;
+constexpr int mRcv = 3502;
+constexpr int mQcv = 3593;
 
 // Futility margin
 Value futility_margin(Depth d, bool noTtCutNode, bool improving, bool oppWorsening) {
