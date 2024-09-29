@@ -1443,10 +1443,10 @@ moves_loop:  // When in check, search starts here
         thisThread->majorPieceCorrectionHistory[us][major_piece_index(pos)] << bonus * 157 / 128;
         thisThread->minorPieceCorrectionHistory[us][minor_piece_index(pos)] << bonus * 153 / 128;
 
-        thisThread->knightPieceCorrectionHistory[us][knight_piece_index(pos)] << bonus;
-        thisThread->bishopPieceCorrectionHistory[us][bishop_piece_index(pos)] << bonus;
-        thisThread->rookPieceCorrectionHistory[us][rook_piece_index(pos)] << bonus;
-        thisThread->queenPieceCorrectionHistory[us][queen_piece_index(pos)] << bonus;
+        thisThread->knightPieceCorrectionHistory[us][knight_piece_index(pos)] << bonus * 153 / 128;
+        thisThread->bishopPieceCorrectionHistory[us][bishop_piece_index(pos)] << bonus * 153 / 128;
+        thisThread->rookPieceCorrectionHistory[us][rook_piece_index(pos)] << bonus * 157 / 128;
+        thisThread->queenPieceCorrectionHistory[us][queen_piece_index(pos)] << bonus * 157 / 128;
 
         thisThread->nonPawnCorrectionHistory[WHITE][us][non_pawn_index<WHITE>(pos)]
           << bonus * 123 / 128;
