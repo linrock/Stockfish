@@ -48,9 +48,8 @@ namespace Stockfish {
        TUNE_vMatOffset, TUNE_vSnDiv, TUNE_vMainDiv);
 
   int nnuePsqSeMult = 0;
-  TUNE(SetRange(-1024, 1024), nnuePsqSeMult);
-
   int optPsqSeMult = 0;
+  TUNE(SetRange(-1024, 1024), nnuePsqSeMult);
   TUNE(SetRange(-1024, 1024), optPsqSeMult);
 
 // Returns a static, purely materialistic evaluation of the position from
@@ -95,7 +94,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     int nnueComplexity = std::abs(psqt - positional);
     int simpleEval = simple_eval(pos, pos.side_to_move());
     optimism += optimism * nnueComplexity / (smallNet ? TUNE_snOptDiv : TUNE_mainOptDiv);
-    optimism += optPsqSeMult * nnue * std::abs(psqt - simpleEval) / 1048576;
+    optimism += optPsqSeMult * std::abs(psqt - simpleEval) / 1048576;
     nnue -= nnue * nnueComplexity / (smallNet ? TUNE_snNnueDiv : TUNE_mainNnueDiv);
     nnue += nnuePsqSeMult * nnue * std::abs(psqt - simpleEval) / 1048576;
 
