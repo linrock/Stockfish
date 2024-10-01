@@ -77,8 +77,11 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     // Blend optimism and eval with nnue complexity
     int nnueComplexity = std::abs(psqt - positional);
+    int simpleEval = simple_eval(pos, pos.side_to_move());
     optimism += optimism * nnueComplexity / (smallNet ? 430 : 474);
+    // optimism += 5 * nnue * std::abs(psqt - simpleEval) / 1048576;
     nnue -= nnue * nnueComplexity / (smallNet ? 20233 : 17879);
+    nnue -= 15 * nnue * std::abs(psqt - simpleEval) / 1048576;
 
     int material = (smallNet ? 553 : 532) * pos.count<PAWN>() + pos.non_pawn_material();
     v = (nnue * (76898 + material) + optimism * (8112 + material)) / (smallNet ? 74411 : 76256);
