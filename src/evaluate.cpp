@@ -217,11 +217,16 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
     // if (smallNet && (nnue * psqt < 0 || std::abs(nnue) < 227))
-    if (smallNet && result > 0.5)
+    // if (smallNet && result > 0.55)
+    // if (smallNet && (nnue * psqt < 0 || std::abs(nnue) < 227))
+    if (smallNet && result > 0.6)
     {
+        int nnueBefore = nnue;
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
         nnue                       = (125 * psqt + 131 * positional) / 128;
         smallNet                   = false;
+
+        dbg_hit_on(std::abs(nnue - nnueBefore) < 32);
     }
 
     // Blend optimism and eval with nnue complexity
