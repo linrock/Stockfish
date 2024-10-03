@@ -45,7 +45,7 @@ namespace Stockfish {
   int TUNE_vSnDiv = 76097;
   int TUNE_vMainDiv = 79548;
   int nnuePsqSeMult = 31;
-  int optPsqSeMult = 30;
+  int optPsqSeMult = -30;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
