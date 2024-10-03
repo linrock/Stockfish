@@ -211,13 +211,13 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
         result = run_inference(input);
         // sync_cout << "Inference result: " << result << sync_endl;
-        // dbg_hit_on(result > 0.5, 0);
+        // dbg_hit_on(result > 0.55, 0);
         // dbg_hit_on((nnue * psqt < 0 || std::abs(nnue) < 227), 1);
     }
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
     // if (smallNet && (nnue * psqt < 0 || std::abs(nnue) < 227))
-    if (smallNet && result > 0.5)
+    if (smallNet && result > 0.55)
     {
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
         nnue                       = (125 * psqt + 131 * positional) / 128;
