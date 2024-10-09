@@ -186,10 +186,11 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Value nnue = (125 * psqt + 131 * positional) / 128;
     int nnueComplexity = std::abs(psqt - positional);
 
-    float result = 0;
-    if (smallNet) {
+    // Re-evaluate the position when higher eval accuracy is worth the time spent
+    // if (smallNet && (nnue * psqt < 0 || std::abs(nnue) < 227))
+    if (smallNet && std::abs(nnue) < 500)
+    {
         int simpleEval = simple_eval(pos, pos.side_to_move());
-        // std::vector<float> input = {0.5, 0.3, 0.7, 0.1, 0.9, 0.4, 0.2, 0.6, 0.8, 0.3};
         float input[9] = {
           (float)std::clamp(nnue - -4730, 0, 5245 - -4730) / (5245 - -4730),
           (float)std::clamp(psqt - -5784, 0, 6030 - -5784) / (6030 - -5784),
@@ -201,27 +202,11 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
           (float)std::clamp(pos.non_pawn_material() - 0, 0, 19142) / 19142,
           (float)std::clamp(simpleEval - -5915, 0, 6044 - -5915) / (6044 - -5915),
         };
-
-        /*
-        sync_cout << "input: " << sync_endl;
-        for (float val : input) {
-            sync_cout << val << " " << sync_endl;
+        if (run_inference(input) > 0.5) {
+            std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
+            nnue                       = (125 * psqt + 131 * positional) / 128;
+            smallNet                   = false;
         }
-        */
-
-        result = run_inference(input);
-        // sync_cout << "Inference result: " << result << sync_endl;
-        // dbg_hit_on(result > 0.5, 0);
-        // dbg_hit_on((nnue * psqt < 0 || std::abs(nnue) < 227), 1);
-    }
-
-    // Re-evaluate the position when higher eval accuracy is worth the time spent
-    // if (smallNet && (nnue * psqt < 0 || std::abs(nnue) < 227))
-    if (smallNet && result > 0.5)
-    {
-        std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
-        nnue                       = (125 * psqt + 131 * positional) / 128;
-        smallNet                   = false;
     }
 
     // Blend optimism and eval with nnue complexity
