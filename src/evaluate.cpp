@@ -202,7 +202,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
           (float)std::clamp(pos.non_pawn_material() - 0, 0, 19142) / 19142,
           (float)std::clamp(simpleEval - -5915, 0, 6044 - -5915) / (6044 - -5915),
         };
-        if (run_inference(input) > 0.5) {
+
+        // control run - inference without using the output
+        run_inference(input);
+        if (nnue * psqt < 0 || std::abs(nnue) < 227) {
             std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
             nnue                       = (125 * psqt + 131 * positional) / 128;
             smallNet                   = false;
