@@ -188,7 +188,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
     // if (smallNet && (nnue * psqt < 0 || std::abs(nnue) < 227))
-    if (smallNet && std::abs(nnue) < 500)
+    if (smallNet && std::abs(nnue) < 240)
     {
         int simpleEval = simple_eval(pos, pos.side_to_move());
         float input[9] = {
