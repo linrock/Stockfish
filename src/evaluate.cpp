@@ -47,7 +47,8 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 962;
+    int pc = pos.count<PAWN>();
+    return std::abs(simpleEval) > 962 + (pc > 4 && pc < 12) * 32;
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
