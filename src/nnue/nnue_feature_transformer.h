@@ -329,7 +329,7 @@ class FeatureTransformer {
             constexpr IndexType NumOutputChunks = HalfDimensions / 2 / OutputChunkSize;
 
             const vec_t Zero = vec_zero();
-            const vec_t One  = vec_set_16(255);
+            const vec_t One  = vec_set_16(511);
 
             const vec_t* in0 = reinterpret_cast<const vec_t*>(&(accumulation[perspectives[p]][0]));
             const vec_t* in1 =
@@ -418,9 +418,9 @@ class FeatureTransformer {
                 BiasType sum0 = accumulation[static_cast<int>(perspectives[p])][j + 0];
                 BiasType sum1 =
                   accumulation[static_cast<int>(perspectives[p])][j + HalfDimensions / 2];
-                sum0               = std::clamp<BiasType>(sum0, 0, 255);
-                sum1               = std::clamp<BiasType>(sum1, 0, 255);
-                output[offset + j] = static_cast<OutputType>(unsigned(sum0 * sum1) / 512);
+                sum0               = std::clamp<BiasType>(sum0, 0, 511);
+                sum1               = std::clamp<BiasType>(sum1, 0, 511);
+                output[offset + j] = static_cast<OutputType>(unsigned(sum0 * sum1) / 2048);
             }
 
 #endif
