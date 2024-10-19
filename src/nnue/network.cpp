@@ -226,7 +226,7 @@ Network<Arch, Transformer>::evaluate(const Position&                         pos
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
-    const int  bucket     = (pos.count<ALL_PIECES>() - 1) / 4;
+    const int  bucket     = (pos.count<ALL_PIECES>() - 1) / 2;
     const auto psqt       = featureTransformer->transform(pos, cache, transformedFeatures, bucket);
     const auto positional = network[bucket].propagate(transformedFeatures);
     return {static_cast<Value>(psqt / OutputScale), static_cast<Value>(positional / OutputScale)};
@@ -303,7 +303,7 @@ Network<Arch, Transformer>::trace_evaluate(const Position&                      
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
     NnueEvalTrace t{};
-    t.correctBucket = (pos.count<ALL_PIECES>() - 1) / 4;
+    t.correctBucket = (pos.count<ALL_PIECES>() - 1) / 2;
     for (IndexType bucket = 0; bucket < LayerStacks; ++bucket)
     {
         const auto materialist =
