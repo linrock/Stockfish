@@ -200,12 +200,12 @@ class FeatureTransformer {
     static constexpr int NumRegs =
       BestRegisterCount<vec_t, WeightType, TransformedFeatureDimensions, NumRegistersSIMD>();
     static constexpr int NumPsqtRegs =
-      BestRegisterCount<psqt_vec_t, PSQTWeightType, PSQTBuckets, NumRegistersSIMD>();
+      BestRegisterCount<psqt_vec_t, PSQTWeightType, TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? PSQTBuckets : PSQTBucketsSmall, NumRegistersSIMD>();
 
     static constexpr IndexType TileHeight     = NumRegs * sizeof(vec_t) / 2;
     static constexpr IndexType PsqtTileHeight = NumPsqtRegs * sizeof(psqt_vec_t) / 4;
     static_assert(HalfDimensions % TileHeight == 0, "TileHeight must divide HalfDimensions");
-    static_assert(PSQTBuckets % PsqtTileHeight == 0, "PsqtTileHeight must divide PSQTBuckets");
+    static_assert((TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? PSQTBuckets : PSQTBucketsSmall) % PsqtTileHeight == 0, "PsqtTileHeight must divide PSQTBuckets");
 #endif
 
    public:
@@ -296,7 +296,11 @@ class FeatureTransformer {
 
         read_leb_128<BiasType>(stream, biases, HalfDimensions);
         read_leb_128<WeightType>(stream, weights, HalfDimensions * InputDimensions);
-        read_leb_128<PSQTWeightType>(stream, psqtWeights, PSQTBuckets * InputDimensions);
+
+        if (TransformedFeatureDimensions == TransformedFeatureDimensionsBig)
+            read_leb_128<PSQTWeightType>(stream, psqtWeights, PSQTBuckets * InputDimensions);
+        else
+            read_leb_128<PSQTWeightType>(stream, psqtWeights, PSQTBucketsSmall * InputDimensions);
 
         permute_weights(inverse_order_packs);
         scale_weights(true);
@@ -311,7 +315,11 @@ class FeatureTransformer {
 
         write_leb_128<BiasType>(stream, biases, HalfDimensions);
         write_leb_128<WeightType>(stream, weights, HalfDimensions * InputDimensions);
-        write_leb_128<PSQTWeightType>(stream, psqtWeights, PSQTBuckets * InputDimensions);
+
+        if (TransformedFeatureDimensions == TransformedFeatureDimensionsBig)
+            write_leb_128<PSQTWeightType>(stream, psqtWeights, PSQTBuckets * InputDimensions);
+        else
+            write_leb_128<PSQTWeightType>(stream, psqtWeights, PSQTBucketsSmall * InputDimensions);
 
         permute_weights(inverse_order_packs);
         scale_weights(true);
@@ -486,6 +494,8 @@ class FeatureTransformer {
 
         const Square ksq = pos.square<KING>(Perspective);
 
+        const int numPsqtBuckets = TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? PSQTBuckets : PSQTBucketsSmall;
+
         // The size must be enough to contain the largest possible update.
         // That might depend on the feature set and generally relies on the
         // feature set's update cost calculation to be correct and never allow
@@ -535,25 +545,25 @@ class FeatureTransformer {
             auto accPsqtOut =
               reinterpret_cast<psqt_vec_t*>(&(next->*accPtr).psqtAccumulation[Perspective][0]);
 
-            const IndexType offsetPsqtR0 = PSQTBuckets * removed[0];
+            const IndexType offsetPsqtR0 = numPsqtBuckets * removed[0];
             auto columnPsqtR0 = reinterpret_cast<const psqt_vec_t*>(&psqtWeights[offsetPsqtR0]);
-            const IndexType offsetPsqtA = PSQTBuckets * added[0];
+            const IndexType offsetPsqtA = numPsqtBuckets * added[0];
             auto columnPsqtA = reinterpret_cast<const psqt_vec_t*>(&psqtWeights[offsetPsqtA]);
 
             if (removed.size() == 1)
             {
                 for (std::size_t i = 0;
-                     i < PSQTBuckets * sizeof(PSQTWeightType) / sizeof(psqt_vec_t); ++i)
+                     i < numPsqtBuckets * sizeof(PSQTWeightType) / sizeof(psqt_vec_t); ++i)
                     accPsqtOut[i] = vec_add_psqt_32(vec_sub_psqt_32(accPsqtIn[i], columnPsqtR0[i]),
                                                     columnPsqtA[i]);
             }
             else
             {
-                const IndexType offsetPsqtR1 = PSQTBuckets * removed[1];
+                const IndexType offsetPsqtR1 = numPsqtBuckets * removed[1];
                 auto columnPsqtR1 = reinterpret_cast<const psqt_vec_t*>(&psqtWeights[offsetPsqtR1]);
 
                 for (std::size_t i = 0;
-                     i < PSQTBuckets * sizeof(PSQTWeightType) / sizeof(psqt_vec_t); ++i)
+                     i < numPsqtBuckets * sizeof(PSQTWeightType) / sizeof(psqt_vec_t); ++i)
                     accPsqtOut[i] =
                       vec_sub_psqt_32(vec_add_psqt_32(accPsqtIn[i], columnPsqtA[i]),
                                       vec_add_psqt_32(columnPsqtR0[i], columnPsqtR1[i]));
@@ -594,7 +604,7 @@ class FeatureTransformer {
                     vec_store(&accTileOut[j], acc[j]);
             }
 
-            for (IndexType i = 0; i < PSQTBuckets / PsqtTileHeight; ++i)
+            for (IndexType i = 0; i < numPsqtBuckets / PsqtTileHeight; ++i)
             {
                 // Load accumulator
                 auto accTilePsqtIn = reinterpret_cast<const psqt_vec_t*>(
@@ -605,7 +615,7 @@ class FeatureTransformer {
                 // Difference calculation for the deactivated features
                 for (const auto index : removed)
                 {
-                    const IndexType offset = PSQTBuckets * index + i * PsqtTileHeight;
+                    const IndexType offset = numPsqtBuckets * index + i * PsqtTileHeight;
                     auto columnPsqt = reinterpret_cast<const psqt_vec_t*>(&psqtWeights[offset]);
                     for (std::size_t j = 0; j < NumPsqtRegs; ++j)
                         psqt[j] = vec_sub_psqt_32(psqt[j], columnPsqt[j]);
@@ -614,7 +624,7 @@ class FeatureTransformer {
                 // Difference calculation for the activated features
                 for (const auto index : added)
                 {
-                    const IndexType offset = PSQTBuckets * index + i * PsqtTileHeight;
+                    const IndexType offset = numPsqtBuckets * index + i * PsqtTileHeight;
                     auto columnPsqt = reinterpret_cast<const psqt_vec_t*>(&psqtWeights[offset]);
                     for (std::size_t j = 0; j < NumPsqtRegs; ++j)
                         psqt[j] = vec_add_psqt_32(psqt[j], columnPsqt[j]);
@@ -633,7 +643,7 @@ class FeatureTransformer {
                     HalfDimensions * sizeof(BiasType));
         std::memcpy((next->*accPtr).psqtAccumulation[Perspective],
                     (computed->*accPtr).psqtAccumulation[Perspective],
-                    PSQTBuckets * sizeof(PSQTWeightType));
+                    numPsqtBuckets * sizeof(PSQTWeightType));
 
         // Difference calculation for the deactivated features
         for (const auto index : removed)
@@ -642,9 +652,9 @@ class FeatureTransformer {
             for (IndexType i = 0; i < HalfDimensions; ++i)
                 (next->*accPtr).accumulation[Perspective][i] -= weights[offset + i];
 
-            for (std::size_t i = 0; i < PSQTBuckets; ++i)
+            for (std::size_t i = 0; i < numPsqtBuckets; ++i)
                 (next->*accPtr).psqtAccumulation[Perspective][i] -=
-                  psqtWeights[index * PSQTBuckets + i];
+                  psqtWeights[index * numPsqtBuckets + i];
         }
 
         // Difference calculation for the activated features
@@ -654,9 +664,9 @@ class FeatureTransformer {
             for (IndexType i = 0; i < HalfDimensions; ++i)
                 (next->*accPtr).accumulation[Perspective][i] += weights[offset + i];
 
-            for (std::size_t i = 0; i < PSQTBuckets; ++i)
+            for (std::size_t i = 0; i < numPsqtBuckets; ++i)
                 (next->*accPtr).psqtAccumulation[Perspective][i] +=
-                  psqtWeights[index * PSQTBuckets + i];
+                  psqtWeights[index * numPsqtBuckets + i];
         }
 #endif
 
@@ -752,7 +762,8 @@ class FeatureTransformer {
                 vec_store(&accTile[k], acc[k]);
         }
 
-        for (IndexType j = 0; j < PSQTBuckets / PsqtTileHeight; ++j)
+        const int numPsqtBuckets = TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? PSQTBuckets : PSQTBucketsSmall;
+        for (IndexType j = 0; j < numPsqtBuckets / PsqtTileHeight; ++j)
         {
             auto accTilePsqt = reinterpret_cast<psqt_vec_t*>(
               &accumulator.psqtAccumulation[Perspective][j * PsqtTileHeight]);
@@ -765,7 +776,7 @@ class FeatureTransformer {
             for (int i = 0; i < int(removed.size()); ++i)
             {
                 IndexType       index  = removed[i];
-                const IndexType offset = PSQTBuckets * index + j * PsqtTileHeight;
+                const IndexType offset = numPsqtBuckets * index + j * PsqtTileHeight;
                 auto columnPsqt        = reinterpret_cast<const psqt_vec_t*>(&psqtWeights[offset]);
 
                 for (std::size_t k = 0; k < NumPsqtRegs; ++k)
@@ -774,7 +785,7 @@ class FeatureTransformer {
             for (int i = 0; i < int(added.size()); ++i)
             {
                 IndexType       index  = added[i];
-                const IndexType offset = PSQTBuckets * index + j * PsqtTileHeight;
+                const IndexType offset = numPsqtBuckets * index + j * PsqtTileHeight;
                 auto columnPsqt        = reinterpret_cast<const psqt_vec_t*>(&psqtWeights[offset]);
 
                 for (std::size_t k = 0; k < NumPsqtRegs; ++k)
@@ -795,8 +806,8 @@ class FeatureTransformer {
             for (IndexType j = 0; j < HalfDimensions; ++j)
                 entry.accumulation[j] -= weights[offset + j];
 
-            for (std::size_t k = 0; k < PSQTBuckets; ++k)
-                entry.psqtAccumulation[k] -= psqtWeights[index * PSQTBuckets + k];
+            for (std::size_t k = 0; k < numPsqtBuckets; ++k)
+                entry.psqtAccumulation[k] -= psqtWeights[index * numPsqtBuckets + k];
         }
         for (const auto index : added)
         {
@@ -804,8 +815,8 @@ class FeatureTransformer {
             for (IndexType j = 0; j < HalfDimensions; ++j)
                 entry.accumulation[j] += weights[offset + j];
 
-            for (std::size_t k = 0; k < PSQTBuckets; ++k)
-                entry.psqtAccumulation[k] += psqtWeights[index * PSQTBuckets + k];
+            for (std::size_t k = 0; k < numPsqtBuckets; ++k)
+                entry.psqtAccumulation[k] += psqtWeights[index * numPsqtBuckets + k];
         }
 
         // The accumulator of the refresh entry has been updated.
@@ -815,7 +826,7 @@ class FeatureTransformer {
                     sizeof(BiasType) * HalfDimensions);
 
         std::memcpy(accumulator.psqtAccumulation[Perspective], entry.psqtAccumulation,
-                    sizeof(int32_t) * PSQTBuckets);
+                    sizeof(int32_t) * numPsqtBuckets);
 #endif
 
         for (Color c : {WHITE, BLACK})
@@ -865,7 +876,7 @@ class FeatureTransformer {
 
     alignas(CacheLineSize) BiasType biases[HalfDimensions];
     alignas(CacheLineSize) WeightType weights[HalfDimensions * InputDimensions];
-    alignas(CacheLineSize) PSQTWeightType psqtWeights[InputDimensions * PSQTBuckets];
+    alignas(CacheLineSize) PSQTWeightType psqtWeights[InputDimensions * (TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? PSQTBuckets : PSQTBucketsSmall)];
 };
 
 }  // namespace Stockfish::Eval::NNUE

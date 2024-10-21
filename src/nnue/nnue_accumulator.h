@@ -36,7 +36,7 @@ using IndexType      = std::uint32_t;
 template<IndexType Size>
 struct alignas(CacheLineSize) Accumulator {
     std::int16_t accumulation[COLOR_NB][Size];
-    std::int32_t psqtAccumulation[COLOR_NB][PSQTBuckets];
+    std::int32_t psqtAccumulation[COLOR_NB][Size == TransformedFeatureDimensionsBig ? PSQTBuckets : PSQTBucketsSmall];
     bool         computed[COLOR_NB];
 };
 
@@ -59,7 +59,7 @@ struct AccumulatorCaches {
 
         struct alignas(CacheLineSize) Entry {
             BiasType       accumulation[Size];
-            PSQTWeightType psqtAccumulation[PSQTBuckets];
+            PSQTWeightType psqtAccumulation[Size == TransformedFeatureDimensionsBig ? PSQTBuckets : PSQTBucketsSmall];
             Bitboard       byColorBB[COLOR_NB];
             Bitboard       byTypeBB[PIECE_TYPE_NB];
 
