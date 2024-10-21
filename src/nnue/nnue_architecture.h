@@ -49,6 +49,9 @@ constexpr int       L3Small                           = 32;
 constexpr IndexType PSQTBuckets = 8;
 constexpr IndexType LayerStacks = 8;
 
+constexpr IndexType PSQTBucketsSmall = 16;
+constexpr IndexType LayerStacksSmall = 16;
+
 template<IndexType L1, int L2, int L3>
 struct NetworkArchitecture {
     static constexpr IndexType TransformedFeatureDimensions = L1;

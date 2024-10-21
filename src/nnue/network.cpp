@@ -114,12 +114,16 @@ Network<Arch, Transformer>::Network(const Network<Arch, Transformer>& other) :
     if (other.featureTransformer)
         featureTransformer = make_unique_large_page<Transformer>(*other.featureTransformer);
 
-    network = make_unique_aligned<Arch[]>(LayerStacks);
+    const int numLayerStacks = Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? LayerStacks : LayerStacksSmall;
+
+    sync_cout << "# layer stacks: " << numLayerStacks << sync_endl;
+
+    network = make_unique_aligned<Arch[]>(numLayerStacks);
 
     if (!other.network)
         return;
 
-    for (std::size_t i = 0; i < LayerStacks; ++i)
+    for (std::size_t i = 0; i < numLayerStacks; ++i)
         network[i] = other.network[i];
 }
 
@@ -132,12 +136,16 @@ Network<Arch, Transformer>::operator=(const Network<Arch, Transformer>& other) {
     if (other.featureTransformer)
         featureTransformer = make_unique_large_page<Transformer>(*other.featureTransformer);
 
-    network = make_unique_aligned<Arch[]>(LayerStacks);
+    const int numLayerStacks = Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? LayerStacks : LayerStacksSmall;
+
+    sync_cout << "# layer stacks: " << numLayerStacks << sync_endl;
+
+    network = make_unique_aligned<Arch[]>(numLayerStacks);
 
     if (!other.network)
         return *this;
 
-    for (std::size_t i = 0; i < LayerStacks; ++i)
+    for (std::size_t i = 0; i < numLayerStacks; ++i)
         network[i] = other.network[i];
 
     return *this;
@@ -362,7 +370,10 @@ void Network<Arch, Transformer>::load_internal() {
 template<typename Arch, typename Transformer>
 void Network<Arch, Transformer>::initialize() {
     featureTransformer = make_unique_large_page<Transformer>();
-    network            = make_unique_aligned<Arch[]>(LayerStacks);
+
+    const int numLayerStacks = Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? LayerStacks : LayerStacksSmall;
+
+    network            = make_unique_aligned<Arch[]>(numLayerStacks);
 }
 
 
@@ -427,7 +438,12 @@ bool Network<Arch, Transformer>::read_parameters(std::istream& stream,
         return false;
     if (!Detail::read_parameters(stream, *featureTransformer))
         return false;
-    for (std::size_t i = 0; i < LayerStacks; ++i)
+
+    const int numLayerStacks = Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? LayerStacks : LayerStacksSmall;
+
+    sync_cout << Arch::TransformedFeatureDimensions << " # layer stacks: " << numLayerStacks << sync_endl;
+
+    for (std::size_t i = 0; i < numLayerStacks; ++i)
     {
         if (!Detail::read_parameters(stream, network[i]))
             return false;
@@ -443,7 +459,10 @@ bool Network<Arch, Transformer>::write_parameters(std::ostream&      stream,
         return false;
     if (!Detail::write_parameters(stream, *featureTransformer))
         return false;
-    for (std::size_t i = 0; i < LayerStacks; ++i)
+
+    const int numLayerStacks = Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? LayerStacks : LayerStacksSmall;
+
+    for (std::size_t i = 0; i < numLayerStacks; ++i)
     {
         if (!Detail::write_parameters(stream, network[i]))
             return false;
