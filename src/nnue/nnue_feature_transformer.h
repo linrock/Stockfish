@@ -279,6 +279,9 @@ class FeatureTransformer {
     }
 
     inline void scale_weights(bool read) const {
+        if (TransformedFeatureDimensions == TransformedFeatureDimensionsSmall)
+            return;
+
         for (IndexType j = 0; j < InputDimensions; ++j)
         {
             WeightType* w = const_cast<WeightType*>(&weights[j * HalfDimensions]);
@@ -345,7 +348,8 @@ class FeatureTransformer {
             constexpr IndexType NumOutputChunks = HalfDimensions / 2 / OutputChunkSize;
 
             const vec_t Zero = vec_zero();
-            const vec_t One  = vec_set_16(127 * 2);
+            const vec_t One  = vec_set_16(
+              TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? 127 * 2 : 255);
 
             const vec_t* in0 = reinterpret_cast<const vec_t*>(&(accumulation[perspectives[p]][0]));
             const vec_t* in1 =
@@ -434,8 +438,8 @@ class FeatureTransformer {
                 BiasType sum0 = accumulation[static_cast<int>(perspectives[p])][j + 0];
                 BiasType sum1 =
                   accumulation[static_cast<int>(perspectives[p])][j + HalfDimensions / 2];
-                sum0               = std::clamp<BiasType>(sum0, 0, 127 * 2);
-                sum1               = std::clamp<BiasType>(sum1, 0, 127 * 2);
+                sum0               = std::clamp<BiasType>(sum0, 0, One);
+                sum1               = std::clamp<BiasType>(sum1, 0, One);
                 output[offset + j] = static_cast<OutputType>(unsigned(sum0 * sum1) / 512);
             }
 
