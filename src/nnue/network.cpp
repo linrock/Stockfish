@@ -226,7 +226,7 @@ Network<Arch, Transformer>::evaluate(const Position&                         pos
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
-    const int  bucket     = (pos.non_pawn_material() + 208 * pos.count<PAWN>()) / 2495;
+    const int  bucket     = std::clamp((pos.non_pawn_material() + 208 * pos.count<PAWN>()) / 2500, 0, 7);
     const auto psqt       = featureTransformer->transform(pos, cache, transformedFeatures, bucket);
     const auto positional = network[bucket].propagate(transformedFeatures);
     return {static_cast<Value>(psqt / OutputScale), static_cast<Value>(positional / OutputScale)};
@@ -303,7 +303,8 @@ Network<Arch, Transformer>::trace_evaluate(const Position&                      
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
     NnueEvalTrace t{};
-    t.correctBucket = (pos.non_pawn_material() + 208 * pos.count<PAWN>()) / 2495;
+    t.correctBucket = std::clamp((pos.non_pawn_material() + 208 * pos.count<PAWN>()) / 2500, 0, 7);
+
     for (IndexType bucket = 0; bucket < LayerStacks; ++bucket)
     {
         const auto materialist =
