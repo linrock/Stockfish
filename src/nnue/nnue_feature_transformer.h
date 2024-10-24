@@ -337,6 +337,9 @@ class FeatureTransformer {
 
         const auto& accumulation = (pos.state()->*accPtr).accumulation;
 
+        constexpr int quantizedOne =
+          TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? 255 : 254;
+
         for (IndexType p = 0; p < 2; ++p)
         {
             const IndexType offset = (HalfDimensions / 2) * p;
@@ -348,8 +351,7 @@ class FeatureTransformer {
             constexpr IndexType NumOutputChunks = HalfDimensions / 2 / OutputChunkSize;
 
             const vec_t Zero = vec_zero();
-            const vec_t One  = vec_set_16(
-              TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? 255 : 254);
+            const vec_t One  = vec_set_16(quantizedOne);
 
             const vec_t* in0 = reinterpret_cast<const vec_t*>(&(accumulation[perspectives[p]][0]));
             const vec_t* in1 =
@@ -438,8 +440,8 @@ class FeatureTransformer {
                 BiasType sum0 = accumulation[static_cast<int>(perspectives[p])][j + 0];
                 BiasType sum1 =
                   accumulation[static_cast<int>(perspectives[p])][j + HalfDimensions / 2];
-                sum0               = std::clamp<BiasType>(sum0, 0, TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? 255 : 254);
-                sum1               = std::clamp<BiasType>(sum1, 0, TransformedFeatureDimensions == TransformedFeatureDimensionsBig ? 255 : 254);
+                sum0               = std::clamp<BiasType>(sum0, 0, quantizedOne);
+                sum1               = std::clamp<BiasType>(sum1, 0, quantizedOne);
                 output[offset + j] = static_cast<OutputType>(unsigned(sum0 * sum1) / 512);
             }
 
