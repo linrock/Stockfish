@@ -176,7 +176,9 @@ Value evaluate(const Position& pos, bool adjusted, int* complexity) {
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
-    const int  bucket     = std::clamp(int((pos.non_pawn_material() + 208 * pos.count<PAWN>()) / 2500), 0, 7);
+    const int bucket =
+      (Eval::simple_eval(pos, WHITE) == 0 ? 0 : 4)
+      + std::clamp(int((pos.non_pawn_material() + 208 * pos.count<PAWN>()) / 5000), 0, 3);
     const auto psqt       = featureTransformer->transform(pos, transformedFeatures, bucket);
     const auto positional = network[bucket]->propagate(transformedFeatures);
 
