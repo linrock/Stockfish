@@ -81,12 +81,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     int material = (smallNet ? 553 : 532) * pos.count<PAWN>() + pos.non_pawn_material();
     int v        = (nnue * (77777 + material) + optimism * (7777 + material)) / 77777;
 
-    if (std::abs(v) > 1024)
-        v = (v / 32) * 32;
-    else if (std::abs(v) > 512)
+    if (std::abs(v) > 512)
         v = (v / 16) * 16;
-    else if (std::abs(v) > 256)
-        v = (v / 8) * 8;
 
     // Damp down the evaluation linearly when shuffling
     v -= v * pos.rule50_count() / 212;
