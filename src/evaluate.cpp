@@ -37,6 +37,15 @@
 
 namespace Stockfish {
 
+int TUNE_snThresh = 962;
+int TUNE_rePosThresh = 0;
+int TUNE_reNnueThresh = 236;
+int TUNE_optDenom = 468;
+int TUNE_snNcDenom = 20233;
+int TUNE_ncDenom = 17879;
+TUNE(SetRange(0, 500), TUNE_rePosThresh);
+TUNE(TUNE_snThresh, TUNE_reNnueThresh, TUNE_optDenom, TUNE_snNcDenom, TUNE_ncDenom);
+
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
 // an approximation of the material advantage on the board in terms of pawns.
@@ -47,7 +56,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 bool Eval::use_smallnet(const Position& pos) {
     int simpleEval = simple_eval(pos, pos.side_to_move());
-    return std::abs(simpleEval) > 962;
+    return std::abs(simpleEval) > TUNE_snThresh;
 }
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
@@ -66,7 +75,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Value nnue = (125 * psqt + 131 * positional) / 128;
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
-    if (smallNet && (nnue * psqt < 0 || std::abs(nnue) < 227))
+    if (smallNet && std::abs(positional) > TUNE_rePosThresh && std::abs(nnue) < TUNE_reNnueThresh)
     {
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
         nnue                       = (125 * psqt + 131 * positional) / 128;
@@ -75,8 +84,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     // Blend optimism and eval with nnue complexity
     int nnueComplexity = std::abs(psqt - positional);
-    optimism += optimism * nnueComplexity / 468;
-    nnue -= nnue * nnueComplexity / (smallNet ? 20233 : 17879);
+    optimism += optimism * nnueComplexity / TUNE_optDenom;
+    nnue -= nnue * nnueComplexity / (smallNet ? TUNE_snNcDenom : TUNE_ncDenom);
 
     int material = (smallNet ? 553 : 532) * pos.count<PAWN>() + pos.non_pawn_material();
     int v        = (nnue * (77777 + material) + optimism * (7777 + material)) / 77777;
