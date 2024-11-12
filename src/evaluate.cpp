@@ -38,13 +38,14 @@
 namespace Stockfish {
 
 int TUNE_snThresh = 962;
-int TUNE_rePosThresh = 0;
+int TUNE_rePosThresh = 50;
 int TUNE_reNnueThresh = 236;
 int TUNE_optDenom = 468;
 int TUNE_snNcDenom = 20233;
 int TUNE_ncDenom = 17879;
-TUNE(SetRange(0, 500), TUNE_rePosThresh);
-TUNE(TUNE_snThresh, TUNE_reNnueThresh, TUNE_optDenom, TUNE_snNcDenom, TUNE_ncDenom);
+int TUNE_delta = 96;
+TUNE(SetRange(0, 600), TUNE_rePosThresh);
+TUNE(TUNE_snThresh, TUNE_reNnueThresh, TUNE_optDenom, TUNE_snNcDenom, TUNE_ncDenom, TUNE_delta);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -72,13 +73,13 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     auto [psqt, positional] = smallNet ? networks.small.evaluate(pos, &caches.small)
                                        : networks.big.evaluate(pos, &caches.big);
 
-    Value nnue = (125 * psqt + 131 * positional) / 128;
+    Value nnue = ((4096 - TUNE_delta) * psqt + (4096 + TUNE_delta) * positional) / 4096;
 
     // Re-evaluate the position when higher eval accuracy is worth the time spent
     if (smallNet && std::abs(positional) > TUNE_rePosThresh && std::abs(nnue) < TUNE_reNnueThresh)
     {
         std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
-        nnue                       = (125 * psqt + 131 * positional) / 128;
+        nnue                       = ((4096 - TUNE_delta) * psqt + (4096 + TUNE_delta) * positional) / 4096;
         smallNet                   = false;
     }
 
