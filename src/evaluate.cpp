@@ -37,14 +37,12 @@
 
 namespace Stockfish {
 
-int TUNE_snThresh = 962;
-int TUNE_rePosThresh = 0;
-int TUNE_reNnueThresh = 236;
-int TUNE_optDenom = 468;
-int TUNE_snNcDenom = 20233;
-int TUNE_ncDenom = 17879;
-TUNE(SetRange(0, 500), TUNE_rePosThresh);
-TUNE(TUNE_snThresh, TUNE_reNnueThresh, TUNE_optDenom, TUNE_snNcDenom, TUNE_ncDenom);
+int TUNE_snThresh = 946;
+int TUNE_rePosThresh = 9;
+int TUNE_reNnueThresh = 244;
+int TUNE_optDenom = 496;
+int TUNE_snNcDenom = 19591;
+int TUNE_ncDenom = 17682;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
