@@ -43,35 +43,31 @@ namespace {
   constexpr Score BlockedPawn[2] = { S(-19, -8), S(-7, 3) };
 
   Score BlockedStorm[RANK_NB] = {
-    S(0, 0), S(0, 0), S(64, 75), S(-3, 14), S(-12, 19), S(-7, 4), S(-10, 5)
+    S(0, 0), S(0, 0), S(66, 78), S(-3, 14), S(-12, 19), S(-7, 4), S(-11, 5)
   };
-  TUNE(BlockedStorm);
 
   // Connected pawn bonus
-  int Connected[RANK_NB] = { 0, 3, 7, 7, 15, 54, 86 };
-  TUNE(Connected);
+  int Connected[RANK_NB] = { 0, 3, 7, 6, 16, 58, 87 };
 
   // Strength of pawn shelter for our king by [distance from edge][rank].
   // RANK_1 = 0 is used for files where we have no pawn, or pawn is behind our king.
   Value ShelterStrength[int(FILE_NB) / 2][RANK_NB] = {
-    { V(-2), V(85), V(95), V(53), V(39), V(23), V(25) },
-    { V(-55), V(64), V(32), V(-55), V(-30), V(-11), V(-61) },
-    { V(-11), V(75), V(19), V(-6), V(26), V(9), V(-47) },
-    { V(-41), V(-11), V(-27), V(-58), V(-42), V(-66), V(-163) }
+    { V(-2), V(84), V(95), V(54), V(37), V(23), V(26) },
+    { V(-59), V(61), V(32), V(-53), V(-32), V(-11), V(-59) },
+    { V(-11), V(76), V(19), V(-6), V(26), V(10), V(-47) },
+    { V(-42), V(-11), V(-28), V(-53), V(-41), V(-69), V(-165) }
   };
-  TUNE(ShelterStrength);
 
   // Danger of enemy pawns moving toward our king by [distance from edge][rank].
   // RANK_1 = 0 is used for files where the enemy has no pawn, or their pawn
   // is behind our king. Note that UnblockedStorm[0][1-2] accommodate opponent pawn
   // on edge, likely blocked by our king.
   Value UnblockedStorm[int(FILE_NB) / 2][RANK_NB] = {
-    { V(94), V(-280), V(-170), V(90), V(59), V(47), V(53) },
-    { V(43), V(-17), V(128), V(39), V(26), V(-17), V(15) },
-    { V(-9), V(62), V(170), V(34), V(-5), V(-20), V(-11) },
-    { V(-27), V(-19), V(106), V(10), V(2), V(-13), V(-24) }
+    { V(94), V(-283), V(-160), V(87), V(59), V(49), V(58) },
+    { V(42), V(-16), V(128), V(39), V(26), V(-17), V(15) },
+    { V(-9), V(58), V(158), V(32), V(-5), V(-20), V(-11) },
+    { V(-27), V(-19), V(104), V(11), V(2), V(-13), V(-25) }
   };
-  TUNE(UnblockedStorm);
 
   // KingOnFile[semi-open Us][semi-open Them] contains bonuses/penalties
   // for king when the king is on a semi-open or open file.
