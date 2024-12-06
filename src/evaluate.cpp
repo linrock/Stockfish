@@ -60,7 +60,7 @@ namespace Stockfish {
 
 namespace Eval {
 
-  bool useNNUE;
+  bool useNNUE = false;
   string currentEvalFileName = "None";
 
   /// NNUE::init() tries to load a NNUE network at startup time, or when the engine
@@ -73,7 +73,7 @@ namespace Eval {
 
   void NNUE::init() {
 
-    useNNUE = Options["Use NNUE"];
+    useNNUE = false;
     if (!useNNUE)
         return;
 
