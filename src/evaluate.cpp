@@ -201,7 +201,7 @@ namespace {
   // SafeCheck[PieceType][single/multiple] contains safe check bonus by piece type,
   // higher if multiple safe checks are possible for that piece type.
   constexpr int SafeCheck[][2] = {
-      {}, {}, {805, 1292}, {650, 984}, {1071, 1886}, {730, 1128}
+      {}, {}, {803, 1326}, {655, 986}, {1005, 1791}, {703, 1020}
   };
 
 #define S(mg, eg) make_score(mg, eg)
@@ -209,14 +209,14 @@ namespace {
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
   // indexed by piece type and number of attacked squares in the mobility area.
   constexpr Score MobilityBonus[][32] = {
-    { S(-62,-79), S(-53,-57), S(-12,-31), S( -3,-17), S(  3,  7), S( 12, 13), // Knight
-      S( 21, 16), S( 28, 21), S( 37, 26) },
+    { S(-61,-75), S(-53,-56), S(-12,-31), S( -3,-16), S(  3,  7), S( 13, 13), // Knight
+      S( 21, 17), S( 28, 21), S( 38, 27) },
     { S(-47,-59), S(-20,-25), S( 14, -8), S( 29, 12), S( 39, 21), S( 53, 40), // Bishop
       S( 53, 56), S( 60, 58), S( 62, 65), S( 69, 72), S( 78, 78), S( 83, 87),
       S( 91, 88), S( 96, 98) },
-    { S(-60,-82), S(-24,-15), S(  0, 17) ,S(  3, 43), S(  4, 72), S( 14,100), // Rook
-      S( 20,102), S( 30,122), S( 41,133), S(41 ,139), S( 41,153), S( 45,160),
-      S( 57,165), S( 58,170), S( 67,175) },
+    { S(-59,-83), S(-24,-14), S(  0, 17) ,S(  3, 40), S(  4, 76), S( 14,102), // Rook
+      S( 19,102), S( 31,127), S( 40,122), S(41 ,134), S( 41,147), S( 44,163),
+      S( 58,161), S( 60,169), S( 67,174) },
     { S(-29,-49), S(-16,-29), S( -8, -8), S( -8, 17), S( 18, 39), S( 25, 54), // Queen
       S( 23, 59), S( 37, 73), S( 41, 76), S( 54, 95), S( 65, 95) ,S( 68,101),
       S( 69,124), S( 70,128), S( 70,132), S( 70,133) ,S( 71,136), S( 72,140),
