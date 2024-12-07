@@ -58,6 +58,16 @@ using namespace std;
 
 namespace Stockfish {
 
+    int kd1 = 183;
+    int kd2 = 148;
+    int kd3 =  98;
+    int kd4 = 873;
+    int kd5 = 100;
+    int kd6 =  48;
+    int kd7 =  32;
+    int kd8 =  37;
+    TUNE(kd1, kd2, kd3, kd4, kd5, kd6, kd7, kd8);
+
 namespace Eval {
 
   bool useNNUE = false;
@@ -596,17 +606,17 @@ namespace {
     int kingFlankDefense = popcount(b3);
 
     kingDanger +=        kingAttackersCount[Them] * kingAttackersWeight[Them] // (~10 Elo)
-                 + 183 * popcount(kingRing[Us] & weak)                        // (~15 Elo)
-                 + 148 * popcount(unsafeChecks)                               // (~4 Elo)
-                 +  98 * popcount(pos.blockers_for_king(Us))                  // (~2 Elo)
+                 + kd1 * popcount(kingRing[Us] & weak)                        // (~15 Elo)
+                 + kd2 * popcount(unsafeChecks)                               // (~4 Elo)
+                 + kd3 * popcount(pos.blockers_for_king(Us))                  // (~2 Elo)
                  +  69 * kingAttacksCount[Them]                               // (~0.5 Elo)
                  +   3 * kingFlankAttack * kingFlankAttack / 8                // (~0.5 Elo)
                  +       mg_value(mobility[Them] - mobility[Us])              // (~0.5 Elo)
-                 - 873 * !pos.count<QUEEN>(Them)                              // (~24 Elo)
-                 - 100 * bool(attackedBy[Us][KNIGHT] & attackedBy[Us][KING])  // (~5 Elo)
-                 -   6 * mg_value(score) / 8                                  // (~8 Elo)
-                 -   4 * kingFlankDefense                                     // (~5 Elo)
-                 +  37;                                                       // (~0.5 Elo)
+                 - kd4 * !pos.count<QUEEN>(Them)                              // (~24 Elo)
+                 - kd5 * bool(attackedBy[Us][KNIGHT] & attackedBy[Us][KING])  // (~5 Elo)
+                 - kd6 * mg_value(score) / 64                                 // (~8 Elo)
+                 - kd7 * kingFlankDefense / 8                                 // (~5 Elo)
+                 + kd8;
 
     // Transform the kingDanger units into a Score, and subtract it from the evaluation
     if (kingDanger > 100)
