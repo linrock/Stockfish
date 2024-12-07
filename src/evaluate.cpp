@@ -249,11 +249,11 @@ namespace {
   // which piece type attacks which one. Attacks on lesser pieces which are
   // pawn-defended are not considered.
   constexpr Score ThreatByMinor[PIECE_TYPE_NB] = {
-    S(0, 0), S(6, 37), S(64, 50), S(82, 57), S(103, 130), S(81, 163)
+    S(0, 0), S(6, 34), S(61, 52), S(84, 62), S(105, 140), S(82, 155)
   };
 
   constexpr Score ThreatByRook[PIECE_TYPE_NB] = {
-    S(0, 0), S(3, 44), S(36, 71), S(44, 59), S(0, 39), S(60, 39)
+    S(0, 0), S(3, 43), S(36, 74), S(40, 60), S(0, 40), S(56, 40)
   };
 
   constexpr Value CorneredBishop = Value(50);
