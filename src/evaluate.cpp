@@ -1032,7 +1032,7 @@ make_v:
     }
 
     // Evaluation grain
-    v = (v / 16) * 16;
+    v = (v / 32) * 32;
 
     // Side to move point of view
     v = (pos.side_to_move() == WHITE ? v : -v);
