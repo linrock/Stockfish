@@ -355,17 +355,13 @@ void Position::set_state() const {
         if (type_of(pc) == PAWN)
             st->pawnKey ^= Zobrist::psq[pc][s];
 
-        else
+        else if (type_of(pc) != KING)
         {
             st->nonPawnKey[color_of(pc)] ^= Zobrist::psq[pc][s];
+            st->nonPawnMaterial[color_of(pc)] += PieceValue[pc];
 
-            if (type_of(pc) != KING)
-            {
-                st->nonPawnMaterial[color_of(pc)] += PieceValue[pc];
-
-                if (type_of(pc) <= BISHOP)
-                    st->minorPieceKey ^= Zobrist::psq[pc][s];
-            }
+            if (type_of(pc) <= BISHOP)
+                st->minorPieceKey ^= Zobrist::psq[pc][s];
         }
     }
 
