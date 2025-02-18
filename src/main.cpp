@@ -21,9 +21,10 @@
 #include "bitboard.h"
 #include "misc.h"
 #include "position.h"
+#include "small_nnue.h"
+#include "tune.h"
 #include "types.h"
 #include "uci.h"
-#include "tune.h"
 
 using namespace Stockfish;
 
@@ -33,6 +34,7 @@ int main(int argc, char* argv[]) {
 
     Bitboards::init();
     Position::init();
+    nnue_init();
 
     UCIEngine uci(argc, argv);
 
