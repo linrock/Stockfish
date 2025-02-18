@@ -31,6 +31,7 @@
 #include "nnue/network.h"
 #include "nnue/nnue_misc.h"
 #include "position.h"
+#include "small_nnue.h"
 #include "types.h"
 #include "uci.h"
 #include "nnue/nnue_accumulator.h"
@@ -59,22 +60,29 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
 
     assert(!pos.checkers());
 
-    bool smallNet           = use_smallnet(pos);
-    auto [psqt, positional] = smallNet ? networks.small.evaluate(pos, &caches.small)
-                                       : networks.big.evaluate(pos, &caches.big);
+    bool smallNet      = use_smallnet(pos);
+    int nnueComplexity = 0;
+    Value nnue;
 
-    Value nnue = (125 * psqt + 131 * positional) / 128;
+    if (smallNet) {
+        NNUEAccumulator* accumulator = &pos.state()->accumulatorTiny;
+        nnue_accumulator_refresh(accumulator, &pos, pos.side_to_move());
+        nnue = nnue_evaluate(accumulator, pos.side_to_move());
+    } else {
+        auto [psqt, positional] = networks.big.evaluate(pos, &caches.big);
+        nnue = (125 * psqt + 131 * positional) / 128;
 
-    // Re-evaluate the position when higher eval accuracy is worth the time spent
-    if (smallNet && (std::abs(nnue) < 236))
-    {
-        std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
-        nnue                       = (125 * psqt + 131 * positional) / 128;
-        smallNet                   = false;
+        // Re-evaluate the position when higher eval accuracy is worth the time spent
+        if (smallNet && (std::abs(nnue) < 236))
+        {
+            std::tie(psqt, positional) = networks.big.evaluate(pos, &caches.big);
+            nnue                       = (125 * psqt + 131 * positional) / 128;
+            smallNet                   = false;
+        }
+        nnueComplexity = std::abs(psqt - positional);
     }
 
     // Blend optimism and eval with nnue complexity
-    int nnueComplexity = std::abs(psqt - positional);
     optimism += optimism * nnueComplexity / 468;
     nnue -= nnue * nnueComplexity / (smallNet ? 20233 : 17879);
 

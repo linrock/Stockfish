@@ -28,6 +28,7 @@
 #include "bitboard.h"
 #include "nnue/nnue_accumulator.h"
 #include "nnue/nnue_architecture.h"
+#include "small_nnue.h"
 #include "types.h"
 
 namespace Stockfish {
@@ -66,6 +67,9 @@ struct StateInfo {
     Eval::NNUE::Accumulator<Eval::NNUE::TransformedFeatureDimensionsBig>   accumulatorBig;
     Eval::NNUE::Accumulator<Eval::NNUE::TransformedFeatureDimensionsSmall> accumulatorSmall;
     DirtyPiece                                                             dirtyPiece;
+
+    NNUEAccumulator accumulatorTiny;
+    DirtyPieces dirtyPiecesTiny;
 };
 
 
