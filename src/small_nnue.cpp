@@ -36,48 +36,6 @@ void nnue_accumulator_refresh(NNUEAccumulator *accumulator, const Position *pos,
   }
 }
 
-void nnue_accumulator_update(
-  NNUEAccumulator *accumulator, Square whiteKingSq, Square blackKingSq, Color side, DirtyPieces* dp,
-  NNUEAccumulator *prevAccumulator)
-{
-  Square povKingSq = side == WHITE ? whiteKingSq : blackKingSq;
-  vector* vPrevAcc = (vector*) prevAccumulator->colors[side];
-  vector* vAcc = (vector*) accumulator->colors[side];
-
-  // printf("    DP_NORMAL sub: %d %d %d %d\n", povKingSq, side, dp->sub0.pc, dp->sub0.sq);
-  // printf("    DP_NORMAL add: %d %d %d %d\n", povKingSq, side, dp->add0.pc, dp->add0.sq);
-  vector* featureFromSq = (vector*) NNUEfeatureAddress(povKingSq, side, dp->sub0.pc, dp->sub0.sq);
-  vector* featureToSq = (vector*) NNUEfeatureAddress(povKingSq, side, dp->add0.pc, dp->add0.sq);
-
-  // piece move - deactivate from, activate to
-  if (dp->type == DirtyPieces::DP_NORMAL)
-  {
-    for (uint8_t i = 0; i < numSimdCalls; ++i)
-      vAcc[i] = sub_epi16(add_epi16(vPrevAcc[i], featureToSq[i]), featureFromSq[i]);
-  }
-
-  // piece capture - deactivate from, activate to, deactivate captured
-  else if (dp->type == DirtyPieces::DP_CAPTURE)
-  {
-    vector* featureCaptured = (vector*) NNUEfeatureAddress(povKingSq, side, dp->sub1.pc, dp->sub1.sq);
-
-    for (uint8_t i = 0; i < numSimdCalls; ++i)
-      vAcc[i] = sub_epi16(sub_epi16(add_epi16(vPrevAcc[i], featureToSq[i]), featureFromSq[i]), featureCaptured[i]);
-  }
-
-  // castling - deactivate king from, activate king to, deactivate rook from, activate rook to
-  else if (dp->type == DirtyPieces::DP_CASTLING)
-  {
-    vector* rookFromSq = (vector*) NNUEfeatureAddress(povKingSq, side, dp->sub1.pc, dp->sub1.sq);
-    vector* rookToSq = (vector*) NNUEfeatureAddress(povKingSq, side, dp->add1.pc, dp->add1.sq);
-
-    for (uint8_t i = 0; i < numSimdCalls; ++i)
-      vAcc[i] = add_epi16(sub_epi16(sub_epi16(add_epi16(vPrevAcc[i], featureToSq[i]), featureFromSq[i]), rookFromSq[i]), rookToSq[i]);
-  }
-
-  // accumulator->computed[side] = true;
-}
-
 Value nnue_evaluate(NNUEAccumulator *accumulator, Color sideToMove) {
   vector* ourAcc = (vector*) accumulator->colors[sideToMove];
   vector* theirAcc = (vector*) accumulator->colors[!sideToMove];
