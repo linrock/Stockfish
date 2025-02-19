@@ -39,4 +39,8 @@ struct NNUEAccumulator {
 typedef struct NNUEAccumulator NNUEAccumulator;
 
 void nnue_init(void);
+void nnue_accumulator_refresh(NNUEAccumulator &accumulator, const Position &pos, Color pov);
+void nnue_accumulator_update(
+  NNUEAccumulator *accumulator, Square whiteKingSq, Square blackKingSq, Color side, TinyDirtyPieces* dp,
+  NNUEAccumulator *prevAccumulator);
 Value nnue_evaluate(const Position &pos);

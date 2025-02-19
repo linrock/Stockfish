@@ -295,6 +295,9 @@ void ThreadPool::start_thinking(const OptionsMap&  options,
     for (auto&& th : threads)
         th->wait_for_search_finished();
 
+    nnue_accumulator_refresh(pos.state()->tinyAccumulator, pos, WHITE);
+    nnue_accumulator_refresh(pos.state()->tinyAccumulator, pos, BLACK);
+
     main_thread()->start_searching();
 }
 

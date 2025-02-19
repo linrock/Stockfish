@@ -39,10 +39,10 @@ void nnue_init() {
   // sync_cout << "outputBias: " << TinyNNUE.outputBias << sync_endl;
 }
 
-void nnue_accumulator_refresh(std::unique_ptr<NNUEAccumulator> &accumulator, const Position &pos, Color pov) {
-  memcpy(accumulator->colors[pov], TinyNNUE.featureTransformerBiases, sizeof(TinyNNUE.featureTransformerBiases));
+void nnue_accumulator_refresh(NNUEAccumulator &accumulator, const Position &pos, Color pov) {
+  memcpy(accumulator.colors[pov], TinyNNUE.featureTransformerBiases, sizeof(TinyNNUE.featureTransformerBiases));
   Square povKingSq = pos.square<KING>(pov == WHITE ? WHITE : BLACK);
-  vector* vAcc = (vector*) accumulator->colors[pov];
+  vector* vAcc = (vector*) accumulator.colors[pov];
   for (Bitboard b = pos.pieces(); b; )
   {
     Square sq = pop_lsb(b);
@@ -99,8 +99,8 @@ Value nnue_evaluate(const Position &pos) {
   std::unique_ptr<NNUEAccumulator> accumulator = std::make_unique<NNUEAccumulator>();
 
   Color pov = pos.side_to_move();
-  nnue_accumulator_refresh(accumulator, pos, pov);
-  nnue_accumulator_refresh(accumulator, pos, ~pov);
+  nnue_accumulator_refresh(*accumulator, pos, pov);
+  nnue_accumulator_refresh(*accumulator, pos, ~pov);
 
   // evaluate
   vector* ourAcc = (vector*) accumulator->colors[pov];
