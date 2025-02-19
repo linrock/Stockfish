@@ -3,14 +3,14 @@
 #include "simd.h"
 #include "types.h"
 
-#define TinyEvalFile "HL96-hse-900-1k-sb50-50.bin"
+#define TinyEvalFile "HL128-hse-900-1k-sc400-sb50-50.bin"
 
 // (768 -> HL)x2 -> 1
-#define HIDDEN_WIDTH    96
+#define HIDDEN_WIDTH   128
 
-#define NETWORK_SCALE  340
-#define NETWORK_QA     512
-#define NETWORK_QB      32
+#define NETWORK_SCALE  400
+#define NETWORK_QA     255
+#define NETWORK_QB      64
 
 
 using namespace Stockfish;
