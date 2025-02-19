@@ -28,7 +28,7 @@
 #include "bitboard.h"
 #include "nnue/nnue_accumulator.h"
 #include "nnue/nnue_architecture.h"
-#include "small_nnue.h"
+#include "tiny_nnue.h"
 #include "types.h"
 
 namespace Stockfish {
@@ -69,7 +69,6 @@ struct StateInfo {
     DirtyPiece                                                             dirtyPiece;
 
     NNUEAccumulator accumulatorTiny;
-    DirtyPieces dirtyPiecesTiny;
 };
 
 

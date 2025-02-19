@@ -1,15 +1,26 @@
 #include "bitboard.h"
 #include "incbin/incbin.h"
 #include "position.h"
-#include "small_nnue.h"
+#include "tiny_nnue.h"
 
 #include <string.h>
 #include <stdio.h>
+
 
 using namespace Stockfish;
 
 const uint8_t weightsPerSimdVector = sizeof(vector) / sizeof(int16_t);
 const uint8_t numSimdCalls = HIDDEN_WIDTH / weightsPerSimdVector;
+
+INCBIN(TinyEmbeddedNNUE, TinyEvalFile);
+
+struct {
+  alignas(SIMD_ALIGNMENT) int16_t featureTransformerWeights[COLOR_NB][6][SQUARE_NB][HIDDEN_WIDTH];
+  alignas(SIMD_ALIGNMENT) int16_t featureTransformerBiases[HIDDEN_WIDTH];
+  alignas(SIMD_ALIGNMENT) int16_t outputWeights[2 * HIDDEN_WIDTH];
+                          int16_t outputBias;
+} TinyNNUE;
+// struct TinyNNUE TinyNNUE;
 
 static inline int16_t* NNUEfeatureAddress(Square kingSq, Color pov, Piece pc, Square sq) {
   // horizontally mirror if POV king is on right side of the board (EFGH files)
@@ -17,11 +28,16 @@ static inline int16_t* NNUEfeatureAddress(Square kingSq, Color pov, Piece pc, Sq
     kingSq = (Square)((int)kingSq ^ 7);
     sq = (Square)((int)sq ^ 7);
   }
-  return NNUE.featureTransformerWeights[pov != color_of(pc)][type_of(pc) - 1][relative_square(pov, sq)];
+  return TinyNNUE.featureTransformerWeights[pov != color_of(pc)][type_of(pc) - 1][relative_square(pov, sq)];
+}
+
+void nnue_init() {
+  memcpy(&TinyNNUE, gTinyEmbeddedNNUEData, sizeof(TinyNNUE));
+  sync_cout << "outputBias: " << TinyNNUE.outputBias << sync_endl;
 }
 
 void nnue_accumulator_refresh(NNUEAccumulator *accumulator, const Position *pos, Color pov) {
-  memcpy(accumulator->colors[pov], NNUE.featureTransformerBiases, sizeof(NNUE.featureTransformerBiases));
+  memcpy(accumulator->colors[pov], TinyNNUE.featureTransformerBiases, sizeof(TinyNNUE.featureTransformerBiases));
   Square povKingSq = pos->square<KING>(pov == WHITE ? WHITE : BLACK);
   vector* vAcc = (vector*) accumulator->colors[pov];
   for (Bitboard b = pos->pieces(); b; )
@@ -40,8 +56,8 @@ Value nnue_evaluate(NNUEAccumulator *accumulator, Color sideToMove) {
   vector* ourAcc = (vector*) accumulator->colors[sideToMove];
   vector* theirAcc = (vector*) accumulator->colors[!sideToMove];
 
-  vector* ourOutputWeights = (vector*) &NNUE.outputWeights[0];
-  vector* theirOutputWeights = (vector*) &NNUE.outputWeights[HIDDEN_WIDTH];
+  vector* ourOutputWeights = (vector*) &TinyNNUE.outputWeights[0];
+  vector* theirOutputWeights = (vector*) &TinyNNUE.outputWeights[HIDDEN_WIDTH];
 
   const vector vZero = vector_setzero();
   const vector vQA = vector_set1_epi16(NETWORK_QA);
@@ -65,7 +81,7 @@ Value nnue_evaluate(NNUEAccumulator *accumulator, Color sideToMove) {
     sum = add_epi32(sum, v1);
   }
 
-  int unsquared = vector_hadd_epi32(sum) / NETWORK_QA + NNUE.outputBias;
+  int unsquared = vector_hadd_epi32(sum) / NETWORK_QA + TinyNNUE.outputBias;
 
   return (Value)((unsquared * NETWORK_SCALE) / (NETWORK_QA * NETWORK_QB));
 }

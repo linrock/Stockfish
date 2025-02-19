@@ -31,7 +31,7 @@
 #include "nnue/network.h"
 #include "nnue/nnue_misc.h"
 #include "position.h"
-#include "small_nnue.h"
+#include "tiny_nnue.h"
 #include "types.h"
 #include "uci.h"
 #include "nnue/nnue_accumulator.h"
@@ -68,6 +68,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
         NNUEAccumulator* accumulator = &pos.state()->accumulatorTiny;
         nnue_accumulator_refresh(accumulator, &pos, pos.side_to_move());
         nnue = nnue_evaluate(accumulator, pos.side_to_move());
+        sync_cout << "sn nnue: " << nnue << sync_endl;
     } else {
         auto [psqt, positional] = networks.big.evaluate(pos, &caches.big);
         nnue = (125 * psqt + 131 * positional) / 128;

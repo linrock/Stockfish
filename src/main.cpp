@@ -21,7 +21,7 @@
 #include "bitboard.h"
 #include "misc.h"
 #include "position.h"
-#include "small_nnue.h"
+#include "tiny_nnue.h"
 #include "tune.h"
 #include "types.h"
 #include "uci.h"
