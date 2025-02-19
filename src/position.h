@@ -67,6 +67,7 @@ struct StateInfo {
     Eval::NNUE::Accumulator<Eval::NNUE::TransformedFeatureDimensionsBig>   accumulatorBig;
     Eval::NNUE::Accumulator<Eval::NNUE::TransformedFeatureDimensionsSmall> accumulatorSmall;
     DirtyPiece                                                             dirtyPiece;
+    TinyDirtyPieces                                                        tinyDirtyPieces;
 };
 
 

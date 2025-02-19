@@ -15,6 +15,21 @@
 
 using namespace Stockfish;
 
+struct SquarePiece {
+  Square sq;
+  Piece pc;
+};
+typedef struct SquarePiece SquarePiece;
+
+struct TinyDirtyPieces {
+  SquarePiece sub0, add0, sub1, add1;
+
+  enum {
+    DP_NORMAL, DP_CAPTURE, DP_CASTLING
+  } type;
+};
+typedef struct TinyDirtyPieces TinyDirtyPieces;
+
 struct NNUEAccumulator {
   union {
     alignas(SIMD_ALIGNMENT) int16_t colors[COLOR_NB][HIDDEN_WIDTH];

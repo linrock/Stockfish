@@ -716,6 +716,9 @@ void Position::do_move(Move                      m,
     auto& dp     = st->dirtyPiece;
     dp.dirty_num = 1;
 
+    TinyDirtyPieces *tdp = &(st->tinyDirtyPieces);
+    tdp->type = TinyDirtyPieces::DP_NORMAL;
+
     Color  us       = sideToMove;
     Color  them     = ~us;
     Square from     = m.from_sq();
@@ -738,6 +741,20 @@ void Position::do_move(Move                      m,
         k ^= Zobrist::psq[captured][rfrom] ^ Zobrist::psq[captured][rto];
         st->nonPawnKey[us] ^= Zobrist::psq[captured][rfrom] ^ Zobrist::psq[captured][rto];
         captured = NO_PIECE;
+
+        tdp->type = TinyDirtyPieces::DP_CASTLING;
+
+        tdp->sub0.sq = from;
+        tdp->sub0.pc = pc;    // KING
+
+        tdp->add0.sq = to;
+        tdp->add0.pc = pc;    // KING
+
+        tdp->sub1.sq = rfrom;
+        tdp->sub1.pc = captured; // ROOK
+
+        tdp->add1.sq = rto;
+        tdp->add1.pc = captured; // ROOK
     }
 
     if (captured)
@@ -774,6 +791,18 @@ void Position::do_move(Move                      m,
         dp.piece[1]  = captured;
         dp.from[1]   = capsq;
         dp.to[1]     = SQ_NONE;
+
+        // tiny dirty piece capture
+        tdp->type = TinyDirtyPieces::DP_CAPTURE;
+
+        tdp->sub0.sq = from;
+        tdp->sub0.pc = pc;
+
+        tdp->add0.sq = to;
+        tdp->add0.pc = pc;
+
+        tdp->sub1.sq = capsq;
+        tdp->sub1.pc = captured;
 
         // Update board and piece lists
         remove_piece(capsq);
@@ -842,6 +871,13 @@ void Position::do_move(Move                      m,
             dp.to[dp.dirty_num]    = to;
             dp.dirty_num++;
 
+            // tiny dirty piece - pawn promotion
+            tdp->sub0.sq = from;
+            tdp->sub0.pc = pc;
+
+            tdp->add0.sq = to;
+            tdp->add0.pc = pc;
+
             // Update hash keys
             // Zobrist::psq[pc][to] is zero, so we don't need to clear it
             k ^= Zobrist::psq[promotion][to];
@@ -868,6 +904,13 @@ void Position::do_move(Move                      m,
 
         if (type_of(pc) <= BISHOP)
             st->minorPieceKey ^= Zobrist::psq[pc][from] ^ Zobrist::psq[pc][to];
+
+        // tiny dirty piece move
+        tdp->sub0.sq = from;
+        tdp->sub0.pc = pc;
+
+        tdp->add0.sq = to;
+        tdp->add0.pc = pc;
     }
 
     // Update the key with the final value
