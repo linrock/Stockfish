@@ -951,20 +951,12 @@ void Position::do_move(Move                      m,
     if (pc == W_KING && ((file_of(from) > FILE_D) != (file_of(to) > FILE_D)))
       nnue_accumulator_refresh(st->tinyAccumulator, *this, WHITE);
     else
-      nnue_accumulator_update(
-        &st->tinyAccumulator, square<KING>(WHITE), square<KING>(BLACK), WHITE,
-        &st->tinyDirtyPieces,
-        &newSt.previous->tinyAccumulator
-      );
+      nnue_accumulator_refresh(st->tinyAccumulator, *this, WHITE);
 
     if (pc == B_KING && ((file_of(from) > FILE_D) != (file_of(to) > FILE_D)))
       nnue_accumulator_refresh(st->tinyAccumulator, *this, BLACK);
     else
-      nnue_accumulator_update(
-        &st->tinyAccumulator, square<KING>(WHITE), square<KING>(BLACK), BLACK,
-        &st->tinyDirtyPieces,
-        &newSt.previous->tinyAccumulator
-      );
+      nnue_accumulator_refresh(st->tinyAccumulator, *this, BLACK);
 
     assert(pos_is_ok());
 }
@@ -1073,6 +1065,7 @@ void Position::do_null_move(StateInfo& newSt, const TranspositionTable& tt) {
     assert(&newSt != st);
 
     std::memcpy(&newSt, st, offsetof(StateInfo, accumulatorBig));
+    newSt.tinyAccumulator = st->tinyAccumulator;
 
     newSt.previous = st;
     st->next       = &newSt;

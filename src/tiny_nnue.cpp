@@ -96,15 +96,13 @@ void nnue_accumulator_update(
 }
 
 Value nnue_evaluate(const Position &pos) {
-  std::unique_ptr<NNUEAccumulator> accumulator = std::make_unique<NNUEAccumulator>();
+  NNUEAccumulator &accumulator = pos.state()->tinyAccumulator;
 
   Color pov = pos.side_to_move();
-  nnue_accumulator_refresh(*accumulator, pos, pov);
-  nnue_accumulator_refresh(*accumulator, pos, ~pov);
 
   // evaluate
-  vector* ourAcc = (vector*) accumulator->colors[pov];
-  vector* theirAcc = (vector*) accumulator->colors[~pov];
+  vector* ourAcc = (vector*) accumulator.colors[pov];
+  vector* theirAcc = (vector*) accumulator.colors[~pov];
 
   vector* ourOutputWeights = (vector*) &TinyNNUE.outputWeights[0];
   vector* theirOutputWeights = (vector*) &TinyNNUE.outputWeights[HIDDEN_WIDTH];
