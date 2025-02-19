@@ -3,10 +3,10 @@
 #include "simd.h"
 #include "types.h"
 
-#define TinyEvalFile "HL64-hse-1k-50.bin"
+#define TinyEvalFile "HL256-hse-1k-50.bin"
 
 // (768 -> HL)x2 -> 1
-#define HIDDEN_WIDTH    64
+#define HIDDEN_WIDTH   256
 
 #define NETWORK_SCALE  340
 #define NETWORK_QA     255
