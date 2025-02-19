@@ -65,10 +65,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     Value nnue;
 
     if (smallNet) {
-        NNUEAccumulator* accumulator = &pos.state()->accumulatorTiny;
-        nnue_accumulator_refresh(accumulator, &pos, pos.side_to_move());
-        nnue = nnue_evaluate(accumulator, pos.side_to_move());
-        sync_cout << "sn nnue: " << nnue << sync_endl;
+        nnue = nnue_evaluate(pos);
+        // sync_cout << "sn nnue: " << nnue << sync_endl;
     } else {
         auto [psqt, positional] = networks.big.evaluate(pos, &caches.big);
         nnue = (125 * psqt + 131 * positional) / 128;

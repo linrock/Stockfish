@@ -33,28 +33,36 @@ static inline int16_t* NNUEfeatureAddress(Square kingSq, Color pov, Piece pc, Sq
 
 void nnue_init() {
   memcpy(&TinyNNUE, gTinyEmbeddedNNUEData, sizeof(TinyNNUE));
-  sync_cout << "outputBias: " << TinyNNUE.outputBias << sync_endl;
+  // for (int i = 0; i < 2 * HIDDEN_WIDTH; i++) {
+  //   sync_cout << "outputWeights[" << i << "] = " << TinyNNUE.outputWeights[i] << sync_endl;
+  // }
+  // sync_cout << "outputBias: " << TinyNNUE.outputBias << sync_endl;
 }
 
-void nnue_accumulator_refresh(NNUEAccumulator *accumulator, const Position *pos, Color pov) {
+Value nnue_evaluate(const Position &pos) {
+  std::unique_ptr<NNUEAccumulator> accumulator = std::make_unique<NNUEAccumulator>();
+
+  // reset
+  Color pov = pos.side_to_move();
   memcpy(accumulator->colors[pov], TinyNNUE.featureTransformerBiases, sizeof(TinyNNUE.featureTransformerBiases));
-  Square povKingSq = pos->square<KING>(pov == WHITE ? WHITE : BLACK);
+
+  // refresh
+  Square povKingSq = pos.square<KING>(pov == WHITE ? WHITE : BLACK);
   vector* vAcc = (vector*) accumulator->colors[pov];
-  for (Bitboard b = pos->pieces(); b; )
+  for (Bitboard b = pos.pieces(); b; )
   {
     Square sq = pop_lsb(b);
-    Piece pc = pos->piece_on(sq);
+    Piece pc = pos.piece_on(sq);
     for (uint8_t i = 0; i < numSimdCalls; ++i)
     {
       vector* featureToActivate = (vector*) NNUEfeatureAddress(povKingSq, pov, pc, sq);
       vAcc[i] = add_epi16(vAcc[i], featureToActivate[i]);
     }
   }
-}
 
-Value nnue_evaluate(NNUEAccumulator *accumulator, Color sideToMove) {
-  vector* ourAcc = (vector*) accumulator->colors[sideToMove];
-  vector* theirAcc = (vector*) accumulator->colors[!sideToMove];
+  // evaluate
+  vector* ourAcc = (vector*) accumulator->colors[pov];
+  vector* theirAcc = (vector*) accumulator->colors[!pov];
 
   vector* ourOutputWeights = (vector*) &TinyNNUE.outputWeights[0];
   vector* theirOutputWeights = (vector*) &TinyNNUE.outputWeights[HIDDEN_WIDTH];
