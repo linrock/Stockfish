@@ -3,7 +3,7 @@
 #include "simd.h"
 #include "types.h"
 
-#define TinyEvalFile "HL128-hse-900-1k-50.bin"
+#define TinyEvalFile "HL128-hse-900-1k-sb30-30.bin"
 
 // (768 -> HL)x2 -> 1
 #define HIDDEN_WIDTH   128
