@@ -64,6 +64,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     int nnueComplexity = 0;
     Value nnue;
 
+    // nnue = nnue_evaluate(pos);
+    // sync_cout << pos.fen() << sync_endl;
+    // sync_cout << "  nnue: " << nnue << sync_endl << sync_endl;
+
     if (smallNet) {
         nnue = nnue_evaluate(pos);
 

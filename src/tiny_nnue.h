@@ -20,8 +20,6 @@ struct NNUEAccumulator {
     alignas(SIMD_ALIGNMENT) int16_t colors[COLOR_NB][HIDDEN_WIDTH];
     alignas(SIMD_ALIGNMENT) int16_t both[COLOR_NB * HIDDEN_WIDTH];
   };
-
-  bool computed[COLOR_NB];
 };
 typedef struct NNUEAccumulator NNUEAccumulator;
 

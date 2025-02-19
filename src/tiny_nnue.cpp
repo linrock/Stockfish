@@ -39,14 +39,8 @@ void nnue_init() {
   // sync_cout << "outputBias: " << TinyNNUE.outputBias << sync_endl;
 }
 
-Value nnue_evaluate(const Position &pos) {
-  std::unique_ptr<NNUEAccumulator> accumulator = std::make_unique<NNUEAccumulator>();
-
-  // reset
-  Color pov = pos.side_to_move();
+void nnue_accumulator_refresh(std::unique_ptr<NNUEAccumulator> &accumulator, const Position &pos, Color pov) {
   memcpy(accumulator->colors[pov], TinyNNUE.featureTransformerBiases, sizeof(TinyNNUE.featureTransformerBiases));
-
-  // refresh
   Square povKingSq = pos.square<KING>(pov == WHITE ? WHITE : BLACK);
   vector* vAcc = (vector*) accumulator->colors[pov];
   for (Bitboard b = pos.pieces(); b; )
@@ -59,10 +53,18 @@ Value nnue_evaluate(const Position &pos) {
       vAcc[i] = add_epi16(vAcc[i], featureToActivate[i]);
     }
   }
+}
+
+Value nnue_evaluate(const Position &pos) {
+  std::unique_ptr<NNUEAccumulator> accumulator = std::make_unique<NNUEAccumulator>();
+
+  Color pov = pos.side_to_move();
+  nnue_accumulator_refresh(accumulator, pos, pov);
+  nnue_accumulator_refresh(accumulator, pos, ~pov);
 
   // evaluate
   vector* ourAcc = (vector*) accumulator->colors[pov];
-  vector* theirAcc = (vector*) accumulator->colors[!pov];
+  vector* theirAcc = (vector*) accumulator->colors[~pov];
 
   vector* ourOutputWeights = (vector*) &TinyNNUE.outputWeights[0];
   vector* theirOutputWeights = (vector*) &TinyNNUE.outputWeights[HIDDEN_WIDTH];
