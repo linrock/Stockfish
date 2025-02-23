@@ -876,7 +876,7 @@ void Position::do_move(Move                      m,
             tdp->sub0.pc = pc;
 
             tdp->add0.sq = to;
-            tdp->add0.pc = pc;
+            tdp->add0.pc = promotion;
 
             // Update hash keys
             // Zobrist::psq[pc][to] is zero, so we don't need to clear it
@@ -949,14 +949,28 @@ void Position::do_move(Move                      m,
     }
 
     if (pc == W_KING && ((file_of(from) > FILE_D) != (file_of(to) > FILE_D)))
-      nnue_accumulator_refresh(st->tinyAccumulator, *this, WHITE);
+      nnue_accumulator_refresh(newSt.tinyAccumulator, *this, WHITE);
     else
-      nnue_accumulator_refresh(st->tinyAccumulator, *this, WHITE);
+    {
+      // nnue_accumulator_update(
+      //   &st->tinyAccumulator, square<KING>(WHITE), square<KING>(BLACK), WHITE,
+      //   &st->tinyDirtyPieces,
+      //   &newSt.previous->tinyAccumulator
+      // );
+      nnue_accumulator_refresh(newSt.tinyAccumulator, *this, WHITE);
+    }
 
     if (pc == B_KING && ((file_of(from) > FILE_D) != (file_of(to) > FILE_D)))
-      nnue_accumulator_refresh(st->tinyAccumulator, *this, BLACK);
+      nnue_accumulator_refresh(newSt.tinyAccumulator, *this, BLACK);
     else
-      nnue_accumulator_refresh(st->tinyAccumulator, *this, BLACK);
+    {
+      // nnue_accumulator_update(
+      //   &st->tinyAccumulator, square<KING>(WHITE), square<KING>(BLACK), BLACK,
+      //   &st->tinyDirtyPieces,
+      //   &newSt.previous->tinyAccumulator
+      // );
+      nnue_accumulator_refresh(newSt.tinyAccumulator, *this, BLACK);
+    }
 
     assert(pos_is_ok());
 }

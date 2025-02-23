@@ -69,6 +69,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     // sync_cout << "  nnue: " << nnue << sync_endl << sync_endl;
 
     if (smallNet) {
+        // nnue_accumulator_refresh(pos.state()->tinyAccumulator, pos, WHITE);
+        // nnue_accumulator_refresh(pos.state()->tinyAccumulator, pos, BLACK);
         nnue = nnue_evaluate(pos);
 
         // Re-evaluate the position when higher eval accuracy is worth the time spent
