@@ -273,6 +273,9 @@ void ThreadPool::start_thinking(const OptionsMap&  options,
     if (states.get())
         setupStates = std::move(states);  // Ownership transfer, states is now empty
 
+    nnue_accumulator_refresh(pos.state()->tinyAccumulator, pos, WHITE);
+    nnue_accumulator_refresh(pos.state()->tinyAccumulator, pos, BLACK);
+
     // We use Position::set() to set root position across threads. But there are
     // some StateInfo fields (previous, pliesFromNull, capturedPiece) that cannot
     // be deduced from a fen string, so set() clears them and they are set from
@@ -287,6 +290,10 @@ void ThreadPool::start_thinking(const OptionsMap&  options,
             th->worker->rootDepth = th->worker->completedDepth = 0;
             th->worker->rootMoves                              = rootMoves;
             th->worker->rootPos.set(pos.fen(), pos.is_chess960(), &th->worker->rootState);
+
+	    nnue_accumulator_refresh(th->worker->rootPos.state()->tinyAccumulator, th->worker->rootPos, WHITE);
+	    nnue_accumulator_refresh(th->worker->rootPos.state()->tinyAccumulator, th->worker->rootPos, BLACK);
+
             th->worker->rootState = setupStates->back();
             th->worker->tbConfig  = tbConfig;
         });
@@ -294,9 +301,6 @@ void ThreadPool::start_thinking(const OptionsMap&  options,
 
     for (auto&& th : threads)
         th->wait_for_search_finished();
-
-    nnue_accumulator_refresh(pos.state()->tinyAccumulator, pos, WHITE);
-    nnue_accumulator_refresh(pos.state()->tinyAccumulator, pos, BLACK);
 
     main_thread()->start_searching();
 }

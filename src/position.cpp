@@ -839,6 +839,9 @@ void Position::do_move(Move                      m,
         dp.from[0]  = from;
         dp.to[0]    = to;
 
+	tdp->sub0 = {from, pc};
+	tdp->add0 = {to, pc};
+
         move_piece(from, to);
     }
 
@@ -952,24 +955,24 @@ void Position::do_move(Move                      m,
       nnue_accumulator_refresh(newSt.tinyAccumulator, *this, WHITE);
     else
     {
-      // nnue_accumulator_update(
-      //   &st->tinyAccumulator, square<KING>(WHITE), square<KING>(BLACK), WHITE,
-      //   &st->tinyDirtyPieces,
-      //   &newSt.previous->tinyAccumulator
-      // );
-      nnue_accumulator_refresh(newSt.tinyAccumulator, *this, WHITE);
+      nnue_accumulator_update(
+        &st->tinyAccumulator, square<KING>(WHITE), square<KING>(BLACK), WHITE,
+        tdp,
+        &newSt.previous->tinyAccumulator
+      );
+      // nnue_accumulator_refresh(newSt.tinyAccumulator, *this, WHITE);
     }
 
     if (pc == B_KING && ((file_of(from) > FILE_D) != (file_of(to) > FILE_D)))
       nnue_accumulator_refresh(newSt.tinyAccumulator, *this, BLACK);
     else
     {
-      // nnue_accumulator_update(
-      //   &st->tinyAccumulator, square<KING>(WHITE), square<KING>(BLACK), BLACK,
-      //   &st->tinyDirtyPieces,
-      //   &newSt.previous->tinyAccumulator
-      // );
-      nnue_accumulator_refresh(newSt.tinyAccumulator, *this, BLACK);
+      nnue_accumulator_update(
+        &st->tinyAccumulator, square<KING>(WHITE), square<KING>(BLACK), BLACK,
+        tdp,
+        &newSt.previous->tinyAccumulator
+      );
+      // nnue_accumulator_refresh(newSt.tinyAccumulator, *this, BLACK);
     }
 
     assert(pos_is_ok());
@@ -1059,6 +1062,14 @@ void Position::do_castling(Color us, Square from, Square& to, Square& rfrom, Squ
         dp.from[1]   = rfrom;
         dp.to[1]     = rto;
         dp.dirty_num = 2;
+
+        st->tinyDirtyPieces.type = TinyDirtyPieces::DP_CASTLING;
+
+        st->tinyDirtyPieces.sub0 = {from, make_piece(us, KING)};
+        st->tinyDirtyPieces.add0 = {to, make_piece(us, KING)};
+
+        st->tinyDirtyPieces.sub1 = {rfrom, make_piece(us, ROOK)};
+        st->tinyDirtyPieces.add1 = {rto, make_piece(us, ROOK)};
     }
 
     // Remove both pieces first since squares could overlap in Chess960

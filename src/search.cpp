@@ -187,6 +187,9 @@ void Search::Worker::start_searching() {
                             main_manager()->originalTimeAdjust);
     tt.new_search();
 
+    nnue_accumulator_refresh(rootPos.state()->tinyAccumulator, rootPos, WHITE);
+    nnue_accumulator_refresh(rootPos.state()->tinyAccumulator, rootPos, BLACK);
+
     if (rootMoves.empty())
     {
         rootMoves.emplace_back(Move::none());
