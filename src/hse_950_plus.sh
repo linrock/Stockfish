@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-  echo "Usage: ./high_simple_eval_only.sh <input_binpack>"
+  echo "Usage: ./hse_950_plus.sh <input_binpack>"
   exit 0
 fi
 
@@ -16,7 +16,7 @@ setoption name Hash value 1024
 isready
 transform high_simple_eval \
   input_file ${input_binpack} \
-  output_file ${input_binpack}.high-simple-eval.binpack
+  output_file ${input_binpack}.hse-950-plus.binpack
 quit"
 
 printf "$options" | ./stockfish
