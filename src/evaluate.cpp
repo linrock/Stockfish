@@ -43,7 +43,9 @@ namespace Stockfish {
     int ncDenom = 18000;
     int snMatMult = 535;
     int matMult = 535;
-    TUNE(snOptDenom, optDenom, snNcDenom, ncDenom, snMatMult, matMult);
+    int snNpmMult = 1024;
+    int npmMult = 1024;
+    TUNE(snOptDenom, optDenom, snNcDenom, ncDenom, snMatMult, matMult, snNpmMult, npmMult);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -86,7 +88,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     optimism += optimism * nnueComplexity / (smallNet ? snOptDenom : optDenom);
     nnue -= nnue * nnueComplexity / (smallNet ? snNcDenom : ncDenom);
 
-    int material = (smallNet ? snMatMult : matMult) * pos.count<PAWN>() + pos.non_pawn_material();
+    int material = (smallNet ? snMatMult : matMult) * pos.count<PAWN>() + (smallNet ? snNpmMult : npmMult) * pos.non_pawn_material() / 1024;
     int v        = (nnue * (77777 + material) + optimism * (7777 + material)) / 77777;
 
     // Damp down the evaluation linearly when shuffling
