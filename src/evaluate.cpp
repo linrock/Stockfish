@@ -37,12 +37,12 @@
 
 namespace Stockfish {
 
-    int snOptDenom = 473;
-    int optDenom = 463;
-    int snNcDenom = 17431;
-    int ncDenom = 18410;
-    int snMatMult = 522;
-    int matMult = 537;
+    int snOptDenom = 476;
+    int optDenom = 470;
+    int snNcDenom = 17045;
+    int ncDenom = 18755;
+    int snMatMult = 521;
+    int matMult = 538;
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
