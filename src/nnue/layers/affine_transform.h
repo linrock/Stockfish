@@ -227,8 +227,25 @@ class AffineTransform {
                 const auto  col0 =
                   reinterpret_cast<const vec_t*>(&weights[i * OutputDimensions * 4]);
 
+#if defined(USE_AVX2)
+                // Manual loop unrolling for AVX2 - process accumulators in groups of 4
+                // for better instruction scheduling and pipeline utilization
+                IndexType k = 0;
+                for (; k + 3 < NumRegs; k += 4) {
+                    // Process 4 accumulators simultaneously to hide latency
+                    vec_add_dpbusd_32(acc[k], in0, col0[k]);
+                    vec_add_dpbusd_32(acc[k+1], in0, col0[k+1]);
+                    vec_add_dpbusd_32(acc[k+2], in0, col0[k+2]);
+                    vec_add_dpbusd_32(acc[k+3], in0, col0[k+3]);
+                }
+                // Handle remaining accumulators
+                for (; k < NumRegs; ++k)
+                    vec_add_dpbusd_32(acc[k], in0, col0[k]);
+#else
+                // Original sequential processing for other architectures
                 for (IndexType k = 0; k < NumRegs; ++k)
                     vec_add_dpbusd_32(acc[k], in0, col0[k]);
+#endif
             }
 
             vec_t* outptr = reinterpret_cast<vec_t*>(output);
@@ -273,6 +290,13 @@ class AffineTransform {
 
             for (int j = 0; j < int(NumChunks); ++j)
             {
+#if defined(USE_AVX2)
+                // Manual prefetching for next iteration to improve memory latency
+                if (j + 1 < int(NumChunks)) {
+                    __builtin_prefetch(&inputVector[j + 1], 0, 3);
+                    __builtin_prefetch(&row0[j + 1], 0, 3);
+                }
+#endif
                 const vec_t in = inputVector[j];
                 vec_add_dpbusd_32(sum0, in, row0[j]);
             }
