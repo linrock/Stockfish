@@ -423,8 +423,29 @@ void update_accumulator_refresh_cache(const FeatureTransformer<Dimensions>& feat
             const IndexType offsetA = Dimensions * indexA + j * Tiling::TileHeight;
             auto* columnA = reinterpret_cast<const vec_t*>(&featureTransformer.weights[offsetA]);
 
+#ifdef USE_AVX2
+            // Memory prefetching for next features to improve cache performance
+            if (i + 1 < std::min(removed.size(), added.size())) {
+                const IndexType nextOffsetR = Dimensions * removed[i + 1] + j * Tiling::TileHeight;
+                const IndexType nextOffsetA = Dimensions * added[i + 1] + j * Tiling::TileHeight;
+                __builtin_prefetch(&featureTransformer.weights[nextOffsetR], 0, 3);
+                __builtin_prefetch(&featureTransformer.weights[nextOffsetA], 0, 3);
+            }
+            
+            // Loop unrolling for better instruction scheduling
+            IndexType k = 0;
+            for (; k + 3 < Tiling::NumRegs; k += 4) {
+                acc[k] = fused<Vec16Wrapper, Add, Sub>(acc[k], columnA[k], columnR[k]);
+                acc[k+1] = fused<Vec16Wrapper, Add, Sub>(acc[k+1], columnA[k+1], columnR[k+1]);
+                acc[k+2] = fused<Vec16Wrapper, Add, Sub>(acc[k+2], columnA[k+2], columnR[k+2]);
+                acc[k+3] = fused<Vec16Wrapper, Add, Sub>(acc[k+3], columnA[k+3], columnR[k+3]);
+            }
+            for (; k < Tiling::NumRegs; ++k)
+                acc[k] = fused<Vec16Wrapper, Add, Sub>(acc[k], columnA[k], columnR[k]);
+#else
             for (IndexType k = 0; k < Tiling::NumRegs; ++k)
                 acc[k] = fused<Vec16Wrapper, Add, Sub>(acc[k], columnA[k], columnR[k]);
+#endif
         }
         for (; i < removed.size(); ++i)
         {
@@ -432,6 +453,13 @@ void update_accumulator_refresh_cache(const FeatureTransformer<Dimensions>& feat
             const IndexType offset = Dimensions * index + j * Tiling::TileHeight;
             auto* column = reinterpret_cast<const vec_t*>(&featureTransformer.weights[offset]);
 
+#ifdef USE_AVX2
+            // Prefetch next removed feature
+            if (i + 1 < removed.size()) {
+                const IndexType nextOffset = Dimensions * removed[i + 1] + j * Tiling::TileHeight;
+                __builtin_prefetch(&featureTransformer.weights[nextOffset], 0, 3);
+            }
+#endif
             for (IndexType k = 0; k < Tiling::NumRegs; ++k)
                 acc[k] = vec_sub_16(acc[k], column[k]);
         }
@@ -441,6 +469,13 @@ void update_accumulator_refresh_cache(const FeatureTransformer<Dimensions>& feat
             const IndexType offset = Dimensions * index + j * Tiling::TileHeight;
             auto* column = reinterpret_cast<const vec_t*>(&featureTransformer.weights[offset]);
 
+#ifdef USE_AVX2
+            // Prefetch next added feature
+            if (i + 1 < added.size()) {
+                const IndexType nextOffset = Dimensions * added[i + 1] + j * Tiling::TileHeight;
+                __builtin_prefetch(&featureTransformer.weights[nextOffset], 0, 3);
+            }
+#endif
             for (IndexType k = 0; k < Tiling::NumRegs; ++k)
                 acc[k] = vec_add_16(acc[k], column[k]);
         }

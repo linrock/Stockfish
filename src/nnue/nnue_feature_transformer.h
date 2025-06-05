@@ -271,6 +271,31 @@ class FeatureTransformer {
 
             for (IndexType j = 0; j < NumOutputChunks; ++j)
             {
+#if defined(USE_AVX2)
+                // Memory prefetching optimization for next iteration
+                if (j + 1 < NumOutputChunks) {
+                    __builtin_prefetch(&in0[(j + 1) * 2], 0, 3);
+                    __builtin_prefetch(&in1[(j + 1) * 2], 0, 3);
+                }
+                
+                // Instruction-level parallelism: interleave operations to reduce pipeline stalls
+                const vec_t in0_0 = in0[j * 2 + 0];
+                const vec_t in0_1 = in0[j * 2 + 1];
+                const vec_t in1_0 = in1[j * 2 + 0];
+                const vec_t in1_1 = in1[j * 2 + 1];
+                
+                // Process both paths simultaneously
+                const vec_t sum0a = vec_slli_16(vec_max_16(vec_min_16(in0_0, One), Zero), shift);
+                const vec_t sum1a = vec_min_16(in1_0, One);
+                const vec_t sum0b = vec_slli_16(vec_max_16(vec_min_16(in0_1, One), Zero), shift);
+                const vec_t sum1b = vec_min_16(in1_1, One);
+
+                // Interleave multiplications to better utilize execution units
+                const vec_t pa = vec_mulhi_16(sum0a, sum1a);
+                const vec_t pb = vec_mulhi_16(sum0b, sum1b);
+
+                out[j] = vec_packus_16(pa, pb);
+#else
                 const vec_t sum0a =
                   vec_slli_16(vec_max_16(vec_min_16(in0[j * 2 + 0], One), Zero), shift);
                 const vec_t sum0b =
@@ -282,6 +307,7 @@ class FeatureTransformer {
                 const vec_t pb = vec_mulhi_16(sum0b, sum1b);
 
                 out[j] = vec_packus_16(pa, pb);
+#endif
             }
 
 #else
