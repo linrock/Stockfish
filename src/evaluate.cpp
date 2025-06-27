@@ -48,8 +48,7 @@ int Eval::simple_eval(const Position& pos) {
 
 bool Eval::use_smallnet(const Position& pos) { return std::abs(simple_eval(pos)) > 962; }
 
-int nnueMatOffset[8] = {77777, 77777, 77777, 77777, 77777, 77777, 77777, 77777};
-TUNE(nnueMatOffset);
+const int nnueMatOffset[8] = {78261, 79389, 79477, 78365, 80041, 77813, 78440, 76686};
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
