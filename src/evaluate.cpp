@@ -47,7 +47,7 @@ int Eval::simple_eval(const Position& pos) {
 }
 
 bool Eval::use_smallnet(const Position& pos) {
-  const int th = pos.count<ALL_PIECES>() > 16 ? 1012 : 962;
+  const int th = pos.count<ALL_PIECES>() > 16 ? 962 : 1012;
   return std::abs(simple_eval(pos)) > th;
 }
 
