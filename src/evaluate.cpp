@@ -46,7 +46,10 @@ int Eval::simple_eval(const Position& pos) {
          + (pos.non_pawn_material(c) - pos.non_pawn_material(~c));
 }
 
-bool Eval::use_smallnet(const Position& pos) { return std::abs(simple_eval(pos)) > 1012; }
+bool Eval::use_smallnet(const Position& pos) {
+  const int th = pos.count<ALL_PIECES>() > 16 ? 1012 : 962;
+  return std::abs(simple_eval(pos)) > th;
+}
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
