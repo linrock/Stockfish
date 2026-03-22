@@ -107,20 +107,11 @@ class SqrClippedReLU {
             int16x8_t words0 = vcombine_s16(vqmovn_s32(a0), vqmovn_s32(a1));
             int16x8_t words1 = vcombine_s16(vqmovn_s32(a2), vqmovn_s32(a3));
 
-            // Match _mm_mulhi_epi16(x, x) then _mm_srli_epi16(..., 3)
-            const int32x4_t p0l = vmull_s16(vget_low_s16(words0), vget_low_s16(words0));
-            const int32x4_t p0h = vmull_s16(vget_high_s16(words0), vget_high_s16(words0));
-            const int32x4_t p1l = vmull_s16(vget_low_s16(words1), vget_low_s16(words1));
-            const int32x4_t p1h = vmull_s16(vget_high_s16(words1), vget_high_s16(words1));
+            words0 = vqdmulhq_s16(words0, words0);
+            words1 = vqdmulhq_s16(words1, words1);
 
-            words0 = vreinterpretq_s16_u16(vshrq_n_u16(
-              vreinterpretq_u16_s16(vcombine_s16(vmovn_s32(vshrq_n_s32(p0l, 16)),
-                                                   vmovn_s32(vshrq_n_s32(p0h, 16)))),
-              3));
-            words1 = vreinterpretq_s16_u16(vshrq_n_u16(
-              vreinterpretq_u16_s16(vcombine_s16(vmovn_s32(vshrq_n_s32(p1l, 16)),
-                                                   vmovn_s32(vshrq_n_s32(p1h, 16)))),
-              3));
+            words0 = vreinterpretq_s16_u16(vshrq_n_u16(words0, 4));
+            words1 = vreinterpretq_s16_u16(vshrq_n_u16(words1, 4));
 
             const int8x16_t packed = vcombine_s8(vqmovn_s16(words0), vqmovn_s16(words1));
             vst1q_s8(reinterpret_cast<std::int8_t*>(output + i * 16), packed);
