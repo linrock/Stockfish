@@ -309,39 +309,14 @@ class AffineTransformSparseInput {
 
         // convince GCC to not do weird pointer arithmetic in the following loop
         const std::int8_t* weights_cp = weights;
-    #if defined(USE_VNNI)
+    #if defined(USE_VNNI) || defined(USE_NEON_DOTPROD)
+        #if defined(USE_VNNI)
         for (IndexType k = NumAccums; k < NumRegs; ++k)
             acc[k] = vec_zero();
-
-        while (start < end - 2)
-        {
-            const std::ptrdiff_t i0 = *start++;
-            const std::ptrdiff_t i1 = *start++;
-            const std::ptrdiff_t i2 = *start++;
-            const invec_t        in0 =
-              vec_set_32(load_as<std::int32_t>(input + i0 * sizeof(std::int32_t)));
-            const invec_t in1 =
-              vec_set_32(load_as<std::int32_t>(input + i1 * sizeof(std::int32_t)));
-            const invec_t in2 =
-              vec_set_32(load_as<std::int32_t>(input + i2 * sizeof(std::int32_t)));
-            const auto col0 =
-              reinterpret_cast<const invec_t*>(&weights_cp[i0 * OutputDimensions * ChunkSize]);
-            const auto col1 =
-              reinterpret_cast<const invec_t*>(&weights_cp[i1 * OutputDimensions * ChunkSize]);
-            const auto col2 =
-              reinterpret_cast<const invec_t*>(&weights_cp[i2 * OutputDimensions * ChunkSize]);
-            for (IndexType k = 0; k < NumAccums; ++k)
-            {
-                vec_add_dpbusd_32(acc[k], in0, col0[k]);
-                vec_add_dpbusd_32(acc[k + NumAccums], in1, col1[k]);
-                vec_add_dpbusd_32(acc[k + 2 * NumAccums], in2, col2[k]);
-            }
-        }
-        for (IndexType k = 0; k < NumAccums; ++k)
-            acc[k] = vec_add_32(vec_add_32(acc[k], acc[k + NumAccums]), acc[k + 2 * NumAccums]);
-    #elif defined(USE_NEON_DOTPROD)
+        #else
         for (IndexType k = NumAccums; k < NumRegs; ++k)
             acc[k] = vdupq_n_s32(0);
+        #endif
 
         while (start < end - 2)
         {
@@ -367,8 +342,13 @@ class AffineTransformSparseInput {
                 vec_add_dpbusd_32(acc[k + 2 * NumAccums], in2, col2[k]);
             }
         }
+        #if defined(USE_VNNI)
+        for (IndexType k = 0; k < NumAccums; ++k)
+            acc[k] = vec_add_32(vec_add_32(acc[k], acc[k + NumAccums]), acc[k + 2 * NumAccums]);
+        #else
         for (IndexType k = 0; k < NumAccums; ++k)
             acc[k] = vaddq_s32(vaddq_s32(acc[k], acc[k + NumAccums]), acc[k + 2 * NumAccums]);
+        #endif
     #endif
         while (start < end)
         {
