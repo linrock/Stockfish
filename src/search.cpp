@@ -900,8 +900,7 @@ Value Search::Worker::search(
             Value futilityMult = 76 - 21 * !ss->ttHit;
 
             return futilityMult * d
-                 - (2686 * improving + 362 * opponentWorsening) * futilityMult / 1024  //
-                 + std::abs(correctionValue) / 180600;
+                 - (2686 * improving + 362 * opponentWorsening) * futilityMult / 1024;
         };
 
         if (!ss->ttPv && depth < 15 && eval - futility_margin(depth) >= beta && eval >= beta
