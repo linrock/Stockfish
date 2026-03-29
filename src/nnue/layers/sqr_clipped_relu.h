@@ -95,15 +95,16 @@ class SqrClippedReLU {
 
         static_assert(WeightScaleBits == 6);
 
-        const auto in  = reinterpret_cast<const_int32x4_t*>(input);
+        const auto in  = reinterpret_cast<const int32x4_t*>(input);
         const auto out = reinterpret_cast<int8x16_t*>(output);
+
         for (IndexType i = 0; i < NumChunks; ++i)
         {
-            int16x8_t words0 = vcombine_s16(vqmovn_s32(in[i * 4    ]), vqmovn_s32(in[i * 4 + 1]));
+            int16x8_t words0 = vcombine_s16(vqmovn_s32(in[i * 4]), vqmovn_s32(in[i * 4 + 1]));
             int16x8_t words1 = vcombine_s16(vqmovn_s32(in[i * 4 + 2]), vqmovn_s32(in[i * 4 + 3]));
 
-            words0 = vshrq_n_s16(vqdmulhq_s16(word0, words0), 4);
-            words1 = vshrq_n_s16(vqdmulhq_s16(word1, words1), 4);
+            words0 = vshrq_n_s16(vqdmulhq_s16(words0, words0), 4);
+            words1 = vshrq_n_s16(vqdmulhq_s16(words1, words1), 4);
 
             out[i] = vcombine_s8(vqmovn_s16(words0), vqmovn_s16(words1));
         }
