@@ -178,13 +178,22 @@ Network<Arch, Transformer>::evaluate(const Position&                         pos
 
     alignas(alignment)
       TransformedFeatureType transformedFeatures[FeatureTransformer<FTDimensions>::BufferSize];
+#if defined(USE_NEON)
+    uint8_t nnz[sizeof(transformedFeatures) / 32];
+#endif
 
     ASSERT_ALIGNED(transformedFeatures, alignment);
 
     const int  bucket = (pos.count<ALL_PIECES>() - 1) / 4;
+#if defined(USE_NEON)
+    const auto psqt =
+      featureTransformer.transform(pos, accumulatorStack, cache, transformedFeatures, bucket, nnz);
+    const auto positional = network[bucket].propagate(transformedFeatures, nnz);
+#else
     const auto psqt =
       featureTransformer.transform(pos, accumulatorStack, cache, transformedFeatures, bucket);
     const auto positional = network[bucket].propagate(transformedFeatures);
+#endif
     return {static_cast<Value>(psqt / OutputScale), static_cast<Value>(positional / OutputScale)};
 }
 

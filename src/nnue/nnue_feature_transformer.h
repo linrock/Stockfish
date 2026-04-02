@@ -237,7 +237,8 @@ class FeatureTransformer {
                            AccumulatorStack&                         accumulatorStack,
                            AccumulatorCaches::Cache<HalfDimensions>& cache,
                            OutputType*                               output,
-                           int                                       bucket) const {
+                           int                                       bucket,
+                           uint8_t*                                  nnz = nullptr) const {
 
         using namespace SIMD;
         accumulatorStack.evaluate(pos, *this, cache);
@@ -280,7 +281,10 @@ class FeatureTransformer {
             const vec_t* in0 = reinterpret_cast<const vec_t*>(&(accumulation[perspectives[p]][0]));
             const vec_t* in1 =
               reinterpret_cast<const vec_t*>(&(accumulation[perspectives[p]][HalfDimensions / 2]));
-            vec_t* out = reinterpret_cast<vec_t*>(output + offset);
+            vec_t*   out     = reinterpret_cast<vec_t*>(output + offset);
+#if defined(USE_NEON)
+            uint8_t* nnz_out = nnz ? nnz + offset / 32 : nullptr;
+#endif
 
             // Per the NNUE architecture, here we want to multiply pairs of
             // clipped elements and divide the product by 128. To do this,
@@ -365,6 +369,16 @@ class FeatureTransformer {
                     const vec_t pb = vec_mulhi_16(sum0b, sum1b);
 
                     out[j] = vec_packus_16(pa, pb);
+#if defined(USE_NEON)
+                    if (nnz_out)
+                    {
+                        unsigned mask = vec_nnz(vreinterpretq_u32_s16(out[j]));
+                        if (j & 1)
+                            nnz_out[j / 2] |= (uint8_t)(mask << 4);
+                        else
+                            nnz_out[j / 2] = (uint8_t)mask;
+                    }
+#endif
                 }
             }
             else
@@ -382,6 +396,16 @@ class FeatureTransformer {
                     const vec_t pb = vec_mulhi_16(sum0b, sum1b);
 
                     out[j] = vec_packus_16(pa, pb);
+#if defined(USE_NEON)
+                    if (nnz_out)
+                    {
+                        unsigned mask = vec_nnz(vreinterpretq_u32_s16(out[j]));
+                        if (j & 1)
+                            nnz_out[j / 2] |= (uint8_t)(mask << 4);
+                        else
+                            nnz_out[j / 2] = (uint8_t)mask;
+                    }
+#endif
                 }
             }
 
