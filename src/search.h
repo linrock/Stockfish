@@ -77,6 +77,7 @@ struct Stack {
     bool                        followPV;
     int                         cutoffCnt;
     int                         reduction;
+    Bitboard                    threats;
 };
 
 
@@ -288,8 +289,9 @@ class Worker {
     void ensure_network_replicated();
 
     // Public because they need to be updatable by the stats
-    ButterflyHistory mainHistory;
-    LowPlyHistory    lowPlyHistory;
+    ButterflyHistory       mainHistory;
+    ThreatButterflyHistory threatHistory;
+    LowPlyHistory          lowPlyHistory;
 
     CapturePieceToHistory           captureHistory;
     ContinuationHistory             continuationHistory[2][2];

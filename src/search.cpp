@@ -315,7 +315,12 @@ void Search::Worker::iterative_deepening() {
 
     for (Color c : {WHITE, BLACK})
         for (int i = 0; i < UINT_16_HISTORY_SIZE; i++)
+        {
             mainHistory[c][i] = mainHistory[c][i] * 820 / 1024;
+            for (int ft = 0; ft < 2; ft++)
+                for (int thr = 0; thr < 2; thr++)
+                    threatHistory[c][ft][thr][i] = threatHistory[c][ft][thr][i] * 820 / 1024;
+        }
 
     // Iterative deepening loop until requested to stop or the target depth is reached
     while (++rootDepth < MAX_PLY && !threads.stop
@@ -601,6 +606,7 @@ void Search::Worker::undo_null_move(Position& pos) { pos.undo_null_move(); }
 // Reset histories, usually before a new game
 void Search::Worker::clear() {
     mainHistory.fill(0);
+    threatHistory.fill(0);
     captureHistory.fill(-678);
 
     // Each thread is responsible for clearing their part of shared history
@@ -873,16 +879,22 @@ Value Search::Worker::search(
         }
     }
 
+    ss->threats =
+      pos.attacks_by<PAWN>(~us) | pos.attacks_by<KNIGHT>(~us) | pos.attacks_by<BISHOP>(~us);
+
     if (ss->inCheck)
         goto moves_loop;
 
     // Use static evaluation difference to improve quiet move ordering
     if (((ss - 1)->currentMove).is_ok() && !(ss - 1)->inCheck && !priorCapture)
     {
-        int evalDiff = std::clamp(-int((ss - 1)->staticEval + ss->staticEval), -214, 171) + 60;
-        mainHistory[~us][((ss - 1)->currentMove).raw()] << evalDiff * 10;
-        if (!ttHit && type_of(pos.piece_on(prevSq)) != PAWN
-            && ((ss - 1)->currentMove).type_of() != PROMOTION)
+        int  evalDiff    = std::clamp(-int((ss - 1)->staticEval + ss->staticEval), -214, 171) + 60;
+        Move prevMove    = (ss - 1)->currentMove;
+        bool prevFromThr = bool(ss->threats & prevMove.from_sq());
+        bool prevToThr   = bool(ss->threats & prevMove.to_sq());
+        mainHistory[~us][prevMove.raw()] << evalDiff * 10;
+        threatHistory[~us][prevFromThr][prevToThr][prevMove.raw()] << evalDiff * 10;
+        if (!ttHit && type_of(pos.piece_on(prevSq)) != PAWN && prevMove.type_of() != PROMOTION)
             sharedHistory.pawn_entry(pos)[pos.piece_on(prevSq)][prevSq] << evalDiff * 12;
     }
 
@@ -1013,8 +1025,8 @@ moves_loop:  // When in check, search starts here
       (ss - 4)->continuationHistory, (ss - 5)->continuationHistory, (ss - 6)->continuationHistory};
 
 
-    MovePicker mp(pos, ttData.move, depth, &mainHistory, &lowPlyHistory, &captureHistory, contHist,
-                  &sharedHistory, ss->ply);
+    MovePicker mp(pos, ttData.move, depth, &mainHistory, &threatHistory, &lowPlyHistory,
+                  &captureHistory, contHist, &sharedHistory, ss->threats, ss->ply);
 
     value = bestValue;
 
@@ -1236,9 +1248,13 @@ moves_loop:  // When in check, search starts here
             ss->statScore = 863 * int(PieceValue[pos.captured_piece()]) / 128
                           + captureHistory[movedPiece][move.to_sq()][type_of(pos.captured_piece())];
         else
-            ss->statScore = 2 * mainHistory[us][move.raw()]
-                          + (*contHist[0])[movedPiece][move.to_sq()]
-                          + (*contHist[1])[movedPiece][move.to_sq()];
+        {
+            bool fThr = bool(ss->threats & move.from_sq());
+            bool tThr = bool(ss->threats & move.to_sq());
+            ss->statScore =
+              2 * mainHistory[us][move.raw()] + threatHistory[us][fThr][tThr][move.raw()]
+              + (*contHist[0])[movedPiece][move.to_sq()] + (*contHist[1])[movedPiece][move.to_sq()];
+        }
 
         // Decrease/increase reduction for moves with a good/bad history
         r -= ss->statScore * 428 / 4096;
@@ -1458,7 +1474,11 @@ moves_loop:  // When in check, search starts here
         update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq,
                                       scaledBonus * 221 / 16384);
 
-        mainHistory[~us][((ss - 1)->currentMove).raw()] << scaledBonus * 235 / 32768;
+        Move prevMove    = (ss - 1)->currentMove;
+        bool prevFromThr = bool(ss->threats & prevMove.from_sq());
+        bool prevToThr   = bool(ss->threats & prevMove.to_sq());
+        mainHistory[~us][prevMove.raw()] << scaledBonus * 235 / 32768;
+        threatHistory[~us][prevFromThr][prevToThr][prevMove.raw()] << scaledBonus * 235 / 32768;
 
         if (type_of(pos.piece_on(prevSq)) != PAWN && ((ss - 1)->currentMove).type_of() != PROMOTION)
             sharedHistory.pawn_entry(pos)[pos.piece_on(prevSq)][prevSq] << scaledBonus * 290 / 8192;
@@ -1629,11 +1649,15 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta)
 
     Square prevSq = ((ss - 1)->currentMove).is_ok() ? ((ss - 1)->currentMove).to_sq() : SQ_NONE;
 
+    Color us = pos.side_to_move();
+    ss->threats =
+      pos.attacks_by<PAWN>(~us) | pos.attacks_by<KNIGHT>(~us) | pos.attacks_by<BISHOP>(~us);
+
     // Initialize a MovePicker object for the current position, and prepare to search
     // the moves. We presently use two stages of move generator in quiescence search:
     // captures, or evasions only when in check.
-    MovePicker mp(pos, ttData.move, DEPTH_QS, &mainHistory, &lowPlyHistory, &captureHistory,
-                  contHist, &sharedHistory, ss->ply);
+    MovePicker mp(pos, ttData.move, DEPTH_QS, &mainHistory, &threatHistory, &lowPlyHistory,
+                  &captureHistory, contHist, &sharedHistory, ss->threats, ss->ply);
 
     // Step 5. Loop through all pseudo-legal moves until no moves remain or a beta
     // cutoff occurs.
@@ -1727,7 +1751,6 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta)
     if (!is_decisive(bestValue) && bestValue > beta)
         bestValue = (bestValue + beta) / 2;
 
-    Color us = pos.side_to_move();
     if (!ss->inCheck && !moveCount && !pos.non_pawn_material(us)
         && type_of(pos.captured_piece()) >= ROOK)
     {
@@ -1921,8 +1944,11 @@ void update_continuation_histories(Stack* ss, Piece pc, Square to, int bonus) {
 void update_quiet_histories(
   const Position& pos, Stack* ss, Search::Worker& workerThread, Move move, int bonus) {
 
-    Color us = pos.side_to_move();
-    workerThread.mainHistory[us][move.raw()] << bonus;  // Untuned to prevent duplicate effort
+    Color us      = pos.side_to_move();
+    bool  fromThr = bool(ss->threats & move.from_sq());
+    bool  toThr   = bool(ss->threats & move.to_sq());
+    workerThread.mainHistory[us][move.raw()] << bonus;
+    workerThread.threatHistory[us][fromThr][toThr][move.raw()] << bonus;
 
     if (ss->ply < LOW_PLY_HISTORY_SIZE)
         workerThread.lowPlyHistory[ss->ply][move.raw()] << bonus * 682 / 1024;
