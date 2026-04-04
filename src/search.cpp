@@ -286,6 +286,7 @@ void Search::Worker::iterative_deepening() {
           &continuationHistory[0][0][NO_PIECE][0];  // Use as a sentinel
         (ss - i)->continuationCorrectionHistory = &continuationCorrectionHistory[NO_PIECE][0];
         (ss - i)->staticEval                    = VALUE_NONE;
+        (ss - i)->complexity                    = 0;
     }
 
     for (int i = 0; i <= MAX_PLY + 2; ++i)
@@ -731,7 +732,10 @@ Value Search::Worker::search(
     const auto correctionValue      = correction_value(*this, pos, ss);
     // Skip early pruning when in check
     if (ss->inCheck)
+    {
+        ss->complexity = 0;
         ss->staticEval = eval = (ss - 2)->staticEval;
+    }
     else if (excludedMove)
         unadjustedStaticEval = eval = ss->staticEval;
     else if (ss->ttHit)
@@ -742,6 +746,7 @@ Value Search::Worker::search(
             unadjustedStaticEval = evaluate(pos);
 
         ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, correctionValue);
+        ss->complexity = std::abs(ss->staticEval - unadjustedStaticEval);
 
         // ttValue can be used as a better position evaluation
         if (is_valid(ttData.value)
@@ -752,6 +757,7 @@ Value Search::Worker::search(
     {
         unadjustedStaticEval = evaluate(pos);
         ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, correctionValue);
+        ss->complexity = std::abs(ss->staticEval - unadjustedStaticEval);
 
         // Static evaluation is saved as it was before adjustment by correction history
         ttWriter.write(posKey, VALUE_NONE, ss->ttPv, BOUND_NONE, DEPTH_UNSEARCHED, Move::none(),
@@ -1212,6 +1218,7 @@ moves_loop:  // When in check, search starts here
         r += 691;  // Base reduction offset to compensate for other tweaks
         r -= moveCount * 65;
         r -= std::abs(correctionValue) / 25600;
+        r -= ss->complexity * 4;
 
         // Increase reduction for cut nodes
         if (cutNode)
