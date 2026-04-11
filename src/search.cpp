@@ -1735,6 +1735,16 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta)
         }
     }
 
+    if (!ss->inCheck && !(bestMove && pos.capture(bestMove))
+        && ss->staticEval != VALUE_NONE
+        && (bestValue > ss->staticEval) == bool(bestMove))
+    {
+      auto bonus = std::clamp(int(bestValue - ss->staticEval) / 8,
+                              -CORRECTION_HISTORY_LIMIT / 4,
+                              CORRECTION_HISTORY_LIMIT / 4);
+      update_correction_history(pos, ss, *this, bonus / 2);
+    }
+
     // Save gathered info in transposition table. The static evaluation
     // is saved as it was before adjustment by correction history.
     ttWriter.write(posKey, value_to_tt(bestValue, ss->ply), pvHit,
