@@ -153,6 +153,8 @@ using ContinuationHistory = MultiArray<PieceToHistory, PIECE_NB, SQUARE_NB>;
 using PawnHistory =
   DynStats<AtomicStats<std::int16_t, 8192, PIECE_NB, SQUARE_NB>, PAWN_HISTORY_BASE_SIZE>;
 
+using KingRelativeHistory = Stats<std::int16_t, 8192, 16, PIECE_NB, SQUARE_NB>;
+
 // Correction histories record differences between the static evaluation of
 // positions and their search score. It is used to improve the static evaluation
 // used by some search heuristics.
@@ -267,6 +269,10 @@ struct SharedHistories {
    private:
     size_t sizeMinus1, pawnHistSizeMinus1;
 };
+
+inline int king_bucket(Square ksq) {
+  return (file_of(ksq) / 2) * 4 + rank_of(ksq) / 2;
+}
 
 }  // namespace Stockfish
 
