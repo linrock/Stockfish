@@ -1742,7 +1742,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta)
       auto bonus = std::clamp(int(bestValue - ss->staticEval) / 8,
                               -CORRECTION_HISTORY_LIMIT / 4,
                               CORRECTION_HISTORY_LIMIT / 4);
-      update_correction_history(pos, ss, *this, bonus / 2);
+      update_correction_history(pos, ss, *this, bonus);
     }
 
     // Save gathered info in transposition table. The static evaluation
