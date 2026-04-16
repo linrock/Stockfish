@@ -715,13 +715,17 @@ void update_accumulator_refresh_cache(Color                                 pers
 #else
     while (removedBB)
     {
-        Square sq = pop_lsb(removedBB);
-        removed.push_back(PSQFeatureSet::make_index(perspective, sq, entry.pieces[sq], ksq));
+        Square    sq    = pop_lsb(removedBB);
+        IndexType index = PSQFeatureSet::make_index(perspective, sq, entry.pieces[sq], ksq);
+        prefetch(&featureTransformer.weights[index * Dimensions]);
+        removed.push_back(index);
     }
     while (addedBB)
     {
-        Square sq = pop_lsb(addedBB);
-        added.push_back(PSQFeatureSet::make_index(perspective, sq, pos.piece_on(sq), ksq));
+        Square    sq    = pop_lsb(addedBB);
+        IndexType index = PSQFeatureSet::make_index(perspective, sq, pos.piece_on(sq), ksq);
+        prefetch(&featureTransformer.weights[index * Dimensions]);
+        added.push_back(index);
     }
 #endif
 
