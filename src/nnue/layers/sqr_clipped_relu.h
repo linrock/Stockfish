@@ -172,6 +172,42 @@ class SqrClippedReLU {
                        ((long long) (input[i]) * input[i]) >> (2 * WeightScaleBitsLocal + 7)));
         }
     }
+
+#if defined(USE_NEON)
+    void propagate_dual(const InputType* input,
+                        OutputType*      squareOutput,
+                        OutputType*      linearOutput) const {
+        static_assert(InputDimensions % 16 == 0);
+        static_assert(WeightScaleBitsLocal >= 5 && WeightScaleBitsLocal <= 8);
+
+        constexpr int SimdShiftAmount = WeightScaleBitsLocal * 2 + 7 - 16;
+        constexpr int NumChunks       = InputDimensions / 16;
+
+        const auto in        = reinterpret_cast<const int32x4_t*>(input);
+        const auto squareOut = reinterpret_cast<int8x16_t*>(squareOutput);
+        const auto linearOut = reinterpret_cast<int8x16_t*>(linearOutput);
+        const int8x16_t zero = vdupq_n_s8(0);
+
+        for (IndexType i = 0; i < NumChunks; ++i)
+        {
+            const int16x8_t words0 =
+              vcombine_s16(vqmovn_s32(in[i * 4 + 0]), vqmovn_s32(in[i * 4 + 1]));
+            const int16x8_t words1 =
+              vcombine_s16(vqmovn_s32(in[i * 4 + 2]), vqmovn_s32(in[i * 4 + 3]));
+
+            const int16x8_t square0 =
+              vshrq_n_s16(vqdmulhq_s16(words0, words0), SimdShiftAmount + 1);
+            const int16x8_t square1 =
+              vshrq_n_s16(vqdmulhq_s16(words1, words1), SimdShiftAmount + 1);
+            squareOut[i] = vcombine_s8(vqmovn_s16(square0), vqmovn_s16(square1));
+
+            const int16x8_t linear0 = vshrq_n_s16(words0, WeightScaleBitsLocal);
+            const int16x8_t linear1 = vshrq_n_s16(words1, WeightScaleBitsLocal);
+            linearOut[i] =
+              vmaxq_s8(vcombine_s8(vqmovn_s16(linear0), vqmovn_s16(linear1)), zero);
+        }
+    }
+#endif
 };
 
 }  // namespace Stockfish::Eval::NNUE::Layers
