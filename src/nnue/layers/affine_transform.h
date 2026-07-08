@@ -255,7 +255,9 @@ class AffineTransform {
             constexpr IndexType NumChunks = ceil_to_multiple<IndexType>(InputDimensions, 8) / 4;
             constexpr IndexType NumAccums = OutputDimensions / OutputSimdWidth;
 
-    #if defined(USE_VNNI)
+    #if defined(USE_AVX512) && defined(USE_VNNI)
+            constexpr IndexType NumRegs = 4 * NumAccums;
+    #elif defined(USE_VNNI)
             constexpr IndexType NumRegs = 2 * NumAccums;
     #else
             constexpr IndexType NumRegs = NumAccums;
@@ -269,7 +271,35 @@ class AffineTransform {
                 acc[k] = vec_set_32(0);
 
             IndexType i = 0;
-    #if defined(USE_VNNI)
+    #if defined(USE_AVX512) && defined(USE_VNNI)
+            for (; i + 3 < NumChunks; i += 4)
+            {
+                const vec_t in0 = vec_set_32(load_as<i32>(input + i * sizeof(i32)));
+                const vec_t in1 = vec_set_32(load_as<i32>(input + (i + 1) * sizeof(i32)));
+                const vec_t in2 = vec_set_32(load_as<i32>(input + (i + 2) * sizeof(i32)));
+                const vec_t in3 = vec_set_32(load_as<i32>(input + (i + 3) * sizeof(i32)));
+                const auto  col0 =
+                  reinterpret_cast<const vec_t*>(&weights[i * OutputDimensions * 4]);
+                const auto col1 =
+                  reinterpret_cast<const vec_t*>(&weights[(i + 1) * OutputDimensions * 4]);
+                const auto col2 =
+                  reinterpret_cast<const vec_t*>(&weights[(i + 2) * OutputDimensions * 4]);
+                const auto col3 =
+                  reinterpret_cast<const vec_t*>(&weights[(i + 3) * OutputDimensions * 4]);
+
+                for (IndexType k = 0; k < NumAccums; ++k)
+                {
+                    vec_add_dpbusd_32(acc[k], in0, col0[k]);
+                    vec_add_dpbusd_32(acc[k + NumAccums], in1, col1[k]);
+                    vec_add_dpbusd_32(acc[k + 2 * NumAccums], in2, col2[k]);
+                    vec_add_dpbusd_32(acc[k + 3 * NumAccums], in3, col3[k]);
+                }
+            }
+
+            for (IndexType k = 0; k < NumAccums; ++k)
+                acc[k] = vec_add_32(vec_add_32(acc[k], acc[k + NumAccums]),
+                                    vec_add_32(acc[k + 2 * NumAccums], acc[k + 3 * NumAccums]));
+    #elif defined(USE_VNNI)
             for (; i < NumChunks; i += 2)
             {
                 const vec_t in0 = vec_set_32(load_as<i32>(input + i * sizeof(i32)));
@@ -295,12 +325,12 @@ class AffineTransform {
                 const auto  col0 =
                   reinterpret_cast<const vec_t*>(&weights[i * OutputDimensions * 4]);
 
-                for (IndexType k = 0; k < NumRegs; ++k)
+                for (IndexType k = 0; k < NumAccums; ++k)
                     vec_add_dpbusd_32(acc[k], in0, col0[k]);
             }
 
             vec_t* outptr = reinterpret_cast<vec_t*>(output);
-            for (IndexType k = 0; k < NumRegs; ++k)
+            for (IndexType k = 0; k < NumAccums; ++k)
                 outptr[k] = acc[k];
 
     #undef vec_set_32
