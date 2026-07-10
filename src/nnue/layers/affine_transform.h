@@ -172,7 +172,7 @@ class AffineTransform {
     static constexpr IndexType get_weight_index_scrambled(IndexType i) {
         IndexType inputIndex = i % PaddedInputDimensions;
 
-#if defined(USE_AVX2)
+#if defined(USE_AVX2_PAIR_ACTIVATIONS)
         if constexpr (ScrambledInput)
         {
             // AVX2 packs operate independently on 128-bit lanes. Keep their interleaved output
