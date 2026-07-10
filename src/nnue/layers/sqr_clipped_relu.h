@@ -67,7 +67,7 @@ class SqrClippedReLU {
         return h;
     }
 
-#if defined(USE_AVX2)
+#if defined(USE_AVX2_PAIR_ACTIVATIONS)
     // Produce the squared and linear clipped activations together, sharing the input loads and
     // the initial signed 32-to-16-bit saturating packs.
     void propagate_pair(const InputType* input, OutputType* squared, OutputType* clipped) const {
