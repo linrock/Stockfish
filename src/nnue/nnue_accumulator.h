@@ -90,7 +90,7 @@ struct AccumulatorCaches {
 };
 
 
-struct AccumulatorState: public Accumulator {
+struct AccumulatorDelta {
     DirtyPiece   dirtyPiece;
     DirtyThreats dirtyThreats;
 };
@@ -99,7 +99,7 @@ class AccumulatorStack {
    public:
     static constexpr usize MaxSize = MAX_PLY + 1;
 
-    [[nodiscard]] const AccumulatorState& latest() const noexcept;
+    [[nodiscard]] const Accumulator& latest() const noexcept;
 
     void                                  reset() noexcept;
     std::pair<DirtyPiece&, DirtyThreats&> push() noexcept;
@@ -111,7 +111,7 @@ class AccumulatorStack {
                   [[maybe_unused]] AccumulatorCaches& cache) noexcept;
 
    private:
-    [[nodiscard]] AccumulatorState& mut_latest() noexcept;
+    [[nodiscard]] Accumulator& mut_latest() noexcept;
 
     void evaluate_side(Color                     perspective,
                        const Position&           pos,
@@ -131,7 +131,8 @@ class AccumulatorStack {
                                      const FeatureTransformer& featureTransformer,
                                      const usize               end) noexcept;
 
-    std::array<AccumulatorState, MaxSize> accumulators;
+    std::array<Accumulator, MaxSize>      accumulators;
+    std::array<AccumulatorDelta, MaxSize> deltas;
     usize                                 size = 1;
 };
 

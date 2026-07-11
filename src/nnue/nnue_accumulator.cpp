@@ -40,34 +40,36 @@ template<bool Forward>
 void update_accumulator_incremental(Color                     perspective,
                                     const FeatureTransformer& featureTransformer,
                                     const Square              ksq,
-                                    AccumulatorState&         target_state,
-                                    const AccumulatorState&   computed);
+                                    Accumulator&              target,
+                                    const Accumulator&        computed,
+                                    const AccumulatorDelta&   delta);
 
 void update_accumulator_refresh_cache(Color                     perspective,
                                       const FeatureTransformer& featureTransformer,
                                       const Position&           pos,
-                                      AccumulatorState&         accumulatorState,
+                                      Accumulator&              accumulator,
                                       AccumulatorCaches&        cache);
 }
 
-const AccumulatorState& AccumulatorStack::latest() const noexcept { return accumulators[size - 1]; }
+const Accumulator& AccumulatorStack::latest() const noexcept { return accumulators[size - 1]; }
 
-AccumulatorState& AccumulatorStack::mut_latest() noexcept { return accumulators[size - 1]; }
+Accumulator& AccumulatorStack::mut_latest() noexcept { return accumulators[size - 1]; }
 
 void AccumulatorStack::reset() noexcept {
-    accumulators[0].dirtyPiece = {};
-    new (&accumulators[0].dirtyThreats) DirtyThreats;
+    deltas[0].dirtyPiece = {};
+    new (&deltas[0].dirtyThreats) DirtyThreats;
     accumulators[0].computed.fill(false);
     size = 1;
 }
 
 std::pair<DirtyPiece&, DirtyThreats&> AccumulatorStack::push() noexcept {
     assert(size < MaxSize);
-    auto& st = accumulators[size];
-    st.computed.fill(false);
-    new (&st.dirtyThreats) DirtyThreats;
+    auto& accumulator = accumulators[size];
+    auto& delta       = deltas[size];
+    accumulator.computed.fill(false);
+    new (&delta.dirtyThreats) DirtyThreats;
     size++;
-    return {st.dirtyPiece, st.dirtyThreats};
+    return {delta.dirtyPiece, delta.dirtyThreats};
 }
 
 void AccumulatorStack::pop() noexcept {
@@ -111,7 +113,7 @@ usize AccumulatorStack::find_last_usable_accumulator(Color perspective) const no
 
         // Threat feature set refreshes require a king move across the center, i.e.,
         // a subset of halfka refreshes
-        if (PSQFeatureSet::requires_refresh(accumulators[curr_idx].dirtyPiece, perspective))
+        if (PSQFeatureSet::requires_refresh(deltas[curr_idx].dirtyPiece, perspective))
             return curr_idx;
     }
 
@@ -130,7 +132,8 @@ void AccumulatorStack::forward_update_incremental(Color                     pers
 
     for (usize next = begin + 1; next < size; next++)
         update_accumulator_incremental<true>(perspective, featureTransformer, ksq,
-                                             accumulators[next], accumulators[next - 1]);
+                                             accumulators[next], accumulators[next - 1],
+                                             deltas[next]);
 
     assert(latest().computed[perspective]);
 }
@@ -148,7 +151,8 @@ void AccumulatorStack::backward_update_incremental(Color                     per
 
     for (i64 next = i64(size) - 2; next >= i64(end); next--)
         update_accumulator_incremental<false>(perspective, featureTransformer, ksq,
-                                              accumulators[next], accumulators[next + 1]);
+                                              accumulators[next], accumulators[next + 1],
+                                              deltas[next + 1]);
 
     assert(accumulators[end].computed[perspective]);
 }
@@ -157,8 +161,8 @@ namespace {
 
 void apply_combined(Color                              perspective,
                     const FeatureTransformer&          featureTransformer,
-                    const AccumulatorState&            from,
-                    AccumulatorState&                  to,
+                    const Accumulator&                 from,
+                    Accumulator&                       to,
                     const PSQFeatureSet::IndexList&    psqAdded,
                     const PSQFeatureSet::IndexList&    psqRemoved,
                     const ThreatFeatureSet::IndexList& thrAdded,
@@ -394,11 +398,12 @@ template<bool Forward>
 void update_accumulator_incremental(Color                     perspective,
                                     const FeatureTransformer& featureTransformer,
                                     const Square              ksq,
-                                    AccumulatorState&         target_state,
-                                    const AccumulatorState&   computed) {
+                                    Accumulator&              target,
+                                    const Accumulator&        computed,
+                                    const AccumulatorDelta&   delta) {
 
     assert(computed.computed[perspective]);
-    assert(!target_state.computed[perspective]);
+    assert(!target.computed[perspective]);
 
     // The size must be enough to contain the largest possible update.
     // That might depend on the feature set and generally relies on the
@@ -407,29 +412,28 @@ void update_accumulator_incremental(Color                     perspective,
     PSQFeatureSet::IndexList    psqRemoved, psqAdded;
     ThreatFeatureSet::IndexList thrRemoved, thrAdded;
 
-    const auto& dirtyPiece   = Forward ? target_state.dirtyPiece : computed.dirtyPiece;
-    const auto& dirtyThreats = Forward ? target_state.dirtyThreats : computed.dirtyThreats;
-
     const auto* pfBase   = &featureTransformer.threatWeights[0];
     IndexType   pfStride = FeatureTransformer::OutputDimensions;
 
     if constexpr (Forward)
     {
-        ThreatFeatureSet::append_changed_indices(perspective, ksq, dirtyThreats, thrRemoved,
+        ThreatFeatureSet::append_changed_indices(perspective, ksq, delta.dirtyThreats, thrRemoved,
                                                  thrAdded, pfBase, pfStride);
-        PSQFeatureSet::append_changed_indices(perspective, ksq, dirtyPiece, psqRemoved, psqAdded);
+        PSQFeatureSet::append_changed_indices(perspective, ksq, delta.dirtyPiece, psqRemoved,
+                                              psqAdded);
     }
     else
     {
-        ThreatFeatureSet::append_changed_indices(perspective, ksq, dirtyThreats, thrAdded,
+        ThreatFeatureSet::append_changed_indices(perspective, ksq, delta.dirtyThreats, thrAdded,
                                                  thrRemoved, pfBase, pfStride);
-        PSQFeatureSet::append_changed_indices(perspective, ksq, dirtyPiece, psqAdded, psqRemoved);
+        PSQFeatureSet::append_changed_indices(perspective, ksq, delta.dirtyPiece, psqAdded,
+                                              psqRemoved);
     }
 
-    apply_combined(perspective, featureTransformer, computed, target_state, psqAdded, psqRemoved,
+    apply_combined(perspective, featureTransformer, computed, target, psqAdded, psqRemoved,
                    thrAdded, thrRemoved);
 
-    target_state.computed[perspective] = true;
+    target.computed[perspective] = true;
 }
 
 Bitboard get_changed_pieces(const std::array<Piece, SQUARE_NB>& oldPieces,
@@ -540,7 +544,7 @@ Bitboard get_changed_pieces(const std::array<Piece, SQUARE_NB>& oldPieces,
 void update_accumulator_refresh_cache(Color                     perspective,
                                       const FeatureTransformer& featureTransformer,
                                       const Position&           pos,
-                                      AccumulatorState&         accumulator,
+                                      Accumulator&              accumulator,
                                       AccumulatorCaches&        cache) {
     constexpr auto Dimensions = FeatureTransformer::OutputDimensions;
 
