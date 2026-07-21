@@ -66,6 +66,9 @@ struct AccumulatorCaches {
         std::array<PSQTWeightType, PSQTBuckets> psqtAccumulation;
         std::array<Piece, SQUARE_NB>            pieces;
         Bitboard                                pieceBB;
+    #ifdef USE_NEON
+        std::array<Bitboard, COLOR_NB>          pawnBB;
+    #endif
 
         // To initialize a refresh entry, we set all its bitboards empty,
         // so we put the biases in the accumulation, without any weights on top
