@@ -544,7 +544,7 @@ Bitboard get_changed_pieces(const std::array<Piece, SQUARE_NB>& oldPieces,
 #endif
 }
 
-// On NEON, HalfKA and pawn-pair data come from the Finny table entry, while
+// On VECTOR, HalfKA and pawn-pair data come from the Finny table entry, while
 // the threats are built from the active threat features.
 void update_accumulator_refresh_cache(Color                     perspective,
                                       const FeatureTransformer& featureTransformer,
@@ -555,12 +555,12 @@ void update_accumulator_refresh_cache(Color                     perspective,
 
     using Tiling [[maybe_unused]] = SIMDTiling<Dimensions, Dimensions, PSQTBuckets>;
 
-    const Square              ksq   = pos.square<KING>(perspective);
-    auto&                     entry = cache[ksq][perspective];
-    PSQFeatureSet::IndexList  removed, added;
- #ifdef USE_NEON
+    const Square             ksq   = pos.square<KING>(perspective);
+    auto&                    entry = cache[ksq][perspective];
+    PSQFeatureSet::IndexList removed, added;
+#ifdef VECTOR
     PairFeatureSet::IndexList ppRemoved, ppAdded;
- #endif
+#endif
 
     const Bitboard changedBB = get_changed_pieces(entry.pieces, pos.piece_array());
     Bitboard       removedBB = changedBB & entry.pieceBB;
@@ -582,23 +582,23 @@ void update_accumulator_refresh_cache(Color                     perspective,
     }
 #endif
 
- #ifdef USE_NEON
+#ifdef VECTOR
     const DirtyPawnPairs dirtyPawnPairs{{entry.pawnBB[WHITE], entry.pawnBB[BLACK]},
                                         {pos.pieces(WHITE, PAWN), pos.pieces(BLACK, PAWN)}};
     PairFeatureSet::append_changed_indices(perspective, ksq, dirtyPawnPairs, ppRemoved, ppAdded);
- #endif
+#endif
 
     entry.pieceBB = pos.pieces();
     entry.pieces  = pos.piece_array();
- #ifdef USE_NEON
-    entry.pawnBB  = {dirtyPawnPairs.after[WHITE], dirtyPawnPairs.after[BLACK]};
- #endif
+#ifdef VECTOR
+    entry.pawnBB = {dirtyPawnPairs.after[WHITE], dirtyPawnPairs.after[BLACK]};
+#endif
 
     ThreatFeatureSet::IndexList active;
     ThreatFeatureSet::append_active_indices(perspective, pos, active);
- #ifndef USE_NEON
+#ifndef VECTOR
     PairFeatureSet::append_active_indices(perspective, pos, active);
- #endif
+#endif
 
     accumulator.computed[perspective] = true;
 
@@ -633,30 +633,38 @@ void update_accumulator_refresh_cache(Color                     perspective,
                 acc[k] = vec_add_16(acc[k], column[k]);
         }
 
-    #ifdef USE_NEON
         for (int i = 0; i < ppRemoved.ssize(); ++i)
         {
             auto* column = reinterpret_cast<const vec_i8_t*>(
               &threatAndPpWeights[ppRemoved[i] * Dimensions + tileOff]);
 
+    #ifdef USE_NEON
             for (IndexType k = 0; k < Tiling::NumRegs; k += 2)
             {
                 acc[k]     = vsubw_s8(acc[k], vget_low_s8(column[k / 2]));
                 acc[k + 1] = vsubw_high_s8(acc[k + 1], column[k / 2]);
             }
+    #else
+            for (IndexType k = 0; k < Tiling::NumRegs; ++k)
+                acc[k] = vec_sub_16(acc[k], vec_convert_8_16(column[k]));
+    #endif
         }
         for (int i = 0; i < ppAdded.ssize(); ++i)
         {
             auto* column = reinterpret_cast<const vec_i8_t*>(
               &threatAndPpWeights[ppAdded[i] * Dimensions + tileOff]);
 
+    #ifdef USE_NEON
             for (IndexType k = 0; k < Tiling::NumRegs; k += 2)
             {
                 acc[k]     = vaddw_s8(acc[k], vget_low_s8(column[k / 2]));
                 acc[k + 1] = vaddw_high_s8(acc[k + 1], column[k / 2]);
             }
-        }
+    #else
+            for (IndexType k = 0; k < Tiling::NumRegs; ++k)
+                acc[k] = vec_add_16(acc[k], vec_convert_8_16(column[k]));
     #endif
+        }
 
         for (IndexType k = 0; k < Tiling::NumRegs; k++)
             vec_store(&entryTile[k], acc[k]);
@@ -707,7 +715,6 @@ void update_accumulator_refresh_cache(Color                     perspective,
                 psqt[k] = vec_add_psqt_32(psqt[k], columnPsqt[k]);
         }
 
-    #ifdef USE_NEON
         for (int i = 0; i < ppRemoved.ssize(); ++i)
         {
             auto* columnPsqt = reinterpret_cast<const psqt_vec_t*>(
@@ -722,7 +729,6 @@ void update_accumulator_refresh_cache(Color                     perspective,
             for (usize k = 0; k < Tiling::NumPsqtRegs; ++k)
                 psqt[k] = vec_add_psqt_32(psqt[k], columnPsqt[k]);
         }
-    #endif
 
         for (IndexType k = 0; k < Tiling::NumPsqtRegs; ++k)
             vec_store_psqt(&entryTilePsqt[k], psqt[k]);

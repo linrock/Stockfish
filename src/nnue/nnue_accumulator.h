@@ -29,6 +29,7 @@
 #include "../misc.h"
 #include "nnue_architecture.h"
 #include "nnue_common.h"
+#include "simd.h"
 
 namespace Stockfish {
 class Position;
@@ -66,7 +67,7 @@ struct AccumulatorCaches {
         std::array<PSQTWeightType, PSQTBuckets> psqtAccumulation;
         std::array<Piece, SQUARE_NB>            pieces;
         Bitboard                                pieceBB;
-    #ifdef USE_NEON
+    #ifdef VECTOR
         std::array<Bitboard, COLOR_NB>          pawnBB;
     #endif
 
