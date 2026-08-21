@@ -1822,7 +1822,10 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta)
                 continue;
 
             // Do not search moves with bad enough SEE values
-            if (!pos.see_ge(move, -74))
+            int captureHist = captureHistory[pos.moved_piece(move)][move.to_sq()]
+                                            [type_of(pos.piece_on(move.to_sq()))];
+            int adjustment  = std::clamp((captureHist + 742) / 128, -64, 64);
+            if (!pos.see_ge(move, -74 - adjustment))
                 continue;
         }
 
