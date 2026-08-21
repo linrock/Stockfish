@@ -764,6 +764,7 @@ Value Search::Worker::search(
     Move  move, excludedMove, bestMove;
     Depth extension, newDepth;
     Value bestValue, value, eval, maxValue, probCutBeta;
+    Value singularValue = VALUE_NONE, ttMoveValue = VALUE_NONE;
     bool  givesCheck, improving, priorCapture, opponentWorsening;
     bool  capture, ttCapture;
     int   priorReduction;
@@ -1266,6 +1267,7 @@ moves_loop:  // When in check, search starts here
             ss->excludedMove = move;
             value = search<NonPV>(pos, ss, singularBeta - 1, singularBeta, singularDepth, cutNode);
             ss->excludedMove = Move::none();
+            singularValue    = value;
 
             if (value < singularBeta)
             {
@@ -1360,6 +1362,10 @@ moves_loop:  // When in check, search starts here
         // Decrease/increase reduction for moves with a good/bad history
         r -= ss->statScore * 439 / 4096;
 
+        if (is_valid(ttMoveValue) && is_valid(singularValue) && !is_decisive(ttMoveValue)
+            && !is_decisive(singularValue))
+            r += std::clamp(4 * (ttMoveValue - singularValue - 160), 0, 1024);
+
         if (!capture && !is_decisive(alpha))
             r += 3 * std::clamp(alpha - eval, -64, 96);
 
@@ -1440,6 +1446,9 @@ moves_loop:  // When in check, search starts here
         // best move, principal variation nor transposition table.
         if (threads.stop.load(std::memory_order_relaxed))
             return VALUE_ZERO;
+
+        if (move == ttData.move)
+            ttMoveValue = value;
 
         if (rootNode)
         {
