@@ -1873,6 +1873,11 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta)
             bestValue = VALUE_DRAW;
     }
 
+    if (bestValue >= beta && bestMove && pos.capture_stage(bestMove))
+        captureHistory[pos.moved_piece(bestMove)][bestMove.to_sq()]
+                      [type_of(pos.piece_on(bestMove.to_sq()))]
+          << 48;
+
     if (!is_decisive(bestValue) && bestValue > beta)
         bestValue = (462 * bestValue + 562 * beta) / 1024;
 
