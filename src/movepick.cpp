@@ -209,6 +209,11 @@ ExtMove* MovePicker::score(const MoveList<Type>& ml) {
         threatByLesser[KING]  = 0;
     }
 
+    [[maybe_unused]] const auto* lphRow =
+      (Type == QUIETS && ply < LOW_PLY_HISTORY_SIZE) ? &(*lowPlyHistory)[ply] : nullptr;
+    [[maybe_unused]] const int lphWeight =
+      (Type == QUIETS && ply < LOW_PLY_HISTORY_SIZE) ? 120 / (1 + ply) : 0;
+
     ExtMove* it = cur;
     for (auto move : ml)
     {
@@ -247,8 +252,8 @@ ExtMove* MovePicker::score(const MoveList<Type>& ml) {
             value += PieceValue[pt] * v;
 
 
-            if (ply < LOW_PLY_HISTORY_SIZE)
-                value += 8 * (*lowPlyHistory)[ply][m.raw()] / (1 + ply);
+            if (lphRow)
+                value += lphWeight * (*lphRow)[m.raw()] / 15;
 
             m.value = value;
         }
