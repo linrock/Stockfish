@@ -1236,15 +1236,27 @@ void Position::update_piece_threats(Piece               pc,
         return;
     }
 
-    const Bitboard threatTargets = pt == PAWN                 ? pieces(KNIGHT, ROOK)
-                                 : pt == BISHOP || pt == ROOK ? pieces(PAWN, KNIGHT, BISHOP, ROOK)
-                                                              : occupiedNoK;
-    Bitboard       threatened    = (pt == BISHOP  ? bAttacks
-                                    : pt == ROOK  ? rAttacks
-                                    : pt == QUEEN ? sliderAttacks
-                                    : pt == PAWN  ? PseudoAttacks[color_of(pc)][s]
-                                                  : PseudoAttacks[pt][s])
-                        & threatTargets;
+    Bitboard threatened;
+    switch (pt)
+    {
+    case PAWN :
+        threatened = PseudoAttacks[color_of(pc)][s] & pieces(KNIGHT, ROOK);
+        break;
+    case KNIGHT :
+        threatened = PseudoAttacks[KNIGHT][s] & occupiedNoK;
+        break;
+    case BISHOP :
+        threatened = bAttacks & pieces(PAWN, KNIGHT, BISHOP, ROOK);
+        break;
+    case ROOK :
+        threatened = rAttacks & pieces(PAWN, KNIGHT, BISHOP, ROOK);
+        break;
+    case QUEEN :
+    default :
+        assert(pt == QUEEN);
+        threatened = sliderAttacks & occupiedNoK;
+        break;
+    }
     Bitboard incomingThreats = PseudoAttacks[KNIGHT][s] & pieces(KNIGHT);
 
     if (pt == KNIGHT || pt == ROOK)
