@@ -84,31 +84,15 @@ constexpr auto make_piece_indices_piece() {
 }
 
 constexpr auto index_lut2_array() {
-    constexpr auto KNIGHT_ATTACKS = make_piece_indices_type<PieceType::KNIGHT>();
-    constexpr auto BISHOP_ATTACKS = make_piece_indices_type<PieceType::BISHOP>();
-    constexpr auto ROOK_ATTACKS   = make_piece_indices_type<PieceType::ROOK>();
-    constexpr auto QUEEN_ATTACKS  = make_piece_indices_type<PieceType::QUEEN>();
-    constexpr auto KING_ATTACKS   = make_piece_indices_type<PieceType::KING>();
+    std::array<std::array<std::array<u8, SQUARE_NB>, SQUARE_NB>, PIECE_TYPE_NB> indices{};
 
-    std::array<std::array<std::array<u8, SQUARE_NB>, SQUARE_NB>, PIECE_NB> indices{};
-
+    indices[0]      = make_piece_indices_piece<B_PAWN>();
     indices[W_PAWN] = make_piece_indices_piece<W_PAWN>();
-    indices[B_PAWN] = make_piece_indices_piece<B_PAWN>();
-
-    indices[W_KNIGHT] = KNIGHT_ATTACKS;
-    indices[B_KNIGHT] = KNIGHT_ATTACKS;
-
-    indices[W_BISHOP] = BISHOP_ATTACKS;
-    indices[B_BISHOP] = BISHOP_ATTACKS;
-
-    indices[W_ROOK] = ROOK_ATTACKS;
-    indices[B_ROOK] = ROOK_ATTACKS;
-
-    indices[W_QUEEN] = QUEEN_ATTACKS;
-    indices[B_QUEEN] = QUEEN_ATTACKS;
-
-    indices[W_KING] = KING_ATTACKS;
-    indices[B_KING] = KING_ATTACKS;
+    indices[KNIGHT] = make_piece_indices_type<PieceType::KNIGHT>();
+    indices[BISHOP] = make_piece_indices_type<PieceType::BISHOP>();
+    indices[ROOK]   = make_piece_indices_type<PieceType::ROOK>();
+    indices[QUEEN]  = make_piece_indices_type<PieceType::QUEEN>();
+    indices[KING]   = make_piece_indices_type<PieceType::KING>();
 
     return indices;
 }
@@ -184,9 +168,9 @@ constexpr auto init_index_luts() {
 // as offsets[attacker][from]
 
 // [attacker][attacked][from < to]
-constexpr auto index_lut1 = init_index_luts();
+alignas(64) constexpr auto index_lut1 = init_index_luts();
 // [attacker][from][to]
-constexpr auto index_lut2 = index_lut2_array();
+alignas(64) constexpr auto index_lut2 = index_lut2_array();
 
 // Index of a feature for a given king position and another piece on some square
 sf_always_inline IndexType FullThreats::make_index(
@@ -198,10 +182,11 @@ sf_always_inline IndexType FullThreats::make_index(
     i8       swap              = 8 * perspective;
     unsigned attacker_oriented = attacker ^ swap;
     unsigned attacked_oriented = attacked ^ swap;
+    unsigned geom              = (attacker_oriented & 7) - (attacker_oriented == B_PAWN);
 
     return index_lut1[attacker_oriented][attacked_oriented][from_oriented < to_oriented]
          + offsets[attacker_oriented][from_oriented]
-         + index_lut2[attacker_oriented][from_oriented][to_oriented];
+         + index_lut2[geom][from_oriented][to_oriented];
 }
 
 // Get a list of indices for active features in ascending order
