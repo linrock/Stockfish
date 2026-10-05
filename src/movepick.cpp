@@ -203,11 +203,18 @@ ExtMove* MovePicker::score(const MoveList<Type>& ml) {
     {
         threatByLesser[PAWN]   = 0;
         threatByLesser[KNIGHT] = threatByLesser[BISHOP] = pos.attacks_by<PAWN>(~us);
-        threatByLesser[ROOK] =
-          pos.attacks_by<KNIGHT>(~us) | pos.attacks_by<BISHOP>(~us) | threatByLesser[KNIGHT];
-        threatByLesser[QUEEN] = pos.attacks_by<ROOK>(~us) | threatByLesser[ROOK];
+        if (pos.pieces(us, ROOK, QUEEN))
+        {
+            threatByLesser[ROOK] =
+              pos.attacks_by<KNIGHT>(~us) | pos.attacks_by<BISHOP>(~us) | threatByLesser[KNIGHT];
+            if (pos.pieces(us, QUEEN))
+                threatByLesser[QUEEN] = pos.attacks_by<ROOK>(~us) | threatByLesser[ROOK];
+        }
         threatByLesser[KING]  = 0;
     }
+
+    [[maybe_unused]] const auto* pawnHist =
+      Type == QUIETS ? &sharedHistory->pawn_entry(pos) : nullptr;
 
     ExtMove* it = cur;
     for (auto move : ml)
@@ -231,7 +238,7 @@ ExtMove* MovePicker::score(const MoveList<Type>& ml) {
 
             // histories
             int value = 2 * (*mainHistory)[us][m.raw()];
-            value += 2 * sharedHistory->pawn_entry(pos)[pc][to];
+            value += 2 * (*pawnHist)[pc][to];
             value += (*continuationHistory[0])[pc][to];
             value += (*continuationHistory[1])[pc][to];
             value += (*continuationHistory[2])[pc][to];
