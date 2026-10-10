@@ -41,8 +41,8 @@ static inline __m256i pp_idx_epi16(__m256i a, __m256i b) {
     const __m256i hi   = _mm256_max_epu16(a, b);
     const __m256i lo   = _mm256_min_epu16(a, b);
     const __m256i prod = _mm256_mullo_epi16(hi, _mm256_sub_epi16(hi, _mm256_set1_epi16(1)));
-    return _mm256_add_epi16(_mm256_add_epi16(_mm256_srli_epi16(prod, 1), lo),
-                            _mm256_set1_epi16(i16(PP_3Wide::IndexBase)));
+    return _mm256_add_epi16(_mm256_srli_epi16(prod, 1),
+                            _mm256_add_epi16(lo, _mm256_set1_epi16(i16(PP_3Wide::IndexBase))));
 }
 #endif
 
@@ -71,6 +71,34 @@ void PP_3Wide::append_active_indices(Color perspective, const Position& pos, Ind
     const Bitboard white = pos.pieces(WHITE, PAWN);
     const Bitboard black = pos.pieces(BLACK, PAWN);
 
+#ifdef USE_AVX512ICL
+    const u8       orientation = u8(FullThreats::OrientTBL[ksq]) ^ u8(56 * perspective);
+    const __m512i  adjusted =
+      _mm512_sub_epi8(_mm512_xor_si512(AllSquares, _mm512_set1_epi8(orientation)),
+                      _mm512_set1_epi8(8));
+    const Bitboard friendly = perspective == WHITE ? white : black;
+    const Bitboard enemy    = perspective == WHITE ? black : white;
+    const __m512i  ids      = _mm512_mask_blend_epi8(
+      friendly, _mm512_add_epi8(adjusted, _mm512_set1_epi8(48)), adjusted);
+
+    for (Bitboard u = white | black; u;)
+    {
+        const Square   a        = pop_lsb(u);
+        const Bitboard partners = pawn_pair_bb(a) & u;
+        const int      n        = popcount(partners);
+        if (!n)
+            continue;
+
+        const u16     colorOff = (enemy & a) ? 48 : 0;
+        const u16     aId      = u16(((u8(a) ^ orientation) - 8) + colorOff);
+        const __m256i pids     = _mm256_cvtepu8_epi16(
+          _mm512_castsi512_si128(_mm512_maskz_compress_epi8(partners, ids)));
+        const __m256i feats = pp_idx_epi16(_mm256_set1_epi16(aId), pids);
+
+        u16* w = active.make_space(n);
+        _mm256_storeu_epi16(w, feats);
+    }
+#else
     Bitboard bb = white;
     while (bb)
     {
@@ -90,6 +118,7 @@ void PP_3Wide::append_active_indices(Color perspective, const Position& pos, Ind
         for (Bitboard bbk = band & bb; bbk;)
             active.push_back(make_index(perspective, BLACK, from, pop_lsb(bbk), BLACK, ksq));
     }
+#endif
 }
 
 void PP_3Wide::append_changed_indices(Color                                    perspective,
