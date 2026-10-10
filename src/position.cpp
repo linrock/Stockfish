@@ -1155,13 +1155,12 @@ inline void add_dirty_threat(DirtyThreats* const dts,
 // Given a DirtyThreat template and bit offsets to insert the piece type and square, write the threats
 // present at the given bitboard.
 template<int SqShift, int PcShift>
-void write_multiple_dirties(const Position& p,
+void write_multiple_dirties(const __m512i   board,
                             Bitboard        mask,
                             DirtyThreat     dt_template,
                             DirtyThreats*   dts) {
     static_assert(sizeof(DirtyThreat) == 4);
 
-    const __m512i board    = _mm512_loadu_si512(p.piece_array().data());
     const int     dt_count = popcount(mask);
     assert(dt_count <= 16);
 
@@ -1170,14 +1169,14 @@ void write_multiple_dirties(const Position& p,
 
     // Extract the list of squares and upconvert to 32 bits. There are never more than 16
     // incoming threats so this is sufficient.
-    __m512i threat_squares = _mm512_maskz_compress_epi8(mask, AllSquares);
-    threat_squares         = _mm512_cvtepi8_epi32(_mm512_castsi512_si128(threat_squares));
-
+    __m512i threat_squares =
+      _mm512_cvtepu8_epi32(_mm512_castsi512_si128(_mm512_maskz_compress_epi8(mask, AllSquares)));
     __m512i threat_pieces =
-      _mm512_maskz_permutexvar_epi8(0x1111111111111111ULL, threat_squares, board);
+      _mm512_cvtepu8_epi32(_mm512_castsi512_si128(_mm512_maskz_compress_epi8(mask, board)));
 
     // Shift the piece and square into place
-    threat_squares = _mm512_slli_epi32(threat_squares, SqShift);
+    if constexpr (SqShift != 0)
+        threat_squares = _mm512_slli_epi32(threat_squares, SqShift);
     threat_pieces  = _mm512_slli_epi32(threat_pieces, PcShift);
 
     const __m512i dirties =
@@ -1252,12 +1251,13 @@ void Position::update_piece_threats(Piece               pc,
                          | (attacks_bb(PAWN, s, BLACK) & pieces(WHITE, PAWN));
 
 #ifdef USE_AVX512ICL
+    const __m512i board = _mm512_loadu_si512(piece_array().data());
     write_multiple_dirties<DirtyThreat::ThreatenedSqOffset, DirtyThreat::ThreatenedPcOffset>(
-      *this, threatened, {pc, NO_PIECE, s, Square(0), putPiece}, dts);
+      board, threatened, {pc, NO_PIECE, s, Square(0), putPiece}, dts);
 
     const Bitboard directSliders = pt == QUEEN ? sliders & pieces(QUEEN) : sliders;
     write_multiple_dirties<DirtyThreat::PcSqOffset, DirtyThreat::PcOffset>(
-      *this, directSliders | incomingThreats, {NO_PIECE, pc, Square(0), s, putPiece}, dts);
+      board, directSliders | incomingThreats, {NO_PIECE, pc, Square(0), s, putPiece}, dts);
 
     // For ICL, direct threats were written above
     if constexpr (ComputeRay)
