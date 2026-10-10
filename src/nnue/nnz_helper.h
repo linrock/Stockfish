@@ -32,21 +32,23 @@ struct NNZInfo {
 #if defined(USE_AVX512)
     unsigned count = 0;
     // indices of non-zero chunks
-    u16 nnz[Dimensions / 4];
-
     #ifdef USE_AVX512ICL
+    static_assert(Dimensions / 4 <= 256);
+    alignas(64) u8 nnz[Dimensions / 4 + 64];
+
     alignas(64) static constexpr auto Indices = []() {
-        std::array<std::array<u16, 32>, 2> indices{};
+        std::array<std::array<u8, 64>, 2> indices{};
         for (int i = 0; i < 2; ++i)
-        {
-            indices[i] = {0, 1, 2,  3,  16, 17, 18, 19, 4,  5,  6,  7,  20, 21, 22, 23,
-                          8, 9, 10, 11, 24, 25, 26, 27, 12, 13, 14, 15, 28, 29, 30, 31};
-            for (u16& m : indices[i])
-                m += u16(i * Dimensions / 8);
-        }
+            for (int lane = 0; lane < 4; ++lane)
+                for (int vec = 0; vec < 4; ++vec)
+                    for (int elem = 0; elem < 4; ++elem)
+                        indices[i][lane * 16 + vec * 4 + elem] =
+                          u8(i * Dimensions / 8 + lane * 4 + vec * 16 + elem);
         return indices;
     }();
     #else
+    u16 nnz[Dimensions / 4];
+
     alignas(64) static constexpr auto Indices = []() {
         std::array<std::array<u32, 16>, 2> indices{};
         for (int i = 0; i < 2; ++i)
@@ -70,21 +72,23 @@ struct NNZInfo {
             indices = _mm512_load_si512(&Indices[perspective]);
         }
 
-        void record2(SIMD::vec_t neurons1, SIMD::vec_t neurons2) {
     #if defined(USE_AVX512ICL)
-            const __m512i increment = _mm512_set1_epi16(32);
+        void record4(SIMD::vec_t n0, SIMD::vec_t n1, SIMD::vec_t n2, SIMD::vec_t n3) {
+            const __m512i increment = _mm512_set1_epi8(64);
 
-            // Get a bitmask and gather non zero indices
-            const __m512i   inputV01 = _mm512_packs_epi32(neurons1, neurons2);
-            const __mmask32 nnzMask  = _mm512_test_epi16_mask(inputV01, inputV01);
+            const __m512i   v01     = _mm512_packs_epi32(n0, n1);
+            const __m512i   v23     = _mm512_packs_epi32(n2, n3);
+            const __m512i   v0123   = _mm512_packs_epi16(v01, v23);
+            const __mmask64 nnzMask = _mm512_test_epi8_mask(v0123, v0123);
 
-            // Avoid _mm512_mask_compressstoreu_epi16() as it's 256 uOps on Zen4
-            __m512i nnzIndices = _mm512_maskz_compress_epi16(nnzMask, indices);
+            __m512i nnzIndices = _mm512_maskz_compress_epi8(nnzMask, indices);
             _mm512_storeu_si512(info.nnz + count, nnzIndices);
 
             count += popcount(nnzMask);
-            indices = _mm512_add_epi16(indices, increment);
+            indices = _mm512_add_epi8(indices, increment);
+        }
     #else
+        void record2(SIMD::vec_t neurons1, SIMD::vec_t neurons2) {
             const __m512i increment = _mm512_set1_epi32(16);
 
             for (auto neurons : {neurons1, neurons2})
@@ -97,8 +101,8 @@ struct NNZInfo {
                 count += popcount(nnzMask);
                 indices = _mm512_add_epi32(indices, increment);
             }
-    #endif
         }
+    #endif
 
         ~NNZCursor() { info.count = count; }
     };

@@ -275,10 +275,16 @@ class FeatureTransformer {
         // value left by 7, and perform mulhi, which shifts the product
         // right by 16 bits, then we will net a right shift of 9 bits.
 
-        for (IndexType j = 0; j < NumOutputChunks; j += 2)
+#if defined(USE_AVX512ICL)
+        constexpr IndexType GroupSize = 4;
+#else
+        constexpr IndexType GroupSize = 2;
+#endif
+
+        for (IndexType j = 0; j < NumOutputChunks; j += GroupSize)
         {
-            vec_t packed[2];
-            for (IndexType k = 0; k < 2; ++k)
+            vec_t packed[GroupSize];
+            for (IndexType k = 0; k < GroupSize; ++k)
             {
                 const IndexType i = (j + k) * 2;
 
@@ -330,7 +336,11 @@ class FeatureTransformer {
                 packed[k] = out[j + k] = result;
             }
 
+#if defined(USE_AVX512ICL)
+            cursor.record4(packed[0], packed[1], packed[2], packed[3]);
+#else
             cursor.record2(packed[0], packed[1]);
+#endif
         }
 
 #elif defined(USE_RVV)
