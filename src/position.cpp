@@ -778,12 +778,11 @@ bool Position::gives_check(Move m) const {
 // to a StateInfo object. The move is assumed to be legal.
 // If a pointer to the TT table is passed, the entry for the new position
 // will be prefetched, and likewise for shared history.
-void Position::do_move(Move                      m,
-                       StateInfo&                newSt,
-                       bool                      givesCheck,
-                       Dirties&                  dirties,
-                       const TranspositionTable* tt      = nullptr,
-                       const SharedHistories*    history = nullptr) {
+void Position::do_move(Move                   m,
+                       StateInfo&             newSt,
+                       bool                   givesCheck,
+                       Dirties&               dirties,
+                       const SharedHistories* history) {
 
     assert(m.is_ok());
     assert(&newSt != st);
@@ -968,8 +967,6 @@ void Position::do_move(Move                      m,
             st->minorPieceKey ^= Zobrist::psq[pc][from] ^ Zobrist::psq[pc][to];
     }
 
-    if (tt)
-        prefetch(tt->first_entry(adjust_key50(k)));
     // Update the key with the final value
     st->key = k;
 
