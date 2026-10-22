@@ -356,15 +356,22 @@ Thread* ThreadPool::get_best_thread() const {
     Thread* bestThread = threads.front().get();
     Value   minScore   = VALUE_INFINITE;
 
+    const auto thread_move_score = [](const Search::RootMove& rm) {
+        return rm.averageScore != -VALUE_INFINITE && !rm.is_inexact()
+               ? (rm.score + rm.averageScore) / 2
+               : rm.score;
+    };
+
     std::unordered_map<Move, i64, Move::MoveHash> votes(
       2 * std::min(size(), bestThread->worker->rootMoves.size()));
 
     for (auto&& th : threads)
-        minScore = std::min(minScore, th->worker->rootMoves[0].score);
+        minScore = std::min(minScore, thread_move_score(th->worker->rootMoves[0]));
 
     // Vote according to score, and select the best thread
     for (auto&& th : threads)
-        votes[th->worker->rootMoves[0].pv[0]] += th->worker->rootMoves[0].score - minScore + 14;
+        votes[th->worker->rootMoves[0].pv[0]] +=
+          thread_move_score(th->worker->rootMoves[0]) - minScore + 14;
 
     for (auto&& th : threads)
     {
@@ -373,6 +380,19 @@ Thread* ThreadPool::get_best_thread() const {
 
         const auto bestThreadMoveVote = votes[bestThreadMove.pv[0]];
         const auto newThreadMoveVote  = votes[newThreadMove.pv[0]];
+        const bool newThreadIsExact   = !newThreadMove.is_inexact();
+        const bool bestThreadIsExact  = !bestThreadMove.is_inexact();
+        const auto newThreadScore     = thread_move_score(newThreadMove);
+        const auto bestThreadScore    = thread_move_score(bestThreadMove);
+
+        const bool newThreadMovePreferred =
+          newThreadMoveVote > bestThreadMoveVote
+          || (newThreadMoveVote == bestThreadMoveVote
+              && (newThreadIsExact > bestThreadIsExact
+                  || (newThreadIsExact == bestThreadIsExact
+                      && (newThreadScore > bestThreadScore
+                          || (newThreadScore == bestThreadScore
+                              && newThreadMove.pv.size() > bestThreadMove.pv.size())))));
 
         // Aborted (d1) searches may lead to inexact win (or loss) scores.
         const bool bestThreadDecisive = bestThreadMove.score != -VALUE_INFINITE
@@ -393,11 +413,7 @@ Thread* ThreadPool::get_best_thread() const {
                 bestThread = th.get();
             }
         }
-        else if (newThreadDecisive
-                 || (!is_loss(newThreadMove.score)
-                     && (newThreadMoveVote > bestThreadMoveVote
-                         || (newThreadMoveVote == bestThreadMoveVote
-                             && newThreadMove.pv.size() > bestThreadMove.pv.size()))))
+        else if (newThreadDecisive || (!is_loss(newThreadMove.score) && newThreadMovePreferred))
             bestThread = th.get();
     }
 
