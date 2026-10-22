@@ -150,9 +150,11 @@ void TimeManagement::init(Search::LimitsType& limits,
     // Warning: don't remove this conditions.
     if (!useNodesTime && limits.movestogo != 1)
     {
+        double incBuffer = 4.0 * (limits.inc[us] + limits.inc[~us]);
         double timeAdvantage =
-          (limits.time[us] - limits.time[~us]) / (1.0 + limits.time[us] + limits.time[~us]);
-        optScale *= 1 + 0.9 * std::min(timeAdvantage, 0.0);
+          (limits.time[us] - limits.time[~us])
+          / (1.0 + limits.time[us] + limits.time[~us] + incBuffer);
+        optScale *= 1 + 0.9 * std::min(timeAdvantage, 0.0) + 0.20 * std::max(timeAdvantage, 0.0);
     }
 
     // Limit the maximum possible time for this move
