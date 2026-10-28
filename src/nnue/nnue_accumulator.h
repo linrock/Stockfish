@@ -90,7 +90,7 @@ struct AccumulatorCaches {
 
 
 struct AccumulatorState: public Accumulator, Dirties {
-    PSQFeatureSet::BlockState blockBefore;
+    std::array<int, COLOR_NB> blockBefore;
 };
 
 class AccumulatorStack {

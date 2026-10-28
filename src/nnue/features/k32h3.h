@@ -70,17 +70,7 @@ class K32H3 {
     //   2: the opponent has a queen.
     static constexpr int NumBlocks = 3;
 
-    struct BlockState {
-        int queens[COLOR_NB];
-        int rooksAndQueens;
-    };
-
-    static constexpr int block(const BlockState& m, Color perspective) {
-        return m.queens[~perspective] ? 2 : m.rooksAndQueens > 0;
-    }
-    static int        block(const Position& pos, Color perspective);
-    static BlockState block_state(const Position& pos);
-
+    static int block(const Position& pos, Color perspective);
     // Number of features per block (22,528 piece-squares)
     static constexpr IndexType BlockDimensions =
       static_cast<IndexType>(SQUARE_NB / 2) * static_cast<IndexType>(PS_NB);
@@ -131,13 +121,6 @@ class K32H3 {
     // Get a list of indices for recently changed features
     static void append_changed_indices(
       Color perspective, Square ksq, const DiffType& diff, IndexList& removed, IndexList& added);
-
-    // Returns whether the change stored in this DirtyPiece means that a full
-    // accumulator refresh is required
-    static bool requires_refresh(const DiffType&   diff,
-                                 Color             perspective,
-                                 const BlockState& before,
-                                 const BlockState& after);
 };
 
 }  // namespace Stockfish::Eval::NNUE::Features

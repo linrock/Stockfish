@@ -84,7 +84,7 @@ Dirties& AccumulatorStack::push(const Position& pos) noexcept {
     assert(size < MaxSize);
     auto& st = accumulators[size];
     st.computed.fill(false);
-    st.blockBefore = PSQFeatureSet::block_state(pos);
+    st.blockBefore = {PSQFeatureSet::block(pos, WHITE), PSQFeatureSet::block(pos, BLACK)};
     new (&st.dirtyThreats) DirtyThreats;
     new (&st.dirtyPawnPairs) DirtyPawnPairs;
     size++;
@@ -126,11 +126,9 @@ void AccumulatorStack::evaluate_side(Color                     perspective,
     else
     {
         const auto& dirtyPiece = latest().dirtyPiece;
-        const auto  after      = PSQFeatureSet::block_state(pos);
-        const auto& before     = latest().blockBefore;
 
         if (dirtyPiece.pc == make_piece(perspective, KING)
-            && PSQFeatureSet::block(before, perspective) == PSQFeatureSet::block(after, perspective)
+            && latest().blockBefore[perspective] == PSQFeatureSet::block(pos, perspective)
             && accumulators[size - 2].computed[perspective]
             && pos.count<ALL_PIECES>() >= MIN_PC_COUNT_HYBRID
             && ((int(dirtyPiece.from) & 0b100) == (int(dirtyPiece.to) & 0b100))
@@ -151,23 +149,18 @@ void AccumulatorStack::evaluate_side(Color                     perspective,
 usize AccumulatorStack::find_last_usable_accumulator(Color           perspective,
                                                      const Position& pos) const noexcept {
 
-    // Backtrack psq block changes
-    auto after = PSQFeatureSet::block_state(pos);
+    const int block = PSQFeatureSet::block(pos, perspective);
 
     for (usize curr_idx = size - 1; curr_idx > 0; curr_idx--)
     {
         if (accumulators[curr_idx].computed[perspective])
             return curr_idx;
 
-        const auto& dirtyPiece = accumulators[curr_idx].dirtyPiece;
-        const auto& before     = accumulators[curr_idx].blockBefore;
-
         // Threat feature set refreshes require a king move across the center, i.e.,
         // a subset of halfka refreshes
-        if (PSQFeatureSet::requires_refresh(dirtyPiece, perspective, before, after))
+        if (accumulators[curr_idx].dirtyPiece.pc == make_piece(perspective, KING)
+            || accumulators[curr_idx].blockBefore[perspective] != block)
             return curr_idx;
-
-        after = before;
     }
 
     return 0;

@@ -22,7 +22,6 @@
 
 #include <array>
 
-#include "../../bitboard.h"
 #include "../../misc.h"
 #include "../../position.h"
 #include "../../types.h"
@@ -120,19 +119,7 @@ void K32H3::append_changed_indices(
 }
 
 int K32H3::block(const Position& pos, Color perspective) {
-    return block(block_state(pos), perspective);
-}
-
-K32H3::BlockState K32H3::block_state(const Position& pos) {
-    return {{pos.count<QUEEN>(WHITE), pos.count<QUEEN>(BLACK)}, popcount(pos.pieces(ROOK, QUEEN))};
-}
-
-bool K32H3::requires_refresh(const DiffType&   diff,
-                             Color             perspective,
-                             const BlockState& before,
-                             const BlockState& after) {
-    return diff.pc == make_piece(perspective, KING)
-        || block(before, perspective) != block(after, perspective);
+    return bool(pos.pieces(ROOK, QUEEN)) + bool(pos.pieces(~perspective, QUEEN));
 }
 
 }  // namespace Stockfish::Eval::NNUE::Features
