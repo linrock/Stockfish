@@ -256,7 +256,7 @@ class AffineTransform {
             constexpr IndexType NumChunks = ceil_to_multiple<IndexType>(InputDimensions, 8) / 4;
             constexpr IndexType NumAccums = OutputDimensions / OutputSimdWidth;
 
-    #if defined(USE_VNNI) || defined(USE_NEON_DOTPROD)
+    #if defined(USE_VNNI) || defined(USE_AVX512) || defined(USE_NEON_DOTPROD)
             constexpr IndexType NumRegs = 2 * NumAccums;
     #else
             constexpr IndexType NumRegs = NumAccums;
@@ -270,7 +270,7 @@ class AffineTransform {
                 acc[k] = vec_set_32(0);
 
             IndexType i = 0;
-    #if defined(USE_VNNI) || defined(USE_NEON_DOTPROD)
+    #if defined(USE_VNNI) || defined(USE_AVX512) || defined(USE_NEON_DOTPROD)
             for (; i < NumChunks; i += 2)
             {
                 const vec_t in0 = vec_load_32(input + i * sizeof(i32));

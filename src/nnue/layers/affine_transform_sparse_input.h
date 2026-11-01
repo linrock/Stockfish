@@ -175,7 +175,7 @@ class AffineTransformSparseInput {
         // If we're using high-latency dot product instructions, split the accumulators
         // into separate dependency chains and merge at the end
         constexpr IndexType NumRegs =
-    #if (defined(USE_VNNI) && defined(USE_AVX512)) || defined(USE_NEON_DOTPROD)
+    #if defined(USE_AVX512) || defined(USE_NEON_DOTPROD)
           3 * NumAccums;
     #elif defined(USE_AVXVNNI)
           2 * NumAccums;
@@ -205,7 +205,6 @@ class AffineTransformSparseInput {
 
         for (IndexType k = NumAccums; k < NumRegs; ++k)
             acc[k] = vec_zero();
-        #if defined(USE_VNNI)
         while (start < end - 2)
         {
             const isize   i0  = *start++;
@@ -230,7 +229,6 @@ class AffineTransformSparseInput {
 
         for (IndexType k = 0; k < NumAccums; ++k)
             acc[k] = vec_add_32(vec_add_32(acc[k], acc[k + NumAccums]), acc[k + 2 * NumAccums]);
-        #endif
 
         while (start < end)
         {
